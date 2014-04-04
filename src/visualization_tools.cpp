@@ -60,6 +60,9 @@ VisualizationTools::VisualizationTools(std::string base_link, std::string marker
     muted_(true),
     alpha_(0.8)
 {
+  // Initialize counters to zero
+  resetMarkerCounts();
+
   // Rviz Visualizations
   pub_rviz_marker_ = nh_.advertise<visualization_msgs::Marker>(marker_topic_, 10);
   ROS_DEBUG_STREAM_NAMED("viz_tools","Visualizing rviz markers on topic " << marker_topic_);
@@ -392,6 +395,16 @@ bool VisualizationTools::loadEEMarker()
   return true;
 }
 
+void VisualizationTools::resetMarkerCounts()
+{
+  arrow_id_ = 0;
+  sphere_id_ = 0;
+  block_id_ = 0;
+  text_id_ = 0;
+  rectangle_id_ = 0;
+  line_id_ = 0;
+}
+
 bool VisualizationTools::publishEEMarkers(const geometry_msgs::Pose &pose,
   const rviz_colors &color, const std::string &ns)
 {
@@ -550,6 +563,20 @@ bool VisualizationTools::publishSphere(const Eigen::Affine3d &pose, const rviz_c
   publishSphere(pose_msg, color, scale);
 }
 
+bool VisualizationTools::publishSphere(const Eigen::Vector3d &point, const rviz_colors color, const rviz_scales scale)
+{
+  geometry_msgs::Pose pose_msg;
+  tf::pointEigenToMsg(point, pose_msg.position);
+  publishSphere(pose_msg, color, scale);
+}
+
+bool VisualizationTools::publishSphere(const geometry_msgs::Point &point, const rviz_colors color, const rviz_scales scale)
+{
+  geometry_msgs::Pose pose_msg;
+  pose_msg.position = point;
+  publishSphere(pose_msg, color, scale);
+}
+
 bool VisualizationTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color, const rviz_scales scale)
 {
   if(muted_)
@@ -558,8 +585,7 @@ bool VisualizationTools::publishSphere(const geometry_msgs::Pose &pose, const rv
   // Set the frame ID and timestamp.  See the TF tutorials for information on these.
   sphere_marker_.header.stamp = ros::Time::now();
 
-  static int id = 0;
-  sphere_marker_.id = ++id;
+  sphere_marker_.id = ++sphere_id_;
   sphere_marker_.color = getColor(color);
   sphere_marker_.scale = getScale(scale, false, 0.1);
 
@@ -589,8 +615,7 @@ bool VisualizationTools::publishArrow(const geometry_msgs::Pose &pose, const rvi
   // Set the frame ID and timestamp.  See the TF tutorials for information on these.
   arrow_marker_.header.stamp = ros::Time::now();
 
-  static int id = 0;
-  arrow_marker_.id = ++id;
+  arrow_marker_.id = ++arrow_id_;
   arrow_marker_.pose = pose;
   arrow_marker_.color = getColor(color);
   arrow_marker_.scale = getScale(scale, true);
@@ -609,8 +634,7 @@ bool VisualizationTools::publishBlock(const geometry_msgs::Pose &pose, const dou
   // Set the timestamp
   block_marker_.header.stamp = ros::Time::now();
 
-  static int id = 0;
-  block_marker_.id = ++id;
+  block_marker_.id = ++block_id_;
 
   // Set the pose
   block_marker_.pose = pose;
@@ -644,8 +668,7 @@ bool VisualizationTools::publishRectangle(const geometry_msgs::Point &point1, co
   // Set the timestamp
   rectangle_marker_.header.stamp = ros::Time::now();
 
-  static int id = 0;
-  rectangle_marker_.id = ++id;
+  rectangle_marker_.id = ++rectangle_id_;
   rectangle_marker_.color = getColor(color);
 
   // Calculate pose
@@ -655,18 +678,18 @@ bool VisualizationTools::publishRectangle(const geometry_msgs::Point &point1, co
   pose.position.z = (point1.z - point2.z) / 2.0 + point2.z;
   rectangle_marker_.pose = pose;
 
-  // Calculate scale  
+  // Calculate scale
   rectangle_marker_.scale.x = fabs(point1.x - point2.x);
   rectangle_marker_.scale.y = fabs(point1.y - point2.y);
   rectangle_marker_.scale.z = fabs(point1.z - point2.z);
-  
+
   pub_rviz_marker_.publish( rectangle_marker_ );
   ros::spinOnce();
 
   return true;
 }
 
-bool VisualizationTools::publishLine(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2, 
+bool VisualizationTools::publishLine(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2,
   const rviz_colors color, const rviz_scales scale)
 {
   if(muted_)
@@ -675,15 +698,14 @@ bool VisualizationTools::publishLine(const geometry_msgs::Point &point1, const g
   // Set the timestamp
   line_marker_.header.stamp = ros::Time::now();
 
-  static int id = 0;
-  line_marker_.id = ++id;
+  line_marker_.id = ++line_id_;
   line_marker_.color = getColor(color);
   line_marker_.scale = getScale( scale, false, 0.1 );
 
   line_marker_.points.clear();
   line_marker_.points.push_back(point1);
   line_marker_.points.push_back(point2);
-  
+
   pub_rviz_marker_.publish( line_marker_ );
   ros::spinOnce();
 
@@ -959,17 +981,17 @@ geometry_msgs::Vector3 VisualizationTools::getScale(const rviz_scales &scale, bo
       val = 0.05;
       break;
     case LARGE:
-      val = 0.1;  
+      val = 0.1;
       break;
     case XLARGE:
-
+      val = 0.5;
       break;
     default:
       ROS_ERROR_STREAM_NAMED("visualization_tools","Not implemented yet");
       break;
   }
 
-  result.x = val * marker_scale; 
+  result.x = val * marker_scale;
   result.y = val * marker_scale;
   result.z = val * marker_scale;
 
