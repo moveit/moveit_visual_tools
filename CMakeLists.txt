@@ -5,10 +5,10 @@ find_package(Eigen REQUIRED)
 find_package(Boost REQUIRED thread system)
 
 # Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED
+find_package(catkin REQUIRED COMPONENTS
   eigen_conversions 
   geometry_msgs
-  moveit_ros_planning 
+  moveit_ros_robot_interaction 
   roscpp
   tf_conversions
   visualization_msgs
@@ -19,11 +19,7 @@ catkin_package(
   LIBRARIES
     ${PROJECT_NAME}
   CATKIN_DEPENDS
-    eigen_conversions 
     geometry_msgs
-    moveit_ros_planning 
-    roscpp
-    tf_conversions
     visualization_msgs 
   INCLUDE_DIRS include
 )
@@ -33,11 +29,11 @@ catkin_package(
 #set(CMAKE_BUILD_TYPE Debug)
 
 ## Build 
+
 include_directories(
   include 
   ${catkin_INCLUDE_DIRS}
 )
-link_directories(${catkin_LIBRARY_DIRS})
 
 # Visualization Tools Library
 add_library(${PROJECT_NAME}
@@ -50,5 +46,14 @@ target_link_libraries(${PROJECT_NAME}
 # Test executable
 add_executable(visualization_tools_test src/visualization_tools_test.cpp)
 target_link_libraries(visualization_tools_test 
-  ${catkin_LIBRARIES} ${PROJECT_NAME} ${PROJECT_NAME}_visualization_tools
+  ${catkin_LIBRARIES} ${PROJECT_NAME}
+)
+
+# Install
+install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+
+# Mark cpp header files for installation
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
 )

@@ -18,16 +18,12 @@
 
   <build_depend>eigen_conversions</build_depend>
   <build_depend>geometry_msgs</build_depend>
-  <build_depend>moveit_ros_planning</build_depend>
+  <build_depend>moveit_ros_robot_interaction</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>tf_conversions</build_depend>
   <build_depend>visualization_msgs</build_depend>
 
-  <run_depend>eigen_conversions</run_depend>
   <run_depend>geometry_msgs</run_depend>
-  <run_depend>moveit_ros_planning</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>tf_conversions</run_depend>
   <run_depend>visualization_msgs</run_depend>
 
 </package>
