@@ -118,6 +118,14 @@ private:
   visualization_msgs::Marker rectangle_marker_;
   visualization_msgs::Marker line_marker_;
 
+  // Marker id counters
+  int arrow_id_;
+  int sphere_id_;
+  int block_id_;
+  int text_id_;
+  int rectangle_id_;
+  int line_id_;
+
 public:
 
   /**
@@ -169,21 +177,27 @@ public:
   bool loadEEMarker();
 
   /**
+   * \brief Reset the id's of all published markers so that they overwrite themselves in the future
+   */
+  void resetMarkerCounts();
+
+  /**
    * \brief Publish an end effector to rviz
    * \param pose - the location to publish the marker with respect to the base frame
-   * \return true if it is successful
+   * \return true on success
    */
-  bool publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_colors &color = WHITE,
-    const std::string &ns="end_effector");
+  bool publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_colors &color = WHITE, const std::string &ns="end_effector");
 
   /**
    * \brief Publish an marker of a sphere to rviz
    * \param pose - the location to publish the sphere with respect to the base frame
    * \param color - an enum pre-defined name of a color
    * \param scale - an enum pre-defined name of a size
-   * \return true if it is successful
+   * \return true on success
    */
   bool publishSphere(const Eigen::Affine3d &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
+  bool publishSphere(const Eigen::Vector3d &point, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
+  bool publishSphere(const geometry_msgs::Point &point, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
   bool publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
 
   /**
@@ -191,7 +205,7 @@ public:
    * \param pose - the location to publish the marker with respect to the base frame
    * \param color - an enum pre-defined name of a color
    * \param scale - an enum pre-defined name of a size   
-   * \return true if it is successful
+   * \return true on success
    */
   bool publishArrow(const Eigen::Affine3d &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
   bool publishArrow(const geometry_msgs::Pose &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
@@ -201,7 +215,7 @@ public:
    * \param point1 - x,y,z top corner location of box
    * \param point2 - x,y,z bottom opposite corner location of box
    * \param color - an enum pre-defined name of a color
-   * \return true if it is successful
+   * \return true on success
    */
   bool publishRectangle(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2, const rviz_colors color = BLUE);
 
@@ -211,7 +225,7 @@ public:
    * \param point2 - x,y,z of end of line
    * \param color - an enum pre-defined name of a color
    * \param scale - an enum pre-defined name of a size
-   * \return true if it is successful
+   * \return true on success
    */
   bool publishLine(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2, 
     const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
@@ -219,14 +233,14 @@ public:
   /**
    * \brief Publish an marker of a block to Rviz
    * \param pose - the location to publish the marker with respect to the base frame
-   * \return true if it is successful
+   * \return true on success
    */
   bool publishBlock(const geometry_msgs::Pose &pose, const double &block_size, const bool isRed);
 
   /**
    * \brief Publish an marker of a text to Rviz
    * \param pose - the location to publish the marker with respect to the base frame
-   * \return true if it is successful
+   * \return true on success
    */
   bool publishText(const geometry_msgs::Pose &pose, const std::string &text,
     const rviz_colors &color = WHITE);
