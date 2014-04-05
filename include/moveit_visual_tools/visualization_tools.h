@@ -158,6 +158,40 @@ public:
   void setGraspPoseToEEFPose(geometry_msgs::Pose grasp_pose_to_eef_pose);
 
   /**
+   * \brief Set the name of the end effector
+   */
+  void setEEGroupName(const std::string& ee_group_name)
+  {
+    ee_group_name_ = ee_group_name;
+  }
+
+  /**
+   * \brief Provide the name of the planning group moveit will use
+   */
+  void setPlanningGroupName(const std::string& planning_group_name)    
+  {
+    planning_group_name_ = planning_group_name;
+  }
+
+  /**
+   * \brief Set this class to not actually publish anything to Rviz.
+   * \param muted true if verbose
+   */
+  void setMuted(bool muted)
+  {
+    muted_ = muted;
+  }
+
+  /**
+   * \brief Change the transparency of all markers published
+   * \param alpha - value 0 - 1 where 0 is invisible
+   */
+  void setAlpha(double alpha)
+  {
+    alpha_ = alpha;
+  }
+
+  /**
    * \brief Pre-load rviz markers for better efficiency
    */
   void loadRvizMarkers();
@@ -244,40 +278,6 @@ public:
    */
   bool publishText(const geometry_msgs::Pose &pose, const std::string &text,
     const rviz_colors &color = WHITE);
-
-  /**
-   * \brief Set the name of the end effector
-   */
-  void setEEGroupName(const std::string& ee_group_name)
-  {
-    ee_group_name_ = ee_group_name;
-  }
-
-  /**
-   * \brief Provide the name of the planning group moveit will use
-   */
-  void setPlanningGroupName(const std::string& planning_group_name)    
-  {
-    planning_group_name_ = planning_group_name;
-  }
-
-  /**
-   * \brief Set this class to not actually publish anything to Rviz.
-   * \param muted true if verbose
-   */
-  void setMuted(bool muted)
-  {
-    muted_ = muted;
-  }
-
-  /**
-   * \brief Change the transparency of all markers published
-   * \param alpha - value 0 - 1 where 0 is invisible
-   */
-  void setAlpha(double alpha)
-  {
-    alpha_ = alpha;
-  }
 
   /**
    * \brief Return if we are in verbose mode

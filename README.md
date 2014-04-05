@@ -13,7 +13,7 @@ Helper functions for displaying and debugging MoveIt! data in Rviz via published
 
 ### Ubuntu Debian
 
-PENDING
+Available next hydro release:
 ```
 sudo apt-get install ros-hydro-moveit-visual-tools
 ```
@@ -126,4 +126,4 @@ This will cause all new markers to overwrite older ones.
 
 ## Contribute
 
-Feel free to send PRs for new helper functions, fixes, etc. - I'll happily discuss and merge them. I do not, howver, want to send much time helping people use this because I am a busy grad student. Use at your own risk.
+Feel free to send PRs for new helper functions, fixes, etc. - I'll happily discuss and merge them. I do not, however, want to send much time helping people use this because I am a busy grad student. Use at your own risk.
