@@ -3,7 +3,6 @@ moveit_visual_tools
 
 Helper functions for displaying and debugging MoveIt! data in Rviz via published markers and MoveIt! collision objects
 
-
 <img align="right" src="https://raw.github.com/davetcoleman/moveit_visual_tools/hydro-devel/resource/demo.png" />
 
 ### Build Status

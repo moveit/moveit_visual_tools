@@ -49,12 +49,6 @@ target_link_libraries(visualization_tools_test
   ${catkin_LIBRARIES} ${PROJECT_NAME}
 )
 
-# Test executable
-add_executable(tester1 src/test.cpp)
-target_link_libraries(tester1
-  ${catkin_LIBRARIES} ${PROJECT_NAME}
-)
-
 # Install
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 

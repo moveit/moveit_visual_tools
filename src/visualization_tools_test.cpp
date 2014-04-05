@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, University of Colorado, Boulder
+ *  Copyright (c) 2014, University of Colorado, Boulder
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /* Author: Dave Coleman
-   Desc:   Tests the rviz_tool
+   Desc:   Tests the moveit_visual_tool
 */
 
 // ROS
@@ -68,7 +68,12 @@ int main(int argc, char *argv[])
   visual_tools_->setEEGroupName(EE_GROUP);
   visual_tools_->setPlanningGroupName(PLANNING_GROUP_NAME);
 
-  //  ros::Duration(1.0).sleep(); // let rviz markers finish publishing
+  
+  
+
+  
+
+  ros::Duration(1.0).sleep(); // let rviz markers finish publishing
 
   ROS_DEBUG_STREAM_NAMED("temp","ending early");
   return 0;
