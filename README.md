@@ -8,7 +8,7 @@ Helper functions for displaying and debugging MoveIt! data in Rviz via published
 
 ### Build Status
 
-[![Build Status](https://travis-ci.org/davetcoleman/baxter_cpp.png?branch=hydro-devel)](https://travis-ci.org/davetcoleman/baxter_cpp)
+[![Build Status](https://travis-ci.org/davetcoleman/moveit_visual_tools.png?branch=hydro-devel)](https://travis-ci.org/davetcoleman/moveit_visual_tools)
 
 ## Install
 
