@@ -13,7 +13,7 @@ Helper functions for displaying and debugging MoveIt! data in Rviz via published
 
 ### Ubuntu Debian
 
-TODO
+PENDING
 ```
 sudo apt-get install ros-hydro-moveit-visual-tools
 ```
