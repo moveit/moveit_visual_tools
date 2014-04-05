@@ -1,7 +1,9 @@
 moveit_visual_tools
 ==========================
 
-Helper functions for displaying and debugging MoveIt! data in Rviz via published markers and MoveIt! collision objects
+Helper functions for displaying and debugging MoveIt! data in Rviz via published markers and MoveIt! collision objects. Very useful for debugging complex software
+
+By [Dave Coleman](http://dav.ee) at the Correll Robotics Lab, University of Colorado Boulder
 
 <img align="right" src="https://raw.github.com/davetcoleman/moveit_visual_tools/hydro-devel/resources/demo.png" />
 
