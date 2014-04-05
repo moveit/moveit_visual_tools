@@ -38,7 +38,7 @@
 
 // ROS
 #include <ros/ros.h>
-#include <moveit_visualization_tools/visualization_tools.h>
+#include <moveit_visual_tools/visualization_tools.h>
 
 int main(int argc, char** argv)
 {
@@ -46,8 +46,8 @@ int main(int argc, char** argv)
   ROS_INFO_STREAM("Test");
 
   // Load the Robot Viz Tools for publishing to Rviz
-  moveit_visualization_tools::VisualizationToolsPtr visual_tools_;
-  visual_tools_.reset(new moveit_visualization_tools::VisualizationTools("/base","/grasp_markers"));
+  moveit_visual_tools::VisualizationToolsPtr visual_tools_;
+  visual_tools_.reset(new moveit_visual_tools::VisualizationTools("/base","/grasp_markers"));
   visual_tools_->setMuted(false);
   visual_tools_->setLifetime(20.0);
   ros::Duration(2).sleep();
@@ -64,15 +64,15 @@ int main(int argc, char** argv)
   pt2.z = 0.3;
 
   // Visualize line
-  visual_tools_->publishLine(pt1, pt2, moveit_visualization_tools::GREY, moveit_visualization_tools::REGULAR);
+  visual_tools_->publishLine(pt1, pt2, moveit_visual_tools::GREY, moveit_visual_tools::REGULAR);
 
   Eigen::Vector3d a, b;
   tf::pointMsgToEigen(pt1,a);
   tf::pointMsgToEigen(pt2,b);
 
   // Visualize points
-  visual_tools_->publishSphere(a, moveit_visualization_tools::BLUE, moveit_visualization_tools::LARGE);
-  visual_tools_->publishSphere(b, moveit_visualization_tools::BLUE, moveit_visualization_tools::LARGE);
+  visual_tools_->publishSphere(a, moveit_visual_tools::BLUE, moveit_visual_tools::LARGE);
+  visual_tools_->publishSphere(b, moveit_visual_tools::BLUE, moveit_visual_tools::LARGE);
 
   Eigen::Quaterniond q;
   q.setFromTwoVectors(a, b);
@@ -84,7 +84,7 @@ int main(int argc, char** argv)
   //Eigen::Affine3d(q.matrix()) * Eigen::Translationd(-a)
   Eigen::Affine3d output_vector = q * Eigen::Translation3d(-b);
 
-  visual_tools_->publishArrow(output_vector, moveit_visualization_tools::RED, moveit_visualization_tools::REGULAR);
+  visual_tools_->publishArrow(output_vector, moveit_visual_tools::RED, moveit_visual_tools::REGULAR);
   ros::Duration(1.0).sleep();
 
   ROS_INFO_STREAM("Shutting down.");

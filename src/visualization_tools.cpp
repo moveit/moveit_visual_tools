@@ -35,9 +35,9 @@
 // Author: Dave Coleman
 // Desc:   Simple tools for showing parts of a robot in Rviz, such as the gripper or arm
 
-#include <moveit_visualization_tools/visualization_tools.h>
+#include <moveit_visual_tools/visualization_tools.h>
 
-namespace moveit_visualization_tools
+namespace moveit_visual_tools
 {
 
 VisualizationTools::VisualizationTools(std::string base_link,

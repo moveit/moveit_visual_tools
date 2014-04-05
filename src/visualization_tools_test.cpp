@@ -40,7 +40,7 @@
 #include <ros/ros.h>
 
 // Grasp generation
-#include <moveit_visualization_tools/visualization_tools.h>
+#include <moveit_visual_tools/visualization_tools.h>
 
 // Baxter specific
 //static const std::string EE_LINK = "gripper_roll_link";
@@ -63,8 +63,8 @@ int main(int argc, char *argv[])
   // ---------------------------------------------------------------------------------------------
   // Load the Robot Viz Tools for publishing to Rviz
   ROS_INFO_STREAM_NAMED("temp","Loading visualization tools");
-  moveit_visualization_tools::VisualizationToolsPtr visual_tools_;
-  visual_tools_.reset(new moveit_visualization_tools::VisualizationTools( BASE_LINK));
+  moveit_visual_tools::VisualizationToolsPtr visual_tools_;
+  visual_tools_.reset(new moveit_visual_tools::VisualizationTools( BASE_LINK));
   visual_tools_->setEEGroupName(EE_GROUP);
   visual_tools_->setPlanningGroupName(PLANNING_GROUP_NAME);
 

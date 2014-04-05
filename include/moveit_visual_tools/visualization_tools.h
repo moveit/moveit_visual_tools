@@ -35,8 +35,8 @@
 // Author: Dave Coleman
 // Desc:   Simple tools for showing parts of a robot in Rviz, such as the gripper or arm
 
-#ifndef MOVEIT_VISUALIZATION_TOOLS__VISUALIZATION_TOOLS_
-#define MOVEIT_VISUALIZATION_TOOLS__VISUALIZATION_TOOLS_
+#ifndef MOVEIT_VISUAL_TOOLS__VISUALIZATION_TOOLS_
+#define MOVEIT_VISUAL_TOOLS__VISUALIZATION_TOOLS_
 
 // Rviz
 #include <visualization_msgs/Marker.h>
@@ -62,7 +62,7 @@
 // Messages
 #include <std_msgs/ColorRGBA.h>
 
-namespace moveit_visualization_tools
+namespace moveit_visual_tools
 {
 
 static const std::string ROBOT_DESCRIPTION="robot_description";
