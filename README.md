@@ -3,26 +3,33 @@ moveit_visual_tools
 
 Helper functions for displaying and debugging MoveIt! data in Rviz via published markers and MoveIt! collision objects
 
-### Install
 
-## Ubuntu Debian
+<img align="right" src="https://raw.github.com/davetcoleman/moveit_visual_tools/hydro-devel/resource/demo.png" />
+
+### Build Status
+
+[![Build Status](https://travis-ci.org/davetcoleman/baxter_cpp.png?branch=hydro-devel)](https://travis-ci.org/davetcoleman/baxter_cpp)
+
+## Install
+
+### Ubuntu Debian
 
 TODO
 ```
 sudo apt-get install ros-hydro-moveit-visual-tools
 ```
 
-## Install From Source
+### Install From Source
 
 ```
 git clone git@github.com:davetcoleman/moveit_visual_tools.git
 ```
 
-### Use
+## Use
 
 We'll assume you will be using these helper functions within a class.
 
-## Initialize
+### Initialize
 
 Add to your includes:
 ```
@@ -53,13 +60,13 @@ visual_tools_->setGraspPoseToEEFPose(grasp_pose_to_eef_pose);
 visual_tools_->setAlpha(alpha);
 ```
 
-### Use
+## Use
 
 Now in your code you can easily debug your MoveIt! code using visual markers in Rviz
 
 Start rviz and create a new marker using the 'Add' button at the bottom right. Choose the marker topic to be the same as the topic you specified in the constructor.
 
-## Publishing Functions
+### Publishing Functions
 
 See ``moveit_visual_tools.h`` for more details and documentation on the following functions:
 
@@ -71,7 +78,7 @@ See ``moveit_visual_tools.h`` for more details and documentation on the followin
  - publishBlock
  - publishText
 
-## Collision Object Functions
+### Collision Object Functions
 
 Helpers for adding and removing objects from the MoveIt! planning scene. CO stands for Collision Object and ACO stands for Active Collision Object.
 
@@ -82,13 +89,13 @@ Helpers for adding and removing objects from the MoveIt! planning scene. CO stan
  - publishCollisionWall
  - publishCollisionTable
 
-# Animate Trajectories
+### Animate Trajectories
 
 Note: this might not currently be working
 
  - publishTrajectoryPath
 
-## Available Colors
+### Available Colors
 
 This package helps you quickly choose colors - feel free to send PRs with more colors as needed
 
@@ -101,7 +108,7 @@ This package helps you quickly choose colors - feel free to send PRs with more c
  - moveit_visual_tools::BLACK
  - moveit_visual_tools::YELLOW
 
-## Available Marker Sizes
+### Available Marker Sizes
 
  - moveit_visual_tools::XXSMALL
  - moveit_visual_tools::XSMALL
@@ -110,7 +117,7 @@ This package helps you quickly choose colors - feel free to send PRs with more c
  - moveit_visual_tools::LARGE
  - moveit_visual_tools::XLARGE
 
-## Lifetime
+### Lifetime
 
 All markers will persist for the duration set by ``setLifetime``, defaulting to 30 seconds. You can reset this earlier by calling
 ```
@@ -118,6 +125,6 @@ resetMarkerCounts();
 ```
 This will cause all new markers to overwrite older ones.
 
-### Contribute
+## Contribute
 
 Feel free to send PRs for new helper functions, fixes, etc. - I'll happily discuss and merge them. I do not, howver, want to send much time helping people use this because I am a busy grad student. Use at your own risk.
