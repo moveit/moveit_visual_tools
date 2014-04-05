@@ -23,15 +23,16 @@ before_install: # Use this to prepare the system to install prerequisites or dep
   - rosdep update
 install: # Use this to install any prerequisites or dependencies necessary to run your build
   # Create workspace
-  - mkdir -p ~/ros/ws_baxter/src
-  - cd ~/ros/ws_baxter/src
-  - wstool init .
+  - mkdir -p ~/ros/ws_test/src
+  - cd ~/ros/ws_test/src
+  #- wstool init .
   # Download non-debian stuff
-  - wstool merge https://raw.github.com/davetcoleman/baxter_cpp/hydro-devel/baxter_sdk.rosinstall
-  - wstool merge --merge-replace -y https://raw.github.com/davetcoleman/baxter_cpp/hydro-devel/baxter.rosinstall
-  - wstool update
+  #- wstool merge https://raw.github.com/davetcoleman/baxter_cpp/hydro-devel/baxter_sdk.rosinstall
+  #- wstool merge --merge-replace -y https://raw.github.com/davetcoleman/baxter_cpp/hydro-devel/baxter.rosinstall
+  #- wstool update
   # Delete the baxter.rosinstall version of the repo and use the one of the branch we are testing
-  - rm -rf moveit_visual_tools/
+  #- rm -rf moveit_visual_tools/
+  - git clone https://github.com/davetcoleman/graph_msgs.git # temporary
   - ln -s $CI_SOURCE_PATH . # Link the repo we are testing to the new workspace
   - cd ../
   # Test manual install

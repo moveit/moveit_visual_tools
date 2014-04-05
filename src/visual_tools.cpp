@@ -37,9 +37,6 @@
 
 #include <moveit_visual_tools/visual_tools.h>
 
-// Generic graphs
-#include <graph_msgs/GeometryGraph.h>
-
 namespace moveit_visual_tools
 {
 
@@ -868,24 +865,27 @@ void VisualTools::publishCollisionCylinder(geometry_msgs::Pose object_pose, std:
   ROS_DEBUG_STREAM_NAMED("visual_tools","Published collision object " << object_name);
 }
 
-void VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_graph)
+void VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_graph, const std::string &object_name)
 {
   ROS_INFO_STREAM_NAMED("temp","Preparing to create collision tree");
+
+  // The tree is one collision object with many primitives
+  moveit_msgs::CollisionObject collision_obj;
+  collision_obj.header.stamp = ros::Time::now();
+  collision_obj.header.frame_id = base_link_;
+  collision_obj.id = object_name;
+  collision_obj.operation = moveit_msgs::CollisionObject::ADD;
 
   // Track which pairs of nodes we've already connected since graph is bi-directional
   typedef std::pair<std::size_t, std::size_t> node_ids;
   std::set<node_ids> added_edges;
   std::pair<std::set<node_ids>::iterator,bool> return_value;
 
-  geometry_msgs::Point a, b;
+  Eigen::Vector3d a, b;
   for (std::size_t i = 0; i < geo_graph.nodes.size(); ++i)
   {
     for (std::size_t j = 0; j < geo_graph.edges[i].node_ids.size(); ++j)
     {
-      // Create a cylinder from two points
-      a = geo_graph.nodes[i];
-      b = geo_graph.nodes[geo_graph.edges[i].node_ids[j]];
-
       // Check if we've already added this pair of nodes (edge)
       return_value = added_edges.insert( node_ids(i,j) );
       if (return_value.second == false)
@@ -895,21 +895,57 @@ void VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_grap
       }
       else
       {
+        // Create a cylinder from two points
+        a = convertPoint(geo_graph.nodes[i]);
+        b = convertPoint(geo_graph.nodes[geo_graph.edges[i].node_ids[j]]);
+
         // add other direction of edge
         added_edges.insert( node_ids(j,i) );
 
-        // Add the collision object
-        std::string object_name = "Segment_" + boost::lexical_cast<std::string>(i)+"_"+boost::lexical_cast<std::string>(j);
+        // Add the shape primitive
         double radius = 0.01;
-        visual_tools_->publishCollisionCylinder(a, b, object_name, radius);
 
+        // Distance between two points
+        double height = (a - b).lpNorm<2>();
+
+        // Find center point
+        Eigen::Vector3d pt_center = getCenterPoint(a, b);
+
+        // Create vector
+        Eigen::Affine3d pose;
+        pose = getVectorBetweenPoints(pt_center, b);
+
+        // Convert pose to be normal to cylindar axis
+        Eigen::Affine3d rotation;
+        rotation = Eigen::AngleAxisd(0.5*M_PI, Eigen::Vector3d::UnitY());
+        pose = pose * rotation;
+
+        // Create the solid primitive
+        shape_msgs::SolidPrimitive cylinder;       
+        cylinder.type = shape_msgs::SolidPrimitive::CYLINDER;
+        cylinder.dimensions.resize(shape_tools::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::CYLINDER>::value);
+        cylinder.dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT] = height;
+        cylinder.dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] = radius;
+
+        // Add to the collision object
+        collision_obj.primitives.push_back(cylinder);
+
+        // Add the pose
+        collision_obj.primitive_poses.push_back(convertPose(pose));
       }
     }
   }
 
   ROS_INFO_STREAM_NAMED("temp","Done creating collision objects");
-  ros::Duration(1.0).sleep();
-  visual_tools_->removeAllCollisionObjects();
+
+  ROS_INFO_STREAM_NAMED("pick_place","CollisionObject: \n " << collision_obj);
+  pub_collision_obj_.publish(collision_obj);
+
+  // Save the collision object name so we can optionally remove them later
+  collision_objects_.push_back(object_name);
+
+
+  //visual_tools_->removeAllCollisionObjects();
 
   // Remove attached object
   //visual_tools_->cleanupACO(object.name);

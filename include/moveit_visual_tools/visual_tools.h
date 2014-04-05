@@ -61,6 +61,8 @@
 
 // Messages
 #include <std_msgs/ColorRGBA.h>
+#include <graph_msgs/GeometryGraph.h>
+
 
 namespace moveit_visual_tools
 {
@@ -367,6 +369,13 @@ public:
    */
   void publishCollisionCylinder(Eigen::Affine3d object_pose, std::string object_name, double radius, double height);
   void publishCollisionCylinder(geometry_msgs::Pose object_pose, std::string object_name, double radius, double height);
+
+  /**
+   * \brief Publish a connected birectional tree that is a graph
+   * \param graph of nodes and edges
+   * \param name of collision object
+   */
+  void publishCollisionTree(const graph_msgs::GeometryGraph &geo_graph, const std::string &object_name);
 
   void publishCollisionWall(double x, double y, double angle, double width, const std::string name);
 

@@ -26,6 +26,11 @@ sudo apt-get install ros-hydro-moveit-visual-tools
 git clone git@github.com:davetcoleman/moveit_visual_tools.git
 ```
 
+Now has dependency:
+```
+git clone git@github.com:davetcoleman/graph_msgs.git
+```
+
 ## Usage
 
 We'll assume you will be using these helper functions within a class.
