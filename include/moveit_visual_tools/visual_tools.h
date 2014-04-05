@@ -85,6 +85,7 @@ private:
   ros::Publisher pub_collision_obj_; // for MoveIt collision objects
   ros::Publisher pub_attach_collision_obj_; // for MoveIt attached objects
   ros::Publisher pub_display_path_; // for MoveIt trajectories
+  ros::Publisher pub_planning_scene_diff_; // for adding and removing collision objects
 
   // Pointer to a Planning Scene Monitor
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
@@ -126,12 +127,15 @@ private:
   int rectangle_id_;
   int line_id_;
 
+  // Track all collision objects we've added
+  std::vector<std::string> collision_objects_;
+
 public:
 
   /**
    * \brief Constructor with planning scene
    */
-  VisualTools(std::string base_link, 
+  VisualTools(std::string base_link,
     planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor,
     std::string marker_topic = RVIZ_MARKER_TOPIC);
 
@@ -168,7 +172,7 @@ public:
   /**
    * \brief Provide the name of the planning group moveit will use
    */
-  void setPlanningGroupName(const std::string& planning_group_name)    
+  void setPlanningGroupName(const std::string& planning_group_name)
   {
     planning_group_name_ = planning_group_name;
   }
@@ -238,7 +242,7 @@ public:
    * \brief Publish an marker of an arrow to rviz
    * \param pose - the location to publish the marker with respect to the base frame
    * \param color - an enum pre-defined name of a color
-   * \param scale - an enum pre-defined name of a size   
+   * \param scale - an enum pre-defined name of a size
    * \return true on success
    */
   bool publishArrow(const Eigen::Affine3d &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
@@ -261,7 +265,7 @@ public:
    * \param scale - an enum pre-defined name of a size
    * \return true on success
    */
-  bool publishLine(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2, 
+  bool publishLine(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2,
     const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
 
   /**
@@ -301,7 +305,7 @@ public:
     line_marker_.lifetime = marker_lifetime_;
     sphere_marker_.lifetime = marker_lifetime_;
     block_marker_.lifetime = marker_lifetime_;
-    text_marker_.lifetime = marker_lifetime_;    
+    text_marker_.lifetime = marker_lifetime_;
   }
 
   /**
@@ -320,17 +324,49 @@ public:
   }
 
   /**
+   * \brief Remove all collision objects that this class has added to the MoveIt! planning scene
+   */
+  void removeAllCollisionObjects();
+
+  /**
    * \brief Remove a collision object from the planning scene
    * \param Name of object
    */
   void cleanupCO(std::string name);
 
+  /**
+   * \brief Remove an active collision object from the planning scene
+   * \param Name of object
+   */
   void cleanupACO(const std::string& name);
 
+  /**
+   * \brief Attach a collision object from the planning scene
+   * \param Name of object
+   */
   void attachCO(const std::string& name);
 
-  void publishCollisionBlock(geometry_msgs::Pose block_pose, std::string block_name,
-    double block_size);
+  void publishCollisionBlock(geometry_msgs::Pose block_pose, std::string block_name, double block_size);
+
+  /**
+   * \brief Create a MoveIt Collision cylinder between two points
+   * \param point a - x,y,z in space of a point
+   * \param point b - x,y,z in space of a point
+   * \param name - semantic name of MoveIt collision object
+   * \param radius - size of cylinder
+   */
+  void publishCollisionCylinder(geometry_msgs::Point a, geometry_msgs::Point b, std::string object_name, double radius);
+  void publishCollisionCylinder(Eigen::Vector3d a, Eigen::Vector3d b, std::string object_name, double radius);
+
+  /**
+   * \brief Create a MoveIt Collision cylinder with a center point pose
+   * \param pose - vector pointing along axis of cylinder
+   * \param name - semantic name of MoveIt collision object
+   * \param radius - size of cylinder
+   * \param height - size of cylinder
+   */
+  void publishCollisionCylinder(Eigen::Affine3d object_pose, std::string object_name, double radius, double height);
+  void publishCollisionCylinder(geometry_msgs::Pose object_pose, std::string object_name, double radius, double height);
 
   void publishCollisionWall(double x, double y, double angle, double width, const std::string name);
 
@@ -373,18 +409,46 @@ public:
     return ee_parent_link_;
   }
 
-
+  /**
+   * \brief A hack - todo remove?
+   */
   bool isMarkerPubLoaded()
   {
     if( !pub_rviz_marker_ )
     {
-    ROS_ERROR_STREAM_NAMED("temp","Pub Rviz Marker is not loaded. this is a HACK! - todo");
-    pub_rviz_marker_ = nh_.advertise<visualization_msgs::Marker>(marker_topic_, 10);
-    ROS_DEBUG_STREAM_NAMED("viz_tools","Visualizing rviz markers on topic " << marker_topic_);      
+      ROS_ERROR_STREAM_NAMED("temp","Pub Rviz Marker is not loaded. this is a HACK! - todo");
+      pub_rviz_marker_ = nh_.advertise<visualization_msgs::Marker>(marker_topic_, 10);
+      ROS_DEBUG_STREAM_NAMED("viz_tools","Visualizing rviz markers on topic " << marker_topic_);
     }
-    
+
     return pub_rviz_marker_;
   }
+
+  /**
+   * \brief Converts an Eigen pose to a geometry_msg pose
+   */
+  geometry_msgs::Pose convertPose(const Eigen::Affine3d &pose);
+
+  /**
+   * \brief Converts a geometry_msg point to an Eigen point
+   */
+  Eigen::Vector3d convertPoint(const geometry_msgs::Point &point);
+
+  /**
+   * \brief Create a vector that points from point a to point b
+   * \param point a - x,y,z in space of a point
+   * \param point b - x,y,z in space of a point
+   * \return vector from a to b
+   */
+  Eigen::Affine3d getVectorBetweenPoints(Eigen::Vector3d a, Eigen::Vector3d b);
+
+  /**
+   * \brief Find the center between to points
+   * \param point a - x,y,z in space of a point
+   * \param point b - x,y,z in space of a point
+   * \return center point
+   */
+  Eigen::Vector3d getCenterPoint(Eigen::Vector3d a, Eigen::Vector3d b);
 
 }; // class
 

@@ -37,6 +37,9 @@
 
 #include <moveit_visual_tools/visual_tools.h>
 
+// Generic graphs
+#include <graph_msgs/GeometryGraph.h>
+
 namespace moveit_visual_tools
 {
 
@@ -65,17 +68,20 @@ VisualTools::VisualTools(std::string base_link, std::string marker_topic)
 
   // Rviz Visualizations
   pub_rviz_marker_ = nh_.advertise<visualization_msgs::Marker>(marker_topic_, 10);
-  ROS_DEBUG_STREAM_NAMED("viz_tools","Visualizing rviz markers on topic " << marker_topic_);
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing rviz markers on topic " << marker_topic_);
 
   // Collision object creator
   pub_collision_obj_ = nh_.advertise<moveit_msgs::CollisionObject>(COLLISION_TOPIC, 10);
-  ROS_DEBUG_STREAM_NAMED("viz_tools","Publishing collision objects on topic " << COLLISION_TOPIC);
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing collision objects on topic " << COLLISION_TOPIC);
 
   // Collision object attacher
   pub_attach_collision_obj_ = nh_.advertise<moveit_msgs::AttachedCollisionObject>
     (ATTACHED_COLLISION_TOPIC, 10);
-  ROS_DEBUG_STREAM_NAMED("viz_tools","Publishing attached collision objects on topic "
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing attached collision objects on topic "
     << ATTACHED_COLLISION_TOPIC);
+
+  // Planning scene diff publisher
+  pub_planning_scene_diff_ = nh_.advertise<moveit_msgs::PlanningScene>("/move_group/monitored_planning_scene", 1);
 
   // Trajectory paths
   pub_display_path_ = nh_.advertise<moveit_msgs::DisplayTrajectory>
@@ -208,7 +214,7 @@ bool VisualTools::loadPlanningSceneMonitor()
   }
   else
   {
-    ROS_FATAL_STREAM_NAMED("rviz_tools","Planning scene not configured");
+    ROS_FATAL_STREAM_NAMED("visual_tools","Planning scene not configured");
     return false;
   }
 
@@ -230,10 +236,10 @@ bool VisualTools::loadPlanningSceneMonitor()
  if(muted_)
  return true; // this function will only work if we have loaded the publishers
 
- ROS_DEBUG_STREAM_NAMED("viz_tools","Publishing planning scene");
+ ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing planning scene");
 
  // Output debug
- //ROS_INFO_STREAM_NAMED("viz_tools","Joint values being sent to planning scene:");
+ //ROS_INFO_STREAM_NAMED("visual_tools","Joint values being sent to planning scene:");
  //std::copy(joint_values.begin(),joint_values.end(), std::ostream_iterator<double>(std::cout, "\n"));
 
  // Update planning scene
@@ -250,34 +256,17 @@ bool VisualTools::loadPlanningSceneMonitor()
 
 bool VisualTools::loadRobotMarkers()
 {
-  ROS_ERROR_STREAM_NAMED("temp","loading robot markers");
-
-
-
   // Get robot model
   robot_model::RobotModelConstPtr robot_model = getPlanningSceneMonitor()->getRobotModel();
-
-  /*
-  // Get joint state group
-  //robot_state::JointStateGroup* joint_state_group = robot_state.getJointStateGroup(ee_group_name_);
-  const robot_model::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(ee_group_name_);
-
-  if( joint_model_group == NULL ) // make sure EE_GROUP exists
-  {
-  ROS_ERROR_STREAM_NAMED("viz_tools","Unable to find joint model group " << ee_group_name_ );
-  return false;
-  }
-  */
 
   // Get all link names
   const std::vector<std::string> &link_names = robot_model->getLinkModelNames();;
 
-  ROS_DEBUG_STREAM_NAMED("viz_tools","Number of links in baxter: " << link_names.size());
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Number of links in baxter: " << link_names.size());
   //    std::copy(link_names.begin(), link_names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
 
   // -----------------------------------------------------------------------------------------------
   // Get EE link markers for Rviz
-  //    robot_state::RobotState robot_state = getPlanningSceneMonitor()->getPlanningScene()->getCurrentState();
   robot_state::RobotState robot_state(robot_model);
 
   robot_state.updateLinkTransforms();
@@ -287,7 +276,7 @@ bool VisualTools::loadRobotMarkers()
   visualization_msgs::MarkerArray robot_marker_array;
   robot_state.getRobotMarkers(robot_marker_array, link_names, getColor( GREY ), "dave test", ros::Duration());
 
-  ROS_DEBUG_STREAM_NAMED("viz_tools","Number of rviz markers: " << robot_marker_array.markers.size());
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Number of rviz markers: " << robot_marker_array.markers.size());
 
   // Publish the markers
   for (std::size_t i = 0 ; i < robot_marker_array.markers.size() ; ++i)
@@ -330,18 +319,17 @@ bool VisualTools::loadEEMarker()
   const robot_model::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(ee_group_name_);
   if( joint_model_group == NULL ) // make sure EE_GROUP exists
   {
-    ROS_ERROR_STREAM_NAMED("viz_tools","Unable to find joint model group " << ee_group_name_ );
+    ROS_ERROR_STREAM_NAMED("visual_tools","Unable to find joint model group " << ee_group_name_ );
     return false;
   }
 
   // Get link names that are in end effector
   const std::vector<std::string> &ee_link_names = joint_model_group->getLinkModelNames();
 
-  ROS_DEBUG_STREAM_NAMED("viz_tools","Number of links in group " << ee_group_name_ << ": " << ee_link_names.size());
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Number of links in group " << ee_group_name_ << ": " << ee_link_names.size());
   //std::copy(ee_link_names.begin(), ee_link_names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
 
   // Robot Interaction - finds the end effector associated with a planning group
-  //robot_interaction::RobotInteraction robot_interaction( getPlanningSceneMonitor()->getRobotModel() );
   robot_interaction::RobotInteraction robot_interaction( robot_model );
 
   // Decide active end effectors
@@ -351,10 +339,10 @@ bool VisualTools::loadEEMarker()
   std::vector<robot_interaction::RobotInteraction::EndEffector> active_eef =
     robot_interaction.getActiveEndEffectors();
 
-  ROS_DEBUG_STREAM_NAMED("viz_tools","Number of active end effectors: " << active_eef.size());
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Number of active end effectors: " << active_eef.size());
   if( !active_eef.size() )
   {
-    ROS_ERROR_STREAM_NAMED("viz_tools","No active end effectors found! Make sure kinematics.yaml is loaded in this node's namespace!");
+    ROS_ERROR_STREAM_NAMED("visual_tools","No active end effectors found! Make sure kinematics.yaml is loaded in this node's namespace!");
     return false;
   }
 
@@ -364,7 +352,6 @@ bool VisualTools::loadEEMarker()
   // -----------------------------------------------------------------------------------------------
   // Get EE link markers for Rviz
   robot_state::RobotState robot_state = getPlanningSceneMonitor()->getPlanningScene()->getCurrentState();
-  //    robot_state.updateTransforms();
 
   /*ROS_ERROR_STREAM_NAMED("temp","before printing");
     robot_state.printStateInfo();
@@ -372,7 +359,7 @@ bool VisualTools::loadEEMarker()
   */
 
   robot_state.getRobotMarkers(ee_marker_array_, ee_link_names, marker_color, eef.eef_group, ros::Duration());
-  ROS_DEBUG_STREAM_NAMED("viz_tools","Number of rviz markers in end effector: " << ee_marker_array_.markers.size());
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Number of rviz markers in end effector: " << ee_marker_array_.markers.size());
 
   // Change pose from Eigen to TF
   try
@@ -383,7 +370,7 @@ bool VisualTools::loadEEMarker()
   }
   catch(...)
   {
-    ROS_ERROR_STREAM_NAMED("viz_tools","Didn't find link state for " << ee_parent_link_);
+    ROS_ERROR_STREAM_NAMED("visual_tools","Didn't find link state for " << ee_parent_link_);
   }
 
   // Copy original marker poses to a vector
@@ -414,7 +401,7 @@ bool VisualTools::publishEEMarkers(const geometry_msgs::Pose &pose,
   // Load EE Markers
   if( !loadEEMarker() )
   {
-    ROS_ERROR_STREAM_NAMED("viz_tools","Unable to publish EE marker");
+    ROS_ERROR_STREAM_NAMED("visual_tools","Unable to publish EE marker");
     return false;
   }
 
@@ -431,8 +418,7 @@ bool VisualTools::publishEEMarkers(const geometry_msgs::Pose &pose,
   ee_pose_eigen = ee_pose_eigen * eef_conversion_pose;
 
   // Convert back to message
-  geometry_msgs::Pose ee_pose;     // Non const version
-  tf::poseEigenToMsg(ee_pose_eigen, ee_pose);
+  geometry_msgs::Pose ee_pose = convertPose(ee_pose_eigen);
 
   // -----------------------------------------------------------------------------------------------
   // Process each link of the end effector
@@ -558,9 +544,7 @@ bool VisualTools::publishEEMarkers(const geometry_msgs::Pose &pose,
 
 bool VisualTools::publishSphere(const Eigen::Affine3d &pose, const rviz_colors color, const rviz_scales scale)
 {
-  geometry_msgs::Pose pose_msg;
-  tf::poseEigenToMsg(pose, pose_msg);
-  publishSphere(pose_msg, color, scale);
+  publishSphere(convertPose(pose), color, scale);
 }
 
 bool VisualTools::publishSphere(const Eigen::Vector3d &point, const rviz_colors color, const rviz_scales scale)
@@ -602,9 +586,7 @@ bool VisualTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colo
 
 bool VisualTools::publishArrow(const Eigen::Affine3d &pose, const rviz_colors color, const rviz_scales scale)
 {
-  geometry_msgs::Pose pose_msg;
-  tf::poseEigenToMsg(pose, pose_msg);
-  publishArrow(pose_msg, color, scale);
+  publishArrow(convertPose(pose), color, scale);
 }
 
 bool VisualTools::publishArrow(const geometry_msgs::Pose &pose, const rviz_colors color, const rviz_scales scale)
@@ -730,6 +712,30 @@ bool VisualTools::publishText(const geometry_msgs::Pose &pose, const std::string
   return true;
 }
 
+void VisualTools::removeAllCollisionObjects()
+{
+  moveit_msgs::PlanningScene planning_scene;
+  planning_scene.is_diff = true;
+  planning_scene.world.collision_objects.clear();
+
+  for (std::size_t i = 0; i < collision_objects_.size(); ++i)
+  {
+    // Clean up old collision objects
+    moveit_msgs::CollisionObject remove_object;
+    remove_object.header.frame_id = base_link_;
+    remove_object.id = collision_objects_[i];
+    remove_object.operation = moveit_msgs::CollisionObject::REMOVE;
+
+    planning_scene.world.collision_objects.push_back(remove_object);
+    ROS_INFO_STREAM_NAMED("temp","removing co named: " << remove_object.id);
+    //pub_collision_obj_.publish(co);
+  }
+
+  // Publish
+  pub_planning_scene_diff_.publish(planning_scene);
+  ros::WallDuration(0.1).sleep();
+}
+
 void VisualTools::cleanupCO(std::string name)
 {
   // Clean up old collision objects
@@ -801,8 +807,115 @@ void VisualTools::publishCollisionBlock(geometry_msgs::Pose block_pose, std::str
   //ROS_INFO_STREAM_NAMED("pick_place","CollisionObject: \n " << collision_obj);
 
   pub_collision_obj_.publish(collision_obj);
+  // Save the collision object name so we can optionally remove them later
+  collision_objects_.push_back(block_name);
 
-  ROS_DEBUG_STREAM_NAMED("simple_pick_place","Published collision object " << block_name);
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Published collision object " << block_name);
+}
+
+void VisualTools::publishCollisionCylinder(geometry_msgs::Point a, geometry_msgs::Point b, std::string object_name, double radius)
+{
+  publishCollisionCylinder(convertPoint(a), convertPoint(b), object_name, radius);
+}
+
+void VisualTools::publishCollisionCylinder(Eigen::Vector3d a, Eigen::Vector3d b, std::string object_name, double radius)
+{
+  // Distance between two points
+  double height = (a - b).lpNorm<2>();
+
+  // Find center point
+  Eigen::Vector3d pt_center = getCenterPoint(a, b);
+
+  // Create vector
+  Eigen::Affine3d pose;
+  pose = getVectorBetweenPoints(pt_center, b);
+
+  // Convert pose to be normal to cylindar axis
+  Eigen::Affine3d rotation;
+  rotation = Eigen::AngleAxisd(0.5*M_PI, Eigen::Vector3d::UnitY());
+  pose = pose * rotation;
+
+  publishCollisionCylinder(pose, object_name, radius, height);
+}
+
+void VisualTools::publishCollisionCylinder(Eigen::Affine3d object_pose, std::string object_name, double radius, double height)
+{
+  publishCollisionCylinder(convertPose(object_pose), object_name, radius, height);
+}
+
+void VisualTools::publishCollisionCylinder(geometry_msgs::Pose object_pose, std::string object_name, double radius, double height)
+{
+  moveit_msgs::CollisionObject collision_obj;
+  collision_obj.header.stamp = ros::Time::now();
+  collision_obj.header.frame_id = base_link_;
+  collision_obj.id = object_name;
+  collision_obj.operation = moveit_msgs::CollisionObject::ADD;
+  collision_obj.primitives.resize(1);
+  collision_obj.primitives[0].type = shape_msgs::SolidPrimitive::CYLINDER;
+  collision_obj.primitives[0].dimensions.resize(shape_tools::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::CYLINDER>::value);
+  collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT] = height;
+  collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] = radius;
+  collision_obj.primitive_poses.resize(1);
+  collision_obj.primitive_poses[0] = object_pose;
+
+  //ROS_INFO_STREAM_NAMED("pick_place","CollisionObject: \n " << collision_obj);
+
+  pub_collision_obj_.publish(collision_obj);
+
+  // Save the collision object name so we can optionally remove them later
+  collision_objects_.push_back(object_name);
+
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Published collision object " << object_name);
+}
+
+void VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_graph)
+{
+  ROS_INFO_STREAM_NAMED("temp","Preparing to create collision tree");
+
+  // Track which pairs of nodes we've already connected since graph is bi-directional
+  typedef std::pair<std::size_t, std::size_t> node_ids;
+  std::set<node_ids> added_edges;
+  std::pair<std::set<node_ids>::iterator,bool> return_value;
+
+  geometry_msgs::Point a, b;
+  for (std::size_t i = 0; i < geo_graph.nodes.size(); ++i)
+  {
+    for (std::size_t j = 0; j < geo_graph.edges[i].node_ids.size(); ++j)
+    {
+      // Create a cylinder from two points
+      a = geo_graph.nodes[i];
+      b = geo_graph.nodes[geo_graph.edges[i].node_ids[j]];
+
+      // Check if we've already added this pair of nodes (edge)
+      return_value = added_edges.insert( node_ids(i,j) );
+      if (return_value.second == false)
+      {
+        // Element already existed in set, so don't add a new collision object
+        ROS_WARN_STREAM_NAMED("temp","edge already exists");
+      }
+      else
+      {
+        // add other direction of edge
+        added_edges.insert( node_ids(j,i) );
+
+        // Add the collision object
+        std::string object_name = "Segment_" + boost::lexical_cast<std::string>(i)+"_"+boost::lexical_cast<std::string>(j);
+        double radius = 0.01;
+        visual_tools_->publishCollisionCylinder(a, b, object_name, radius);
+
+      }
+    }
+  }
+
+  ROS_INFO_STREAM_NAMED("temp","Done creating collision objects");
+  ros::Duration(1.0).sleep();
+  visual_tools_->removeAllCollisionObjects();
+
+  // Remove attached object
+  //visual_tools_->cleanupACO(object.name);
+
+  // Remove collision object
+  //visual_tools_->cleanupCO(object.name);
 }
 
 void VisualTools::publishCollisionWall(double x, double y, double angle, double width, const std::string name)
@@ -845,6 +958,9 @@ void VisualTools::publishCollisionWall(double x, double y, double angle, double 
   collision_obj.primitive_poses[0] = rec_pose;
 
   pub_collision_obj_.publish(collision_obj);
+
+  // Save the collision object name so we can optionally remove them later
+  collision_objects_.push_back(name);
 }
 
 void VisualTools::publishCollisionTable(double x, double y, double angle, double width, double height,
@@ -882,6 +998,9 @@ void VisualTools::publishCollisionTable(double x, double y, double angle, double
   collision_obj.primitive_poses[0] = table_pose;
 
   pub_collision_obj_.publish(collision_obj);
+
+  // Save the collision object name so we can optionally remove them later
+  collision_objects_.push_back(name);
 }
 
 bool VisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg,
@@ -904,7 +1023,7 @@ bool VisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& traj
   if( waitTrajectory )
   {
     ros::Duration wait_sec = trajectory_msg.joint_trajectory.points.back().time_from_start * 4;
-    ROS_INFO_STREAM_NAMED("viz_tools","Waiting for trajectory animation " << wait_sec.toSec() << " seconds");
+    ROS_INFO_STREAM_NAMED("visual_tools","Waiting for trajectory animation " << wait_sec.toSec() << " seconds");
     wait_sec.sleep();
   }
 
@@ -1003,6 +1122,76 @@ geometry_msgs::Vector3 VisualTools::getScale(const rviz_scales &scale, bool arro
   }
 
   return result;
+}
+
+geometry_msgs::Pose VisualTools::convertPose(const Eigen::Affine3d &pose)
+{
+  geometry_msgs::Pose pose_msg;
+  tf::poseEigenToMsg(pose, pose_msg);
+  return pose_msg;
+}
+
+Eigen::Vector3d VisualTools::convertPoint(const geometry_msgs::Point &point)
+{
+  Eigen::Vector3d point_eigen;
+  point_eigen[0] = point.x;
+  point_eigen[1] = point.y;
+  point_eigen[2] = point.z;
+  return point_eigen;
+}
+
+Eigen::Vector3d VisualTools::getCenterPoint(Eigen::Vector3d a, Eigen::Vector3d b)
+{
+  Eigen::Vector3d center;
+  center[0] = (a[0] + b[0]) / 2;
+  center[1] = (a[1] + b[1]) / 2;
+  center[2] = (a[2] + b[2]) / 2;
+  return center;
+}
+
+Eigen::Affine3d VisualTools::getVectorBetweenPoints(Eigen::Vector3d a, Eigen::Vector3d b)
+{
+  // from http://answers.ros.org/question/31006/how-can-a-vector3-axis-be-used-to-produce-a-quaternion/
+
+  // Goal pose:
+  Eigen::Quaterniond q;
+
+  Eigen::Vector3d axis_vector = b - a;
+  axis_vector.normalize();
+
+  Eigen::Vector3d up_vector(0.0, 0.0, 1.0);
+  Eigen::Vector3d right_axis_vector = axis_vector.cross(up_vector);
+  right_axis_vector.normalized();
+  double theta = axis_vector.dot(up_vector);
+  double angle_rotation = -1.0*acos(theta);
+
+  //-------------------------------------------
+  // Method 1 - TF - works
+  //Convert to TF
+  tf::Vector3 tf_right_axis_vector;
+  tf::vectorEigenToTF(right_axis_vector, tf_right_axis_vector);
+
+  // Create quaternion
+  tf::Quaternion tf_q(tf_right_axis_vector, angle_rotation);
+
+  // Convert back to Eigen
+  tf::quaternionTFToEigen(tf_q, q);
+  //-------------------------------------------
+  //std::cout << q.toRotationMatrix() << std::endl;
+
+  //-------------------------------------------
+  // Method 2 - Eigen - broken TODO
+  //q = Eigen::AngleAxis<double>(angle_rotation, right_axis_vector);
+  //-------------------------------------------
+  //std::cout << q.toRotationMatrix() << std::endl;
+
+  // Rotate so that vector points along line
+  Eigen::Affine3d pose;
+  q.normalize();
+  pose = q * Eigen::AngleAxisd(-0.5*M_PI, Eigen::Vector3d::UnitY());
+  pose.translation() = a;
+
+  return pose;
 }
 
 } // namespace
