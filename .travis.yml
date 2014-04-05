@@ -31,7 +31,7 @@ install: # Use this to install any prerequisites or dependencies necessary to ru
   - wstool merge --merge-replace -y https://raw.github.com/davetcoleman/baxter_cpp/hydro-devel/baxter.rosinstall
   - wstool update
   # Delete the baxter.rosinstall version of the repo and use the one of the branch we are testing
-  - rm -rf baxter_cpp/
+  - rm -rf moveit_visual_tools/
   - ln -s $CI_SOURCE_PATH . # Link the repo we are testing to the new workspace
   - cd ../
   # Test manual install
