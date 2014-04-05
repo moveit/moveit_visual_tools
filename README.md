@@ -24,7 +24,7 @@ sudo apt-get install ros-hydro-moveit-visual-tools
 git clone git@github.com:davetcoleman/moveit_visual_tools.git
 ```
 
-## Use
+## Usage
 
 We'll assume you will be using these helper functions within a class.
 
@@ -59,7 +59,7 @@ visual_tools_->setGraspPoseToEEFPose(grasp_pose_to_eef_pose);
 visual_tools_->setAlpha(alpha);
 ```
 
-## Use
+### Tools
 
 Now in your code you can easily debug your MoveIt! code using visual markers in Rviz
 
