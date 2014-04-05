@@ -73,7 +73,7 @@ static const std::string RVIZ_MARKER_TOPIC = "/end_effector_marker";
 enum rviz_colors { RED, GREEN, BLUE, GREY, WHITE, ORANGE, BLACK, YELLOW };
 enum rviz_scales { XXSMALL, XSMALL, SMALL, REGULAR, LARGE, XLARGE };
 
-class VisualizationTools
+class VisualTools
 {
 private:
 
@@ -131,19 +131,19 @@ public:
   /**
    * \brief Constructor with planning scene
    */
-  VisualizationTools(std::string base_link, 
+  VisualTools(std::string base_link, 
     planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor,
     std::string marker_topic = RVIZ_MARKER_TOPIC);
 
   /**
    * \brief Constructor w/o planning scene passed in
    */
-  VisualizationTools(std::string base_link = "base", std::string marker_topic = RVIZ_MARKER_TOPIC);
+  VisualTools(std::string base_link = "base", std::string marker_topic = RVIZ_MARKER_TOPIC);
 
   /**
    * \brief Deconstructor
    */
-  ~VisualizationTools();
+  ~VisualTools();
 
   /**
    * \brief Allows an offset between base link and floor where objects are built. Default is zero
@@ -388,8 +388,8 @@ public:
 
 }; // class
 
-typedef boost::shared_ptr<VisualizationTools> VisualizationToolsPtr;
-typedef boost::shared_ptr<const VisualizationTools> VisualizationToolsConstPtr;
+typedef boost::shared_ptr<VisualTools> VisualToolsPtr;
+typedef boost::shared_ptr<const VisualTools> VisualToolsConstPtr;
 
 } // namespace
 

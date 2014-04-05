@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, University of Colorado, Boulder
+ *  Copyright (c) 2013, University of Colorado, Boulder
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,48 +33,87 @@
  *********************************************************************/
 
 /* Author: Dave Coleman
-   Desc:   Tests the moveit_visual_tool
+   Desc:   Demo implementation of moveit_visual_tools
 */
 
 // ROS
 #include <ros/ros.h>
 
-// Grasp generation
-#include <moveit_visual_tools/visualization_tools.h>
+// For visualizing things in rviz
+#include <moveit_visual_tools/visual_tools.h>
+
+namespace moveit_visual_tools
+{
 
 // Baxter specific
-//static const std::string EE_LINK = "gripper_roll_link";
 static const std::string EE_PARENT_LINK = "right_wrist";
 static const std::string PLANNING_GROUP_NAME = "right_arm_torso_grasping";
 static const std::string EE_GROUP = "right_hand";
-static const std::string BASE_LINK = "/base";
 
-
-
-int main(int argc, char *argv[])
+class VisualToolsTest
 {
-  ros::init(argc, argv, "visualization_tool_test");
-  ros::AsyncSpinner spinner(1);
+private:
+
+  // A shared node handle
+  ros::NodeHandle nh_;
+
+  // For visualizing things in rviz
+  moveit_visual_tools::VisualToolsPtr visual_tools_;
+
+public:
+
+  /**
+   * \brief Constructor
+   */
+  VisualToolsTest()
+  {
+    visual_tools_.reset(new moveit_visual_tools::VisualTools("base_link","/moveit_visual_markers"));
+    visual_tools_->setEEGroupName(EE_GROUP);
+    visual_tools_->setPlanningGroupName(PLANNING_GROUP_NAME);
+
+    runTest();
+
+    // Allow time to publish messages
+    ros::Duration(1.0).sleep();
+  }
+
+  /**
+   * \brief Destructor
+   */
+  ~VisualToolsTest()
+  {
+  }
+
+  /**
+   * \brief Test
+   */
+  void runTest()
+  {
+    // Create pose
+    Eigen::Affine3d pose;
+    pose = Eigen::AngleAxisd(M_PI/4, Eigen::Vector3d::UnitX()); // rotate along X axis by 45 degrees
+    pose.translation() = Eigen::Vector3d( 0.1, 0.1, 0.1 ); // translate x,y,z
+
+    // Publish arrow vector of pose
+    visual_tools_->publishArrow(pose);
+  }
+
+}; // end class
+
+} // end namespace
+
+int main(int argc, char** argv)
+{
+  ros::init(argc, argv, "visual_tools_test");
+  ROS_INFO_STREAM("Visual Tools Test");
+
+  // Allow the action server to recieve and send ros messages
+  ros::AsyncSpinner spinner(4);
   spinner.start();
 
-  ros::NodeHandle nh;
-  ros::Duration(1.0).sleep();
+  moveit_visual_tools::VisualToolsTest tester;
 
-  // ---------------------------------------------------------------------------------------------
-  // Load the Robot Viz Tools for publishing to Rviz
-  ROS_INFO_STREAM_NAMED("temp","Loading visualization tools");
-  moveit_visual_tools::VisualizationToolsPtr visual_tools_;
-  visual_tools_.reset(new moveit_visual_tools::VisualizationTools( BASE_LINK));
-  visual_tools_->setEEGroupName(EE_GROUP);
-  visual_tools_->setPlanningGroupName(PLANNING_GROUP_NAME);
+  ROS_INFO_STREAM("Shutting down.");
 
-  
-  
-
-  
-
-  ros::Duration(1.0).sleep(); // let rviz markers finish publishing
-
-  ROS_DEBUG_STREAM_NAMED("temp","ending early");
   return 0;
 }

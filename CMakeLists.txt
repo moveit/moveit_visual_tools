@@ -37,15 +37,15 @@ include_directories(
 
 # Visualization Tools Library
 add_library(${PROJECT_NAME}
-  src/visualization_tools.cpp
+  src/visual_tools.cpp
 )
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES} ${Boost_LIBRARIES}
 )
 
 # Test executable
-add_executable(visualization_tools_test src/visualization_tools_test.cpp)
-target_link_libraries(visualization_tools_test 
+add_executable(visual_tools_test src/visual_tools_test.cpp)
+target_link_libraries(visual_tools_test 
   ${catkin_LIBRARIES} ${PROJECT_NAME}
 )
 

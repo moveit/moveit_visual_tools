@@ -35,21 +35,21 @@
 // Author: Dave Coleman
 // Desc:   Simple tools for showing parts of a robot in Rviz, such as the gripper or arm
 
-#include <moveit_visual_tools/visualization_tools.h>
+#include <moveit_visual_tools/visual_tools.h>
 
 namespace moveit_visual_tools
 {
 
-VisualizationTools::VisualizationTools(std::string base_link,
+VisualTools::VisualTools(std::string base_link,
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor,
   std::string marker_topic)
   : planning_scene_monitor_(planning_scene_monitor)
 {
   // Pass to next contructor
-  VisualizationTools(base_link, marker_topic);
+  VisualTools(base_link, marker_topic);
 }
 
-VisualizationTools::VisualizationTools(std::string base_link, std::string marker_topic)
+VisualTools::VisualTools(std::string base_link, std::string marker_topic)
   : nh_("~"),
     marker_topic_(marker_topic),
     ee_group_name_("unknown"),
@@ -89,21 +89,21 @@ VisualizationTools::VisualizationTools(std::string base_link, std::string marker
   ros::Duration(0.5).sleep();
 }
 
-VisualizationTools::~VisualizationTools()
+VisualTools::~VisualTools()
 {
 }
 
-void VisualizationTools::setFloorToBaseHeight(double floor_to_base_height)
+void VisualTools::setFloorToBaseHeight(double floor_to_base_height)
 {
   floor_to_base_height_ = floor_to_base_height;
 }
 
-void VisualizationTools::setGraspPoseToEEFPose(geometry_msgs::Pose grasp_pose_to_eef_pose)
+void VisualTools::setGraspPoseToEEFPose(geometry_msgs::Pose grasp_pose_to_eef_pose)
 {
   grasp_pose_to_eef_pose_ = grasp_pose_to_eef_pose;
 }
 
-void VisualizationTools::loadRvizMarkers()
+void VisualTools::loadRvizMarkers()
 {
   // Load arrow ----------------------------------------------------
 
@@ -188,7 +188,7 @@ void VisualizationTools::loadRvizMarkers()
   text_marker_.lifetime = marker_lifetime_;
 }
 
-bool VisualizationTools::loadPlanningSceneMonitor()
+bool VisualTools::loadPlanningSceneMonitor()
 {
   // ---------------------------------------------------------------------------------------------
   // Create planning scene monitor
@@ -248,7 +248,7 @@ bool VisualizationTools::loadPlanningSceneMonitor()
  }
 */
 
-bool VisualizationTools::loadRobotMarkers()
+bool VisualTools::loadRobotMarkers()
 {
   ROS_ERROR_STREAM_NAMED("temp","loading robot markers");
 
@@ -311,7 +311,7 @@ bool VisualizationTools::loadRobotMarkers()
   return true;
 }
 
-bool VisualizationTools::loadEEMarker()
+bool VisualTools::loadEEMarker()
 {
   // Check if we have already loaded the EE markers
   if( ee_marker_array_.markers.size() > 0 ) // already loaded
@@ -395,7 +395,7 @@ bool VisualizationTools::loadEEMarker()
   return true;
 }
 
-void VisualizationTools::resetMarkerCounts()
+void VisualTools::resetMarkerCounts()
 {
   arrow_id_ = 0;
   sphere_id_ = 0;
@@ -405,7 +405,7 @@ void VisualizationTools::resetMarkerCounts()
   line_id_ = 0;
 }
 
-bool VisualizationTools::publishEEMarkers(const geometry_msgs::Pose &pose,
+bool VisualTools::publishEEMarkers(const geometry_msgs::Pose &pose,
   const rviz_colors &color, const std::string &ns)
 {
   if(muted_)
@@ -556,28 +556,28 @@ bool VisualizationTools::publishEEMarkers(const geometry_msgs::Pose &pose,
  }
 */
 
-bool VisualizationTools::publishSphere(const Eigen::Affine3d &pose, const rviz_colors color, const rviz_scales scale)
+bool VisualTools::publishSphere(const Eigen::Affine3d &pose, const rviz_colors color, const rviz_scales scale)
 {
   geometry_msgs::Pose pose_msg;
   tf::poseEigenToMsg(pose, pose_msg);
   publishSphere(pose_msg, color, scale);
 }
 
-bool VisualizationTools::publishSphere(const Eigen::Vector3d &point, const rviz_colors color, const rviz_scales scale)
+bool VisualTools::publishSphere(const Eigen::Vector3d &point, const rviz_colors color, const rviz_scales scale)
 {
   geometry_msgs::Pose pose_msg;
   tf::pointEigenToMsg(point, pose_msg.position);
   publishSphere(pose_msg, color, scale);
 }
 
-bool VisualizationTools::publishSphere(const geometry_msgs::Point &point, const rviz_colors color, const rviz_scales scale)
+bool VisualTools::publishSphere(const geometry_msgs::Point &point, const rviz_colors color, const rviz_scales scale)
 {
   geometry_msgs::Pose pose_msg;
   pose_msg.position = point;
   publishSphere(pose_msg, color, scale);
 }
 
-bool VisualizationTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color, const rviz_scales scale)
+bool VisualTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color, const rviz_scales scale)
 {
   if(muted_)
     return true; // this function will only work if we have loaded the publishers
@@ -600,14 +600,14 @@ bool VisualizationTools::publishSphere(const geometry_msgs::Pose &pose, const rv
   return true;
 }
 
-bool VisualizationTools::publishArrow(const Eigen::Affine3d &pose, const rviz_colors color, const rviz_scales scale)
+bool VisualTools::publishArrow(const Eigen::Affine3d &pose, const rviz_colors color, const rviz_scales scale)
 {
   geometry_msgs::Pose pose_msg;
   tf::poseEigenToMsg(pose, pose_msg);
   publishArrow(pose_msg, color, scale);
 }
 
-bool VisualizationTools::publishArrow(const geometry_msgs::Pose &pose, const rviz_colors color, const rviz_scales scale)
+bool VisualTools::publishArrow(const geometry_msgs::Pose &pose, const rviz_colors color, const rviz_scales scale)
 {
   if(muted_)
     return true;
@@ -626,7 +626,7 @@ bool VisualizationTools::publishArrow(const geometry_msgs::Pose &pose, const rvi
   return true;
 }
 
-bool VisualizationTools::publishBlock(const geometry_msgs::Pose &pose, const double &block_size, const bool isRed)
+bool VisualTools::publishBlock(const geometry_msgs::Pose &pose, const double &block_size, const bool isRed)
 {
   if(muted_)
     return true;
@@ -660,7 +660,7 @@ bool VisualizationTools::publishBlock(const geometry_msgs::Pose &pose, const dou
   return true;
 }
 
-bool VisualizationTools::publishRectangle(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2, const rviz_colors color)
+bool VisualTools::publishRectangle(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2, const rviz_colors color)
 {
   if(muted_)
     return true;
@@ -689,7 +689,7 @@ bool VisualizationTools::publishRectangle(const geometry_msgs::Point &point1, co
   return true;
 }
 
-bool VisualizationTools::publishLine(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2,
+bool VisualTools::publishLine(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2,
   const rviz_colors color, const rviz_scales scale)
 {
   if(muted_)
@@ -712,7 +712,7 @@ bool VisualizationTools::publishLine(const geometry_msgs::Point &point1, const g
   return true;
 }
 
-bool VisualizationTools::publishText(const geometry_msgs::Pose &pose, const std::string &text, const rviz_colors &color)
+bool VisualTools::publishText(const geometry_msgs::Pose &pose, const std::string &text, const rviz_colors &color)
 {
   if(muted_)
     return true;
@@ -730,7 +730,7 @@ bool VisualizationTools::publishText(const geometry_msgs::Pose &pose, const std:
   return true;
 }
 
-void VisualizationTools::cleanupCO(std::string name)
+void VisualTools::cleanupCO(std::string name)
 {
   // Clean up old collision objects
   moveit_msgs::CollisionObject co;
@@ -744,7 +744,7 @@ void VisualizationTools::cleanupCO(std::string name)
   pub_collision_obj_.publish(co);
 }
 
-void VisualizationTools::cleanupACO(const std::string& name)
+void VisualTools::cleanupACO(const std::string& name)
 {
   // Clean up old attached collision object
   moveit_msgs::AttachedCollisionObject aco;
@@ -762,7 +762,7 @@ void VisualizationTools::cleanupACO(const std::string& name)
   pub_attach_collision_obj_.publish(aco);
 
 }
-void VisualizationTools::attachCO(const std::string& name)
+void VisualTools::attachCO(const std::string& name)
 {
   // Clean up old attached collision object
   moveit_msgs::AttachedCollisionObject aco;
@@ -782,7 +782,7 @@ void VisualizationTools::attachCO(const std::string& name)
 
 }
 
-void VisualizationTools::publishCollisionBlock(geometry_msgs::Pose block_pose, std::string block_name, double block_size)
+void VisualTools::publishCollisionBlock(geometry_msgs::Pose block_pose, std::string block_name, double block_size)
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
@@ -805,7 +805,7 @@ void VisualizationTools::publishCollisionBlock(geometry_msgs::Pose block_pose, s
   ROS_DEBUG_STREAM_NAMED("simple_pick_place","Published collision object " << block_name);
 }
 
-void VisualizationTools::publishCollisionWall(double x, double y, double angle, double width, const std::string name)
+void VisualTools::publishCollisionWall(double x, double y, double angle, double width, const std::string name)
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
@@ -847,7 +847,7 @@ void VisualizationTools::publishCollisionWall(double x, double y, double angle, 
   pub_collision_obj_.publish(collision_obj);
 }
 
-void VisualizationTools::publishCollisionTable(double x, double y, double angle, double width, double height,
+void VisualTools::publishCollisionTable(double x, double y, double angle, double width, double height,
   double depth, const std::string name)
 {
   geometry_msgs::Pose table_pose;
@@ -884,7 +884,7 @@ void VisualizationTools::publishCollisionTable(double x, double y, double angle,
   pub_collision_obj_.publish(collision_obj);
 }
 
-bool VisualizationTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg,
+bool VisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg,
   bool waitTrajectory)
 {
   // Create the message
@@ -911,7 +911,7 @@ bool VisualizationTools::publishTrajectoryPath(const moveit_msgs::RobotTrajector
   return true;
 }
 
-std_msgs::ColorRGBA VisualizationTools::getColor(const rviz_colors &color)
+std_msgs::ColorRGBA VisualTools::getColor(const rviz_colors &color)
 {
   std_msgs::ColorRGBA result;
   result.a = alpha_;
@@ -962,7 +962,7 @@ std_msgs::ColorRGBA VisualizationTools::getColor(const rviz_colors &color)
   return result;
 }
 
-geometry_msgs::Vector3 VisualizationTools::getScale(const rviz_scales &scale, bool arrow_scale, double marker_scale)
+geometry_msgs::Vector3 VisualTools::getScale(const rviz_scales &scale, bool arrow_scale, double marker_scale)
 {
   geometry_msgs::Vector3 result;
   double val;

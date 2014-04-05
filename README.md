@@ -34,18 +34,18 @@ We'll assume you will be using these helper functions within a class.
 
 Add to your includes:
 ```
-#include <moveit_visual_tools/visualization_tools.h>
+#include <moveit_visual_tools/visual_tools.h>
 ```
 
 Add to your class's member variables:
 ```
 // For visualizing things in rviz
-moveit_visual_tools::VisualizationToolsPtr visual_tools_;
+moveit_visual_tools::VisualToolsPtr visual_tools_;
 ```
 
 In your class' constructor add:
 ```
-visual_tools_.reset(new moveit_visual_tools::VisualizationTools("base_link","/moveit_visual_markers"));
+visual_tools_.reset(new moveit_visual_tools::VisualTools("base_link","/moveit_visual_markers"));
 ```
 
 Change the first parameter to the name of your robot's base link, and the second parameter to whatever name you'd like to use for the corresponding Rviz marker ROS topic.
