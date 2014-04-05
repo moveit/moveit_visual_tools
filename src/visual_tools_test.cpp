@@ -34,6 +34,7 @@
 
 /* Author: Dave Coleman
    Desc:   Demo implementation of moveit_visual_tools
+           To use, add a Rviz Marker Display subscribed to topic /moveit_visual_tools
 */
 
 // ROS
@@ -67,9 +68,10 @@ public:
    */
   VisualToolsTest()
   {
-    visual_tools_.reset(new moveit_visual_tools::VisualTools("base_link","/moveit_visual_markers"));
+    visual_tools_.reset(new moveit_visual_tools::VisualTools("base","/moveit_visual_tools"));
     visual_tools_->setEEGroupName(EE_GROUP);
     visual_tools_->setPlanningGroupName(PLANNING_GROUP_NAME);
+    visual_tools_->setMuted(false);
 
     runTest();
 
@@ -91,11 +93,12 @@ public:
   {
     // Create pose
     Eigen::Affine3d pose;
-    pose = Eigen::AngleAxisd(M_PI/4, Eigen::Vector3d::UnitX()); // rotate along X axis by 45 degrees
+    pose = Eigen::AngleAxisd(M_PI/4, Eigen::Vector3d::UnitY()); // rotate along X axis by 45 degrees
     pose.translation() = Eigen::Vector3d( 0.1, 0.1, 0.1 ); // translate x,y,z
 
     // Publish arrow vector of pose
-    visual_tools_->publishArrow(pose);
+    ROS_INFO_STREAM_NAMED("test","Publishing Arrow");
+    visual_tools_->publishArrow(pose, moveit_visual_tools::RED, moveit_visual_tools::LARGE);
   }
 
 }; // end class
@@ -108,7 +111,7 @@ int main(int argc, char** argv)
   ROS_INFO_STREAM("Visual Tools Test");
 
   // Allow the action server to recieve and send ros messages
-  ros::AsyncSpinner spinner(4);
+  ros::AsyncSpinner spinner(1);
   spinner.start();
 
   moveit_visual_tools::VisualToolsTest tester;

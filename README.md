@@ -67,6 +67,22 @@ Now in your code you can easily debug your MoveIt! code using visual markers in 
 
 Start rviz and create a new marker using the 'Add' button at the bottom right. Choose the marker topic to be the same as the topic you specified in the constructor.
 
+### Example Code
+
+In the following snippet we create a pose at xyz (0.1, 0.1, 0.1) and rotate the pose down 45 degrees along the Y axis. Then we publish the pose as a arrow for visualziation in Rviz. Make sure your Rviz fixed frame is the same as the one chosen in the code.
+
+    ```
+    // Create pose
+    Eigen::Affine3d pose;
+    pose = Eigen::AngleAxisd(M_PI/4, Eigen::Vector3d::UnitY()); // rotate along X axis by 45 degrees
+    pose.translation() = Eigen::Vector3d( 0.1, 0.1, 0.1 ); // translate x,y,z
+
+    // Publish arrow vector of pose
+    ROS_INFO_STREAM_NAMED("test","Publishing Arrow");
+    visual_tools_->publishArrow(pose, moveit_visual_tools::RED, moveit_visual_tools::LARGE);
+    ```
+
+
 ### Publishing Functions
 
 See ``moveit_visual_tools.h`` for more details and documentation on the following functions:
