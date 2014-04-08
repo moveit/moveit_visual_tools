@@ -1,0 +1,13 @@
+<launch>
+  
+  <arg name="debug" default="false" />
+  <arg unless="$(arg debug)" name="launch_prefix" value="" />
+  <arg     if="$(arg debug)" name="launch_prefix" value="gdb --ex run --args" />
+
+  <!-- Start test -->
+  <node name="robot_viz_tool_test" launch-prefix="$(arg launch_prefix)" pkg="simple_grasps" 
+	type="robot_viz_tool_test" output="screen">
+    <rosparam command="load" file="$(find baxter_moveit_config)/config/kinematics.yaml"/>
+  </node>
+
+</launch>

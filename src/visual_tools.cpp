@@ -763,8 +763,8 @@ void VisualTools::cleanupACO(const std::string& name)
   pub_attach_collision_obj_.publish(aco);
   ros::WallDuration(0.1).sleep();
   pub_attach_collision_obj_.publish(aco);
-
 }
+
 void VisualTools::attachCO(const std::string& name)
 {
   // Clean up old attached collision object
@@ -782,7 +782,6 @@ void VisualTools::attachCO(const std::string& name)
   pub_attach_collision_obj_.publish(aco);
   ros::WallDuration(0.1).sleep();
   pub_attach_collision_obj_.publish(aco);
-
 }
 
 void VisualTools::publishCollisionBlock(geometry_msgs::Pose block_pose, std::string block_name, double block_size)
@@ -865,7 +864,7 @@ void VisualTools::publishCollisionCylinder(geometry_msgs::Pose object_pose, std:
   ROS_DEBUG_STREAM_NAMED("visual_tools","Published collision object " << object_name);
 }
 
-void VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_graph, const std::string &object_name)
+void VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_graph, const std::string &object_name, double radius)
 {
   ROS_INFO_STREAM_NAMED("temp","Preparing to create collision tree");
 
@@ -901,9 +900,6 @@ void VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_grap
 
         // add other direction of edge
         added_edges.insert( node_ids(j,i) );
-
-        // Add the shape primitive
-        double radius = 0.01;
 
         // Distance between two points
         double height = (a - b).lpNorm<2>();

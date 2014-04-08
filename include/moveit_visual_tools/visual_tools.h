@@ -375,7 +375,7 @@ public:
    * \param graph of nodes and edges
    * \param name of collision object
    */
-  void publishCollisionTree(const graph_msgs::GeometryGraph &geo_graph, const std::string &object_name);
+  void publishCollisionTree(const graph_msgs::GeometryGraph &geo_graph, const std::string &object_name, double radius);
 
   void publishCollisionWall(double x, double y, double angle, double width, const std::string name);
 
@@ -458,6 +458,15 @@ public:
    * \return center point
    */
   Eigen::Vector3d getCenterPoint(Eigen::Vector3d a, Eigen::Vector3d b);
+
+  /**
+   * \brief Get the base frame
+   * \return name of base frame
+   */
+  const std::string getBaseLink()
+  {
+    return base_link_;
+  }
 
 }; // class
 
