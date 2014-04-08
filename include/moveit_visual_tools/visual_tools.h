@@ -275,7 +275,7 @@ public:
    * \param pose - the location to publish the marker with respect to the base frame
    * \return true on success
    */
-  bool publishBlock(const geometry_msgs::Pose &pose, const double &block_size, const bool isRed);
+  bool publishBlock(const geometry_msgs::Pose &pose, const rviz_colors color = BLUE, const double &block_size = 0.1);
 
   /**
    * \brief Publish an marker of a text to Rviz
@@ -381,6 +381,15 @@ public:
 
   void publishCollisionTable(double x, double y, double angle, double width, double height,
     double depth, const std::string name);
+
+  /**
+   * \brief Move a joint group in MoveIt for visualization
+   *  make sure you have already set the planning group name
+   *  this assumes the trajectory_pt position is the size of the number of joints in the planning group
+   * \param trajectory_pts - a single joint configuration
+   * \return true if no errors
+   */
+  bool publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt, const std::string &group_name);
 
   /**
    * \brief Animate trajectory in rviz

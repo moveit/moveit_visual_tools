@@ -81,8 +81,7 @@ VisualTools::VisualTools(std::string base_link, std::string marker_topic)
   pub_planning_scene_diff_ = nh_.advertise<moveit_msgs::PlanningScene>("/move_group/monitored_planning_scene", 1);
 
   // Trajectory paths
-  pub_display_path_ = nh_.advertise<moveit_msgs::DisplayTrajectory>
-    ("/move_group/display_planned_path", 10, false);
+  pub_display_path_ = nh_.advertise<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 10, false);
 
   // Cache the reusable markers
   loadRvizMarkers();
@@ -223,32 +222,34 @@ bool VisualTools::loadPlanningSceneMonitor()
 }
 
 
-/**  NEEDS TO BE PORTED TO THE NEW MOVEIT FUNCTIONALITY
+/**
  * \brief Move the robot arm to the ik solution in rviz
  * \param joint_values - the in-order list of values to set the robot's joints
  * \return true if it is successful
  *
- bool publishPlanningScene(std::vector<double> joint_values)
- {
- if(muted_)
- return true; // this function will only work if we have loaded the publishers
+ */
+/*
+bool VisualTools::publishPlanningScene(std::vector<double> joint_values)
+{
+  if(muted_)
+    return true; // this function will only work if we have loaded the publishers
 
- ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing planning scene");
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing planning scene");
 
- // Output debug
- //ROS_INFO_STREAM_NAMED("visual_tools","Joint values being sent to planning scene:");
- //std::copy(joint_values.begin(),joint_values.end(), std::ostream_iterator<double>(std::cout, "\n"));
+  // Output debug
+  //ROS_INFO_STREAM_NAMED("visual_tools","Joint values being sent to planning scene:");
+  //std::copy(joint_values.begin(),joint_values.end(), std::ostream_iterator<double>(std::cout, "\n"));
 
- // Update planning scene
- robot_state::JointStateGroup* joint_state_group = getPlanningSceneMonitor()->getPlanningScene()->getCurrentStateNonConst()
- .getJointStateGroup(planning_group_name_);
- joint_state_group->setVariableValues(joint_values);
+  // Update planning scene
+  robot_state::JointStateGroup* joint_state_group = getPlanningSceneMonitor()->getPlanningScene()->getCurrentStateNonConst()
+    .getJointStateGroup(planning_group_name_);
+  joint_state_group->setVariableValues(joint_values);
 
- //    getPlanningSceneMonitor()->updateFrameTransforms();
- getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
+  //    getPlanningSceneMonitor()->updateFrameTransforms();
+  getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
 
- return true;
- }
+  return true;
+}
 */
 
 bool VisualTools::loadRobotMarkers()
@@ -605,7 +606,7 @@ bool VisualTools::publishArrow(const geometry_msgs::Pose &pose, const rviz_color
   return true;
 }
 
-bool VisualTools::publishBlock(const geometry_msgs::Pose &pose, const double &block_size, const bool isRed)
+bool VisualTools::publishBlock(const geometry_msgs::Pose &pose, const rviz_colors color, const double &block_size)
 {
   if(muted_)
     return true;
@@ -624,17 +625,9 @@ bool VisualTools::publishBlock(const geometry_msgs::Pose &pose, const double &bl
   block_marker_.scale.z = block_size;
 
   // Set marker color
-  if(isRed)
-  {
-    block_marker_.color = getColor( RED );
-  }
-  else
-  {
-    block_marker_.color = getColor( GREEN );
-  }
+  block_marker_.color = getColor( color );
 
   pub_rviz_marker_.publish( block_marker_ );
-  //ros::Duration(0.05).sleep(); // Sleep to prevent markers from being 'skipped' in rviz
 
   return true;
 }
@@ -917,7 +910,7 @@ void VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_grap
         pose = pose * rotation;
 
         // Create the solid primitive
-        shape_msgs::SolidPrimitive cylinder;       
+        shape_msgs::SolidPrimitive cylinder;
         cylinder.type = shape_msgs::SolidPrimitive::CYLINDER;
         cylinder.dimensions.resize(shape_tools::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::CYLINDER>::value);
         cylinder.dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT] = height;
@@ -1033,6 +1026,31 @@ void VisualTools::publishCollisionTable(double x, double y, double angle, double
 
   // Save the collision object name so we can optionally remove them later
   collision_objects_.push_back(name);
+}
+
+bool VisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
+  const std::string &group_name)
+{
+  ROS_WARN_STREAM_NAMED("temp","Attempting to get joint model group " << group_name);
+
+  // Get robot model
+  robot_model::RobotModelConstPtr robot_model = getPlanningSceneMonitor()->getRobotModel();
+  // Get joint state group
+  const robot_model::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(group_name);
+
+  if (joint_model_group == NULL) // not found
+  {
+    ROS_ERROR_STREAM_NAMED("temp","Could not find joint model group " << group_name);
+    return false;
+  }
+
+  // Create a trajectory with one point
+  moveit_msgs::RobotTrajectory trajectory_msg;
+  trajectory_msg.joint_trajectory.header.frame_id = base_link_;
+  trajectory_msg.joint_trajectory.joint_names = joint_model_group->getJointModelNames();
+  trajectory_msg.joint_trajectory.points.push_back(trajectory_pt);
+
+  return publishTrajectoryPath(trajectory_msg, false);
 }
 
 bool VisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg,
