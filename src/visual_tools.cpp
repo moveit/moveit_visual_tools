@@ -105,6 +105,185 @@ void VisualTools::setGraspPoseToEEFPose(geometry_msgs::Pose grasp_pose_to_eef_po
   grasp_pose_to_eef_pose_ = grasp_pose_to_eef_pose;
 }
 
+void VisualTools::setLifetime(double lifetime)
+{
+  marker_lifetime_ = ros::Duration(lifetime);
+
+  // Update cached markers
+  arrow_marker_.lifetime = marker_lifetime_;
+  rectangle_marker_.lifetime = marker_lifetime_;
+  line_marker_.lifetime = marker_lifetime_;
+  sphere_marker_.lifetime = marker_lifetime_;
+  block_marker_.lifetime = marker_lifetime_;
+  text_marker_.lifetime = marker_lifetime_;
+}
+
+std_msgs::ColorRGBA VisualTools::getColor(const rviz_colors &color)
+{
+  std_msgs::ColorRGBA result;
+  result.a = alpha_;
+  switch(color)
+  {
+    case RED:
+      result.r = 0.8;
+      result.g = 0.1;
+      result.b = 0.1;
+      break;
+    case GREEN:
+      result.r = 0.1;
+      result.g = 0.8;
+      result.b = 0.1;
+      break;
+    case GREY:
+      result.r = 0.9;
+      result.g = 0.9;
+      result.b = 0.9;
+      break;
+    case WHITE:
+      result.r = 1.0;
+      result.g = 1.0;
+      result.b = 1.0;
+      break;
+    case ORANGE:
+      result.r = 1.0;
+      result.g = 0.5;
+      result.b = 0.0;
+      break;
+    case BLACK:
+      result.r = 0.0;
+      result.g = 0.0;
+      result.b = 0.0;
+      break;
+    case YELLOW:
+      result.r = 1.0;
+      result.g = 1.0;
+      result.b = 0.0;
+      break;
+    case BLUE:
+    default:
+      result.r = 0.1;
+      result.g = 0.1;
+      result.b = 0.8;
+  }
+
+  return result;
+}
+
+geometry_msgs::Vector3 VisualTools::getScale(const rviz_scales &scale, bool arrow_scale, double marker_scale)
+{
+  geometry_msgs::Vector3 result;
+  double val;
+  switch(scale)
+  {
+    case XXSMALL:
+      val = 0.005;
+      break;
+    case XSMALL:
+      val = 0.01;
+      break;
+    case SMALL:
+      val = 0.03;
+      break;
+    case REGULAR:
+      val = 0.05;
+      break;
+    case LARGE:
+      val = 0.1;
+      break;
+    case XLARGE:
+      val = 0.5;
+      break;
+    default:
+      ROS_ERROR_STREAM_NAMED("visualization_tools","Not implemented yet");
+      break;
+  }
+
+  result.x = val * marker_scale;
+  result.y = val * marker_scale;
+  result.z = val * marker_scale;
+
+  // The y and z scaling is smaller for arrows
+  if (arrow_scale)
+  {
+    result.y *= 0.1;
+    result.z *= 0.1;
+  }
+
+  return result;
+}
+
+const std::string& VisualTools::getEEParentLink()
+{
+  // Make sure we already loaded the EE markers
+  loadEEMarker();
+
+  return ee_parent_link_;
+}
+
+planning_scene_monitor::PlanningSceneMonitorPtr VisualTools::getPlanningSceneMonitor()
+{
+  if( !planning_scene_monitor_ )
+  {
+    loadPlanningSceneMonitor();
+  }
+
+  return planning_scene_monitor_;
+}
+
+Eigen::Vector3d VisualTools::getCenterPoint(Eigen::Vector3d a, Eigen::Vector3d b)
+{
+  Eigen::Vector3d center;
+  center[0] = (a[0] + b[0]) / 2;
+  center[1] = (a[1] + b[1]) / 2;
+  center[2] = (a[2] + b[2]) / 2;
+  return center;
+}
+
+Eigen::Affine3d VisualTools::getVectorBetweenPoints(Eigen::Vector3d a, Eigen::Vector3d b)
+{
+  // from http://answers.ros.org/question/31006/how-can-a-vector3-axis-be-used-to-produce-a-quaternion/
+
+  // Goal pose:
+  Eigen::Quaterniond q;
+
+  Eigen::Vector3d axis_vector = b - a;
+  axis_vector.normalize();
+
+  Eigen::Vector3d up_vector(0.0, 0.0, 1.0);
+  Eigen::Vector3d right_axis_vector = axis_vector.cross(up_vector);
+  right_axis_vector.normalized();
+  double theta = axis_vector.dot(up_vector);
+  double angle_rotation = -1.0*acos(theta);
+
+  //-------------------------------------------
+  // Method 1 - TF - works
+  //Convert to TF
+  tf::Vector3 tf_right_axis_vector;
+  tf::vectorEigenToTF(right_axis_vector, tf_right_axis_vector);
+
+  // Create quaternion
+  tf::Quaternion tf_q(tf_right_axis_vector, angle_rotation);
+
+  // Convert back to Eigen
+  tf::quaternionTFToEigen(tf_q, q);
+  //-------------------------------------------
+  //std::cout << q.toRotationMatrix() << std::endl;
+
+  //-------------------------------------------
+  // Method 2 - Eigen - broken TODO
+  //q = Eigen::AngleAxis<double>(angle_rotation, right_axis_vector);
+  //-------------------------------------------
+  //std::cout << q.toRotationMatrix() << std::endl;
+
+  // Rotate so that vector points along line
+  Eigen::Affine3d pose;
+  q.normalize();
+  pose = q * Eigen::AngleAxisd(-0.5*M_PI, Eigen::Vector3d::UnitY());
+  pose.translation() = a;
+
+  return pose;
+}
+
 void VisualTools::loadRvizMarkers()
 {
   // Load arrow ----------------------------------------------------
@@ -206,7 +385,7 @@ bool VisualTools::loadPlanningSceneMonitor()
     //planning_scene_monitor_->startSceneMonitor("/move_group/monitored_planning_scene");
     //planning_scene_monitor_->startStateMonitor("/joint_states", "/attached_collision_object");
     //planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
-    //  "dave_planning_scene");
+    //  "test_planning_scene");
   }
   else
   {
@@ -229,10 +408,10 @@ bool VisualTools::loadPlanningSceneMonitor()
  *
  */
 /*
-bool VisualTools::publishPlanningScene(std::vector<double> joint_values)
-{
+  bool VisualTools::publishPlanningScene(std::vector<double> joint_values)
+  {
   if(muted_)
-    return true; // this function will only work if we have loaded the publishers
+  return true; // this function will only work if we have loaded the publishers
 
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing planning scene");
 
@@ -242,14 +421,14 @@ bool VisualTools::publishPlanningScene(std::vector<double> joint_values)
 
   // Update planning scene
   robot_state::JointStateGroup* joint_state_group = getPlanningSceneMonitor()->getPlanningScene()->getCurrentStateNonConst()
-    .getJointStateGroup(planning_group_name_);
+  .getJointStateGroup(planning_group_name_);
   joint_state_group->setVariableValues(joint_values);
 
   //    getPlanningSceneMonitor()->updateFrameTransforms();
   getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
 
   return true;
-}
+  }
 */
 
 bool VisualTools::loadRobotMarkers()
@@ -260,7 +439,7 @@ bool VisualTools::loadRobotMarkers()
   // Get all link names
   const std::vector<std::string> &link_names = robot_model->getLinkModelNames();;
 
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Number of links in baxter: " << link_names.size());
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Number of links in robot: " << link_names.size());
   //    std::copy(link_names.begin(), link_names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
 
   // -----------------------------------------------------------------------------------------------
@@ -272,7 +451,7 @@ bool VisualTools::loadRobotMarkers()
   //robot_state.printTransforms();
 
   visualization_msgs::MarkerArray robot_marker_array;
-  robot_state.getRobotMarkers(robot_marker_array, link_names, getColor( GREY ), "dave test", ros::Duration());
+  robot_state.getRobotMarkers(robot_marker_array, link_names, getColor( GREY ), "test", ros::Duration());
 
   ROS_DEBUG_STREAM_NAMED("visual_tools","Number of rviz markers: " << robot_marker_array.markers.size());
 
@@ -1080,100 +1259,6 @@ bool VisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& traj
   return true;
 }
 
-std_msgs::ColorRGBA VisualTools::getColor(const rviz_colors &color)
-{
-  std_msgs::ColorRGBA result;
-  result.a = alpha_;
-  switch(color)
-  {
-    case RED:
-      result.r = 0.8;
-      result.g = 0.1;
-      result.b = 0.1;
-      break;
-    case GREEN:
-      result.r = 0.1;
-      result.g = 0.8;
-      result.b = 0.1;
-      break;
-    case GREY:
-      result.r = 0.9;
-      result.g = 0.9;
-      result.b = 0.9;
-      break;
-    case WHITE:
-      result.r = 1.0;
-      result.g = 1.0;
-      result.b = 1.0;
-      break;
-    case ORANGE:
-      result.r = 1.0;
-      result.g = 0.5;
-      result.b = 0.0;
-      break;
-    case BLACK:
-      result.r = 0.0;
-      result.g = 0.0;
-      result.b = 0.0;
-      break;
-    case YELLOW:
-      result.r = 1.0;
-      result.g = 1.0;
-      result.b = 0.0;
-      break;
-    case BLUE:
-    default:
-      result.r = 0.1;
-      result.g = 0.1;
-      result.b = 0.8;
-  }
-
-  return result;
-}
-
-geometry_msgs::Vector3 VisualTools::getScale(const rviz_scales &scale, bool arrow_scale, double marker_scale)
-{
-  geometry_msgs::Vector3 result;
-  double val;
-  switch(scale)
-  {
-    case XXSMALL:
-      val = 0.005;
-      break;
-    case XSMALL:
-      val = 0.01;
-      break;
-    case SMALL:
-      val = 0.03;
-      break;
-    case REGULAR:
-      val = 0.05;
-      break;
-    case LARGE:
-      val = 0.1;
-      break;
-    case XLARGE:
-      val = 0.5;
-      break;
-    default:
-      ROS_ERROR_STREAM_NAMED("visualization_tools","Not implemented yet");
-      break;
-  }
-
-  result.x = val * marker_scale;
-  result.y = val * marker_scale;
-  result.z = val * marker_scale;
-
-  // The y and z scaling is smaller for arrows
-  if (arrow_scale)
-  {
-    result.y *= 0.1;
-    result.z *= 0.1;
-  }
-
-  return result;
-}
-
 geometry_msgs::Pose VisualTools::convertPose(const Eigen::Affine3d &pose)
 {
   geometry_msgs::Pose pose_msg;
@@ -1188,60 +1273,6 @@ Eigen::Vector3d VisualTools::convertPoint(const geometry_msgs::Point &point)
   point_eigen[1] = point.y;
   point_eigen[2] = point.z;
   return point_eigen;
-}
-
-Eigen::Vector3d VisualTools::getCenterPoint(Eigen::Vector3d a, Eigen::Vector3d b)
-{
-  Eigen::Vector3d center;
-  center[0] = (a[0] + b[0]) / 2;
-  center[1] = (a[1] + b[1]) / 2;
-  center[2] = (a[2] + b[2]) / 2;
-  return center;
-}
-
-Eigen::Affine3d VisualTools::getVectorBetweenPoints(Eigen::Vector3d a, Eigen::Vector3d b)
-{
-  // from http://answers.ros.org/question/31006/how-can-a-vector3-axis-be-used-to-produce-a-quaternion/
-
-  // Goal pose:
-  Eigen::Quaterniond q;
-
-  Eigen::Vector3d axis_vector = b - a;
-  axis_vector.normalize();
-
-  Eigen::Vector3d up_vector(0.0, 0.0, 1.0);
-  Eigen::Vector3d right_axis_vector = axis_vector.cross(up_vector);
-  right_axis_vector.normalized();
-  double theta = axis_vector.dot(up_vector);
-  double angle_rotation = -1.0*acos(theta);
-
-  //-------------------------------------------
-  // Method 1 - TF - works
-  //Convert to TF
-  tf::Vector3 tf_right_axis_vector;
-  tf::vectorEigenToTF(right_axis_vector, tf_right_axis_vector);
-
-  // Create quaternion
-  tf::Quaternion tf_q(tf_right_axis_vector, angle_rotation);
-
-  // Convert back to Eigen
-  tf::quaternionTFToEigen(tf_q, q);
-  //-------------------------------------------
-  //std::cout << q.toRotationMatrix() << std::endl;
-
-  //-------------------------------------------
-  // Method 2 - Eigen - broken TODO
-  //q = Eigen::AngleAxis<double>(angle_rotation, right_axis_vector);
-  //-------------------------------------------
-  //std::cout << q.toRotationMatrix() << std::endl;
-
-  // Rotate so that vector points along line
-  Eigen::Affine3d pose;
-  q.normalize();
-  pose = q * Eigen::AngleAxisd(-0.5*M_PI, Eigen::Vector3d::UnitY());
-  pose.translation() = a;
-
-  return pose;
 }
 
 } // namespace
