@@ -45,16 +45,8 @@
 
 // MoveIt
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/robot_interaction/robot_interaction.h>
-#include <shape_tools/solid_primitive_dims.h>
-
-// MoveIt Messages
-#include <moveit_msgs/DisplayTrajectory.h>
-#include <moveit_msgs/CollisionObject.h>
 
 // ROS
-#include <tf_conversions/tf_eigen.h>
-#include <eigen_conversions/eigen_msg.h>
 #include <geometry_msgs/PoseArray.h>
 
 // Boost

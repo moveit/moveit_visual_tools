@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf_conversions
   visualization_msgs
   graph_msgs
+  std_msgs
 )
 
 # Catkin
@@ -23,6 +24,7 @@ catkin_package(
     geometry_msgs
     visualization_msgs 
     graph_msgs
+    std_msgs
   INCLUDE_DIRS include
 )
 

@@ -36,6 +36,17 @@
 // Desc:   Simple tools for showing parts of a robot in Rviz, such as the gripper or arm
 
 #include <moveit_visual_tools/visual_tools.h>
+#include <moveit/robot_interaction/robot_interaction.h>
+
+// MoveIt Messages
+#include <moveit_msgs/DisplayTrajectory.h>
+#include <moveit_msgs/CollisionObject.h>
+
+// Conversions
+#include <tf_conversions/tf_eigen.h>
+#include <eigen_conversions/eigen_msg.h>
+
+#include <shape_tools/solid_primitive_dims.h>
 
 namespace moveit_visual_tools
 {
