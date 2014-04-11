@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.0 (2014-04-11)
+------------------
 * Improved header comments are re-ordered functions into groups
 * Started to create new trajectory point publisher
 * Added getBaseLink function
