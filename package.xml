@@ -19,15 +19,22 @@
   <build_depend>eigen_conversions</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>moveit_ros_robot_interaction</build_depend>
+  <build_depend>moveit_core</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>tf_conversions</build_depend>
   <build_depend>visualization_msgs</build_depend>
   <build_depend>graph_msgs</build_depend>
   <build_depend>std_msgs</build_depend>
+  <build_depend>moveit_msgs</build_depend>
+  <build_depend>trajectory_msgs</build_depend>
 
+  <run_depend>moveit_ros_robot_interaction</run_depend>
+  <run_depend>moveit_core</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>visualization_msgs</run_depend>
   <run_depend>graph_msgs</run_depend>
   <run_depend>std_msgs</run_depend>
+  <run_depend>moveit_msgs</run_depend>
+  <run_depend>trajectory_msgs</run_depend>
 
 </package>

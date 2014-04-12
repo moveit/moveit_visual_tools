@@ -9,11 +9,13 @@ find_package(catkin REQUIRED COMPONENTS
   eigen_conversions 
   geometry_msgs
   moveit_ros_robot_interaction 
+  moveit_core
   roscpp
   tf_conversions
   visualization_msgs
   graph_msgs
   std_msgs
+  trajectory_msgs
 )
 
 # Catkin
@@ -21,15 +23,19 @@ catkin_package(
   LIBRARIES
     ${PROJECT_NAME}
   CATKIN_DEPENDS
+    moveit_ros_robot_interaction
+    moveit_core
     geometry_msgs
     visualization_msgs 
     graph_msgs
     std_msgs
+    moveit_msgs
+    trajectory_msgs
   INCLUDE_DIRS include
 )
 
 # Enable gdb to show line numbers
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -W -Wall -Wno-unused-parameter -fno-strict-aliasing")
 #set(CMAKE_BUILD_TYPE Debug)
 
 ## Build 

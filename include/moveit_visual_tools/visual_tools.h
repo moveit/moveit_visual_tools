@@ -32,9 +32,15 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-// \author  Dave Coleman
-// \desc    Helper functions for displaying and debugging MoveIt! data in Rviz via published markers 
-//          and MoveIt! collision objects. Very useful for debugging complex software
+/* \author  Dave Coleman
+ * \desc    Helper functions for displaying and debugging MoveIt! data in Rviz via published markers
+ *          and MoveIt! collision objects. Very useful for debugging complex software
+ *
+ * Standard: we do not want to load any features until they are actually needed since this library
+ *           contains so many components
+ *
+ * Standard: all publish() ROS topics should be followed by a ros::spinOnce();
+ */
 
 #ifndef MOVEIT_VISUAL_TOOLS__VISUAL_TOOLS_H_
 #define MOVEIT_VISUAL_TOOLS__VISUAL_TOOLS_H_
@@ -45,9 +51,8 @@
 
 // MoveIt
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-
-// ROS
-#include <geometry_msgs/PoseArray.h>
+#include <moveit_msgs/Grasp.h>
+#include <moveit_msgs/DisplayRobotState.h>
 
 // Boost
 #include <boost/shared_ptr.hpp>
@@ -55,7 +60,8 @@
 // Messages
 #include <std_msgs/ColorRGBA.h>
 #include <graph_msgs/GeometryGraph.h>
-
+#include <geometry_msgs/PoseArray.h>
+#include <trajectory_msgs/JointTrajectory.h>
 
 namespace moveit_visual_tools
 {
@@ -65,6 +71,9 @@ static const std::string ROBOT_DESCRIPTION="robot_description";
 static const std::string COLLISION_TOPIC = "/collision_object";
 static const std::string ATTACHED_COLLISION_TOPIC = "/attached_collision_object";
 static const std::string RVIZ_MARKER_TOPIC = "/end_effector_marker";
+static const std::string PLANNING_SCENE_TOPIC = "/move_group/monitored_planning_scene";
+static const std::string DISPLAY_PLANNED_PATH_TOPIC = "/move_group/display_planned_path";
+static const std::string DISPLAY_ROBOT_STATE_TOPIC = "/move_group/robot_state";
 
 enum rviz_colors { RED, GREEN, BLUE, GREY, WHITE, ORANGE, BLACK, YELLOW };
 enum rviz_scales { XXSMALL, XSMALL, SMALL, REGULAR, LARGE, XLARGE };
@@ -82,6 +91,7 @@ private:
   ros::Publisher pub_attach_collision_obj_; // for MoveIt attached objects
   ros::Publisher pub_display_path_; // for MoveIt trajectories
   ros::Publisher pub_planning_scene_diff_; // for adding and removing collision objects
+  ros::Publisher pub_robot_state_; // publish a RobotState message
 
   // Pointer to a Planning Scene Monitor
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
@@ -104,6 +114,7 @@ private:
   geometry_msgs::Pose grasp_pose_to_eef_pose_; // Convert generic grasp pose to this end effector's frame of reference
   std::vector<geometry_msgs::Pose> marker_poses_;
 
+  // Library settings
   bool muted_; // Whether to actually publish to rviz or not
   double alpha_; // opacity of all markers
 
@@ -114,6 +125,12 @@ private:
   visualization_msgs::Marker text_marker_;
   visualization_msgs::Marker rectangle_marker_;
   visualization_msgs::Marker line_marker_;
+
+  // MoveIt cached markers
+  moveit_msgs::DisplayRobotState display_robot_msg_;
+
+  // MoveIt cached objects
+  robot_state::RobotStatePtr shared_robot_state_;
 
   // Marker id counters
   int arrow_id_;
@@ -179,6 +196,9 @@ public:
    */
   void setEEGroupName(const std::string& ee_group_name)
   {
+    if (ee_group_name.empty())
+      ROS_ERROR_STREAM_NAMED("visual_tools","Set EE group name to empty string, will probably fail.");
+
     ee_group_name_ = ee_group_name;
   }
 
@@ -355,6 +375,29 @@ public:
     const rviz_colors &color = WHITE);
 
   /**
+   * \brief Display a vector of grasps in Rviz.
+   *        Note: make sure you call setPlanningGroupName first
+   * \param possible_grasps - a set of grasp positions to visualize
+   * \param ik_solutions - a set of corresponding arm positions to achieve each grasp
+   * \param ee_parent_link - end effector's attachment link
+   * \param animate_speed - how fast the gripper approach is animated
+   */
+  bool publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
+    const std::string &ee_parent_link, double animate_speed = 0.01);
+
+  bool publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
+    const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions,
+    const std::string &ee_parent_link, double animate_speed = 0.01);
+
+  /**
+   * \brief Animate a single grasp in its movement direction
+   * \param grasp
+   * \param ee_parent_link - end effector's attachment link
+   * \param animate_speed - how fast the gripper approach is animated
+   */
+  void animateGrasp(const moveit_msgs::Grasp &grasp, const std::string &ee_parent_link, double animate_speed);
+
+  /**
    * \brief Remove all collision objects that this class has added to the MoveIt! planning scene
    */
   void removeAllCollisionObjects();
@@ -439,8 +482,9 @@ public:
    * \brief Move a joint group in MoveIt for visualization
    *  make sure you have already set the planning group name
    *  this assumes the trajectory_pt position is the size of the number of joints in the planning group
+   *  This will be displayed in the Planned Path section of the MoveIt Rviz plugin
    * \param trajectory_pts - a single joint configuration
-   * \param group_name - the MoveIt planning group the trajectory applies to 
+   * \param group_name - the MoveIt planning group the trajectory applies to
    * \return true if no errors
    */
   bool publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt, const std::string &group_name);
@@ -452,6 +496,21 @@ public:
    * \return true if no errors
    */
   bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg, bool waitTrajectory);
+
+  /**
+   * \brief Publish a complete robot state to Rviz
+   *        To use, add a RobotState marker to Rviz and subscribe to the DISPLAY_ROBOT_STATE_TOPIC, above
+   * \param robot_state
+   */
+  bool publishRobotState(const robot_state::RobotState &robot_state);
+
+  /**
+   * \brief TODO
+   * \param input - description
+   * \param input - description
+   * \return 
+   */
+  bool publishRobotState(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt, const std::string &group_name);
 
   /**
    * \brief Converts an Eigen pose to a geometry_msg pose
