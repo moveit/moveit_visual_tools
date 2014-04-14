@@ -1446,11 +1446,11 @@ bool VisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& traj
       << trajectory_msg.joint_trajectory.points.back().time_from_start << " seconds");
 
     // Check if ROS is ok in intervals
-    for (std::size_t i = 0; i < trajectory_msg.joint_trajectory.points.size(); ++i)
+    double counter = 0;
+    while (ros::ok() && counter < trajectory_msg.joint_trajectory.points.back().time_from_start.toSec())
     {
-      ros::Duration(trajectory_msg.joint_trajectory.points[i].time_from_start).sleep();
-      if(!ros::ok())
-        break;      
+      counter += 0.25; // check every fourth second
+      ros::Duration(0.5).sleep();
     }
   }
 
