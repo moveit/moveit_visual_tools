@@ -141,7 +141,7 @@ private:
   int line_id_;
 
   // Track all collision objects we've added
-  std::vector<std::string> collision_objects_;
+  std::vector<std::string> collision_objects_; // \todo remove this functionality
 
 public:
 
@@ -375,19 +375,22 @@ public:
     const rviz_colors &color = WHITE);
 
   /**
-   * \brief Display a vector of grasps in Rviz.
-   *        Note: make sure you call setPlanningGroupName first
+   * \brief Display an animated vector of grasps including its approach movement in Rviz
    * \param possible_grasps - a set of grasp positions to visualize
-   * \param ik_solutions - a set of corresponding arm positions to achieve each grasp
    * \param ee_parent_link - end effector's attachment link
-   * \param animate_speed - how fast the gripper approach is animated
+   * \param animate_speed - how fast the gripper approach is animated, optional
    */
-  bool publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
+  bool publishAnimatedGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
     const std::string &ee_parent_link, double animate_speed = 0.01);
 
-  bool publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
-    const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions,
-    const std::string &ee_parent_link, double animate_speed = 0.01);
+  /**
+   * \brief Display an vector of inverse kinematic solutions for the IK service in Rviz
+   *        Note: this is published to the 'Planned Path' section of the 'MotionPlanning' display in Rviz
+   *        Note: make sure you call setPlanningGroupName first
+   * \param ik_solutions - a set of corresponding arm positions to achieve each grasp
+   * \param display_time - amount of time to sleep between sending trajectories, optional
+   */
+  bool publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions, double display_time = 0.4);
 
   /**
    * \brief Animate a single grasp in its movement direction
@@ -483,19 +486,22 @@ public:
    *  make sure you have already set the planning group name
    *  this assumes the trajectory_pt position is the size of the number of joints in the planning group
    *  This will be displayed in the Planned Path section of the MoveIt Rviz plugin
+   *
    * \param trajectory_pts - a single joint configuration
    * \param group_name - the MoveIt planning group the trajectory applies to
+   * \param display_time - amount of time for the trajectory to "execute"
    * \return true if no errors
    */
-  bool publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt, const std::string &group_name);
+  bool publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt, const std::string &group_name,
+    double display_time = 0.1);
 
   /**
    * \brief Animate trajectory in rviz
    * \param trajectory_msg the actual plan
-   * \param waitTrajectory whether we need to wait for the animation to complete
+   * \param blocking whether we need to wait for the animation to complete
    * \return true if no errors
    */
-  bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg, bool waitTrajectory);
+  bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg, bool blocking = false);
 
   /**
    * \brief Publish a complete robot state to Rviz

@@ -86,9 +86,9 @@ VisualTools::VisualTools(std::string base_link, std::string marker_topic)
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing collision objects on topic " << COLLISION_TOPIC);
 
   // Collision object attacher
-  pub_attach_collision_obj_ = nh_.advertise<moveit_msgs::AttachedCollisionObject>(ATTACHED_COLLISION_TOPIC, 10);    
+  pub_attach_collision_obj_ = nh_.advertise<moveit_msgs::AttachedCollisionObject>(ATTACHED_COLLISION_TOPIC, 10);
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing attached collision objects on topic " << ATTACHED_COLLISION_TOPIC);
-    
+
   // Planning scene diff publisher
   pub_planning_scene_diff_ = nh_.advertise<moveit_msgs::PlanningScene>(PLANNING_SCENE_TOPIC, 1);
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing planning scene on topic " << PLANNING_SCENE_TOPIC);
@@ -897,17 +897,10 @@ bool VisualTools::publishText(const geometry_msgs::Pose &pose, const std::string
 }
 
 
-bool VisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
+bool VisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
   const std::string &ee_parent_link, double animate_speed)
 {
-  const std::vector<trajectory_msgs::JointTrajectoryPoint> ik_solutions;
-  return publishGrasps(possible_grasps, ik_solutions, ee_parent_link);
-}
 
-bool VisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
-  const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions,
-  const std::string &ee_parent_link, double animate_speed)
-{
   if(muted_)
   {
     ROS_DEBUG_STREAM_NAMED("visual_tools","Not visualizing grasps - muted.");
@@ -918,28 +911,82 @@ bool VisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_
 
   // Loop through all grasps
   for (std::size_t i = 0; i < possible_grasps.size(); ++i)
-  {   
+  {
     if( !ros::ok() )  // Check that ROS is still ok and that user isn't trying to quit
       break;
 
-    ROS_DEBUG_STREAM_NAMED("grasp","Visualizing grasp pose " << i);
+    //ROS_DEBUG_STREAM_NAMED("grasp","Visualizing grasp pose " << i);
 
-    // Show robot joint positions if available
-    if( ik_solutions.size() > i )
-    {
-      //ROS_WARN_STREAM_NAMED("temp","Displaying IK solution:\n" << ik_solutions[i]);
-      //publishTrajectoryPoint(ik_solutions[i], planning_group_name_);
-      publishRobotState(ik_solutions[i], planning_group_name_);
-    }
-    else
-    {
-      animateGrasp(possible_grasps[i], ee_parent_link, animate_speed);
-    }
+    animateGrasp(possible_grasps[i], ee_parent_link, animate_speed);
 
     ros::Duration(0.1).sleep();
   }
 
   return true;
+}
+
+bool VisualTools::publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions, double display_time)
+{
+  if(muted_)
+  {
+    ROS_DEBUG_STREAM_NAMED("visual_tools","Not visualizing inverse kinematic solutions - muted.");
+    return false;
+  }
+
+  if (ik_solutions.empty())
+  {
+    ROS_WARN_STREAM_NAMED("visual_tools","Empty ik_solutions vector passed into publishIKSolutions()");
+    return false;
+  }
+
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing " << ik_solutions.size() << " inverse kinematic solutions");
+
+  // Get robot model
+  robot_model::RobotModelConstPtr robot_model = getPlanningSceneMonitor()->getRobotModel();
+  // Get joint state group
+  const robot_model::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(planning_group_name_);
+
+  if (joint_model_group == NULL) // not found
+  {
+    ROS_ERROR_STREAM_NAMED("temp","Could not find joint model group " << planning_group_name_);
+    return false;
+  }
+
+  // Apply the time to the trajectory
+  trajectory_msgs::JointTrajectoryPoint trajectory_pt_timed;
+
+  // Create a trajectory with one point
+  moveit_msgs::RobotTrajectory trajectory_msg;
+  trajectory_msg.joint_trajectory.header.frame_id = base_link_;
+  trajectory_msg.joint_trajectory.joint_names = joint_model_group->getJointModelNames();
+
+  // Overall length of trajectory
+  double running_time = 0;
+
+  // Loop through all inverse kinematic solutions
+  for (std::size_t i = 0; i < ik_solutions.size(); ++i)
+  {
+    if( !ros::ok() )  // Check that ROS is still ok and that user isn't trying to quit
+      break;
+
+    trajectory_pt_timed = ik_solutions[i];
+    trajectory_pt_timed.time_from_start = ros::Duration(running_time);
+    trajectory_msg.joint_trajectory.points.push_back(trajectory_pt_timed);
+
+    running_time += display_time;
+
+    //ROS_DEBUG_STREAM_NAMED("grasp","Visualizing ik solution " << i);
+
+    // Other method:
+    //publishRobotState(ik_solutions[i], planning_group_name_); // a different method to do this
+  }
+
+  // Re-add final position so the last point is displayed fully
+  trajectory_pt_timed = trajectory_msg.joint_trajectory.points.back();
+  trajectory_pt_timed.time_from_start = ros::Duration(running_time);
+  trajectory_msg.joint_trajectory.points.push_back(trajectory_pt_timed);
+
+  return publishTrajectoryPath(trajectory_msg, true);
 }
 
 void VisualTools::animateGrasp(const moveit_msgs::Grasp &grasp, const std::string &ee_parent_link, double animate_speed)
@@ -1202,7 +1249,6 @@ void VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_grap
       if (return_value.second == false)
       {
         // Element already existed in set, so don't add a new collision object
-        ROS_WARN_STREAM_NAMED("temp","edge already exists");
       }
       else
       {
@@ -1246,7 +1292,7 @@ void VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_grap
 
   ROS_INFO_STREAM_NAMED("temp","Done creating collision objects");
 
-  ROS_INFO_STREAM_NAMED("pick_place","CollisionObject: \n " << collision_obj);
+  //ROS_INFO_STREAM_NAMED("pick_place","CollisionObject: \n " << collision_obj);
   pub_collision_obj_.publish(collision_obj);
   ros::spinOnce();
 
@@ -1351,7 +1397,7 @@ void VisualTools::publishCollisionTable(double x, double y, double angle, double
 }
 
 bool VisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
-  const std::string &group_name)
+  const std::string &group_name, double display_time)
 {
   // Get robot model
   robot_model::RobotModelConstPtr robot_model = getPlanningSceneMonitor()->getRobotModel();
@@ -1364,18 +1410,22 @@ bool VisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryP
     return false;
   }
 
+  // Apply the time to the trajectory
+  trajectory_msgs::JointTrajectoryPoint trajectory_pt_timed = trajectory_pt;
+  trajectory_pt_timed.time_from_start = ros::Duration(display_time);
+
   // Create a trajectory with one point
   moveit_msgs::RobotTrajectory trajectory_msg;
   trajectory_msg.joint_trajectory.header.frame_id = base_link_;
   trajectory_msg.joint_trajectory.joint_names = joint_model_group->getJointModelNames();
   trajectory_msg.joint_trajectory.points.push_back(trajectory_pt);
+  trajectory_msg.joint_trajectory.points.push_back(trajectory_pt_timed);
 
-
-  return publishTrajectoryPath(trajectory_msg, false);
+  return publishTrajectoryPath(trajectory_msg, true);
 }
 
 bool VisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg,
-  bool waitTrajectory)
+  bool blocking)
 {
   // Create the message
   moveit_msgs::DisplayTrajectory rviz_display;
@@ -1390,11 +1440,18 @@ bool VisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& traj
   ros::spinOnce();
 
   // Wait the duration of the trajectory
-  if( waitTrajectory )
+  if( blocking )
   {
-    ros::Duration wait_sec = trajectory_msg.joint_trajectory.points.back().time_from_start * 4;
-    ROS_INFO_STREAM_NAMED("visual_tools","Waiting for trajectory animation " << wait_sec.toSec() << " seconds");
-    wait_sec.sleep();
+    ROS_INFO_STREAM_NAMED("visual_tools","Waiting for trajectory animation " 
+      << trajectory_msg.joint_trajectory.points.back().time_from_start << " seconds");
+
+    // Check if ROS is ok in intervals
+    for (std::size_t i = 0; i < trajectory_msg.joint_trajectory.points.size(); ++i)
+    {
+      ros::Duration(trajectory_msg.joint_trajectory.points[i].time_from_start).sleep();
+      if(!ros::ok())
+        break;      
+    }
   }
 
   return true;
@@ -1415,7 +1472,7 @@ bool VisualTools::publishRobotState(const trajectory_msgs::JointTrajectoryPoint&
   // Set robot state
   shared_robot_state_->setToDefaultValues(); // reset the state just in case
   shared_robot_state_->setJointGroupPositions(group_name, trajectory_pt.positions);
-  
+
   // Publish robot state
   publishRobotState(*shared_robot_state_);
 
