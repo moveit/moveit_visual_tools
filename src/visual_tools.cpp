@@ -79,7 +79,7 @@ VisualTools::VisualTools(std::string base_link, std::string marker_topic)
 
   // Rviz Visualizations
   pub_rviz_marker_ = nh_.advertise<visualization_msgs::Marker>(marker_topic_, 10);
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing rviz markers on topic " << marker_topic_);
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing Rviz markers on topic " << marker_topic_);
 
   // Collision object creator
   pub_collision_obj_ = nh_.advertise<moveit_msgs::CollisionObject>(COLLISION_TOPIC, 10);
@@ -103,9 +103,6 @@ VisualTools::VisualTools(std::string base_link, std::string marker_topic)
 
   // Cache the reusable markers
   loadRvizMarkers();
-
-  // Get robot state - TODO not load this here?
-  shared_robot_state_.reset(new robot_state::RobotState(getPlanningSceneMonitor()->getRobotModel()));
 
   // Wait
   ros::spinOnce();
@@ -251,6 +248,13 @@ planning_scene_monitor::PlanningSceneMonitorPtr VisualTools::getPlanningSceneMon
   return planning_scene_monitor_;
 }
 
+robot_state::RobotStatePtr VisualTools::loadSharedRobotState()
+{
+  // Get robot state
+  if (!shared_robot_state_)
+    shared_robot_state_.reset(new robot_state::RobotState(getPlanningSceneMonitor()->getRobotModel()));
+}
+
 Eigen::Vector3d VisualTools::getCenterPoint(Eigen::Vector3d a, Eigen::Vector3d b)
 {
   Eigen::Vector3d center;
@@ -305,7 +309,7 @@ Eigen::Affine3d VisualTools::getVectorBetweenPoints(Eigen::Vector3d a, Eigen::Ve
   return pose;
 }
 
-void VisualTools::loadRvizMarkers()
+bool VisualTools::loadRvizMarkers()
 {
   // Load arrow ----------------------------------------------------
 
@@ -454,6 +458,9 @@ bool VisualTools::loadPlanningSceneMonitor()
 
 bool VisualTools::loadRobotMarkers()
 {
+  // Always oad the robot state before using
+  loadSharedRobotState(); 
+
   // Get all link names
   const std::vector<std::string> &link_names = shared_robot_state_->getRobotModel()->getLinkModelNames();;
 
@@ -496,6 +503,9 @@ bool VisualTools::loadRobotMarkers()
 
 bool VisualTools::loadEEMarker()
 {
+  // Always oad the robot state before using
+  loadSharedRobotState(); 
+
   // Check if we have already loaded the EE markers
   if( ee_marker_array_.markers.size() > 0 ) // already loaded
     return true;
@@ -734,21 +744,21 @@ bool VisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_c
 
 bool VisualTools::publishSphere(const Eigen::Affine3d &pose, const rviz_colors color, const rviz_scales scale)
 {
-  publishSphere(convertPose(pose), color, scale);
+  return publishSphere(convertPose(pose), color, scale);
 }
 
 bool VisualTools::publishSphere(const Eigen::Vector3d &point, const rviz_colors color, const rviz_scales scale)
 {
   geometry_msgs::Pose pose_msg;
   tf::pointEigenToMsg(point, pose_msg.position);
-  publishSphere(pose_msg, color, scale);
+  return publishSphere(pose_msg, color, scale);
 }
 
 bool VisualTools::publishSphere(const geometry_msgs::Point &point, const rviz_colors color, const rviz_scales scale)
 {
   geometry_msgs::Pose pose_msg;
   pose_msg.position = point;
-  publishSphere(pose_msg, color, scale);
+  return publishSphere(pose_msg, color, scale);
 }
 
 bool VisualTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color, const rviz_scales scale)
@@ -776,7 +786,7 @@ bool VisualTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colo
 
 bool VisualTools::publishArrow(const Eigen::Affine3d &pose, const rviz_colors color, const rviz_scales scale)
 {
-  publishArrow(convertPose(pose), color, scale);
+  return publishArrow(convertPose(pose), color, scale);
 }
 
 bool VisualTools::publishArrow(const geometry_msgs::Pose &pose, const rviz_colors color, const rviz_scales scale)
@@ -989,7 +999,7 @@ bool VisualTools::publishIKSolutions(const std::vector<trajectory_msgs::JointTra
   return publishTrajectoryPath(trajectory_msg, true);
 }
 
-void VisualTools::animateGrasp(const moveit_msgs::Grasp &grasp, const std::string &ee_parent_link, double animate_speed)
+bool VisualTools::animateGrasp(const moveit_msgs::Grasp &grasp, const std::string &ee_parent_link, double animate_speed)
 {
   // Grasp Pose Variables
   geometry_msgs::Pose grasp_pose = grasp.grasp_pose.pose;
@@ -1049,10 +1059,10 @@ void VisualTools::animateGrasp(const moveit_msgs::Grasp &grasp, const std::strin
 
     ros::Duration(animate_speed).sleep();
   }
-
+  return true;
 }
 
-void VisualTools::removeAllCollisionObjects()
+bool VisualTools::removeAllCollisionObjects()
 {
   // Method 1: Publish an empty REMOVE message so as to remove all of them
 
@@ -1093,9 +1103,10 @@ void VisualTools::removeAllCollisionObjects()
      pub_planning_scene_diff_.publish(planning_scene);
      ros::WallDuration(0.1).sleep();
   */
+  return true;
 }
 
-void VisualTools::cleanupCO(std::string name)
+bool VisualTools::cleanupCO(std::string name)
 {
   // Clean up old collision objects
   moveit_msgs::CollisionObject co;
@@ -1106,9 +1117,10 @@ void VisualTools::cleanupCO(std::string name)
 
   pub_collision_obj_.publish(co);
   ros::spinOnce();
+  return true;
 }
 
-void VisualTools::cleanupACO(const std::string& name)
+bool VisualTools::cleanupACO(const std::string& name)
 {
   // Clean up old attached collision object
   moveit_msgs::AttachedCollisionObject aco;
@@ -1122,9 +1134,10 @@ void VisualTools::cleanupACO(const std::string& name)
 
   pub_attach_collision_obj_.publish(aco);
   ros::spinOnce();
+  return true;
 }
 
-void VisualTools::attachCO(const std::string& name)
+bool VisualTools::attachCO(const std::string& name)
 {
   // Clean up old attached collision object
   moveit_msgs::AttachedCollisionObject aco;
@@ -1139,9 +1152,10 @@ void VisualTools::attachCO(const std::string& name)
 
   pub_attach_collision_obj_.publish(aco);
   ros::spinOnce();
+  return true;
 }
 
-void VisualTools::publishCollisionBlock(geometry_msgs::Pose block_pose, std::string block_name, double block_size)
+bool VisualTools::publishCollisionBlock(geometry_msgs::Pose block_pose, std::string block_name, double block_size)
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
@@ -1165,14 +1179,15 @@ void VisualTools::publishCollisionBlock(geometry_msgs::Pose block_pose, std::str
   collision_objects_.push_back(block_name);
 
   ROS_DEBUG_STREAM_NAMED("visual_tools","Published collision object " << block_name);
+  return true;
 }
 
-void VisualTools::publishCollisionCylinder(geometry_msgs::Point a, geometry_msgs::Point b, std::string object_name, double radius)
+bool VisualTools::publishCollisionCylinder(geometry_msgs::Point a, geometry_msgs::Point b, std::string object_name, double radius)
 {
-  publishCollisionCylinder(convertPoint(a), convertPoint(b), object_name, radius);
+  return publishCollisionCylinder(convertPoint(a), convertPoint(b), object_name, radius);
 }
 
-void VisualTools::publishCollisionCylinder(Eigen::Vector3d a, Eigen::Vector3d b, std::string object_name, double radius)
+bool VisualTools::publishCollisionCylinder(Eigen::Vector3d a, Eigen::Vector3d b, std::string object_name, double radius)
 {
   // Distance between two points
   double height = (a - b).lpNorm<2>();
@@ -1189,15 +1204,15 @@ void VisualTools::publishCollisionCylinder(Eigen::Vector3d a, Eigen::Vector3d b,
   rotation = Eigen::AngleAxisd(0.5*M_PI, Eigen::Vector3d::UnitY());
   pose = pose * rotation;
 
-  publishCollisionCylinder(pose, object_name, radius, height);
+  return publishCollisionCylinder(pose, object_name, radius, height);
 }
 
-void VisualTools::publishCollisionCylinder(Eigen::Affine3d object_pose, std::string object_name, double radius, double height)
+bool VisualTools::publishCollisionCylinder(Eigen::Affine3d object_pose, std::string object_name, double radius, double height)
 {
-  publishCollisionCylinder(convertPose(object_pose), object_name, radius, height);
+  return publishCollisionCylinder(convertPose(object_pose), object_name, radius, height);
 }
 
-void VisualTools::publishCollisionCylinder(geometry_msgs::Pose object_pose, std::string object_name, double radius, double height)
+bool VisualTools::publishCollisionCylinder(geometry_msgs::Pose object_pose, std::string object_name, double radius, double height)
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
@@ -1220,10 +1235,11 @@ void VisualTools::publishCollisionCylinder(geometry_msgs::Pose object_pose, std:
   // Save the collision object name so we can optionally remove them later
   collision_objects_.push_back(object_name);
 
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Published collision object " << object_name);
+  //ROS_DEBUG_STREAM_NAMED("visual_tools","Published collision object " << object_name);
+  return true;
 }
 
-void VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_graph, const std::string &object_name, double radius)
+bool VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_graph, const std::string &object_name, double radius)
 {
   ROS_INFO_STREAM_NAMED("temp","Preparing to create collision tree");
 
@@ -1307,9 +1323,11 @@ void VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_grap
 
   // Remove collision object
   //visual_tools_->cleanupCO(object.name);
+
+  return true;
 }
 
-void VisualTools::publishCollisionWall(double x, double y, double angle, double width, const std::string name)
+bool VisualTools::publishCollisionWall(double x, double y, double angle, double width, const std::string name)
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
@@ -1353,9 +1371,11 @@ void VisualTools::publishCollisionWall(double x, double y, double angle, double 
 
   // Save the collision object name so we can optionally remove them later
   collision_objects_.push_back(name);
+
+  return true;
 }
 
-void VisualTools::publishCollisionTable(double x, double y, double angle, double width, double height,
+bool VisualTools::publishCollisionTable(double x, double y, double angle, double width, double height,
   double depth, const std::string name)
 {
   geometry_msgs::Pose table_pose;
@@ -1394,6 +1414,8 @@ void VisualTools::publishCollisionTable(double x, double y, double angle, double
 
   // Save the collision object name so we can optionally remove them later
   collision_objects_.push_back(name);
+
+  return true;
 }
 
 bool VisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
@@ -1469,6 +1491,9 @@ bool VisualTools::publishRobotState(const robot_state::RobotState &robot_state)
 bool VisualTools::publishRobotState(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
   const std::string &group_name)
 {
+  // Always oad the robot state before using
+  loadSharedRobotState(); 
+
   // Set robot state
   shared_robot_state_->setToDefaultValues(); // reset the state just in case
   shared_robot_state_->setJointGroupPositions(group_name, trajectory_pt.positions);

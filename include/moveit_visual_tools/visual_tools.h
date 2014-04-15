@@ -130,7 +130,7 @@ private:
   moveit_msgs::DisplayRobotState display_robot_msg_;
 
   // MoveIt cached objects
-  robot_state::RobotStatePtr shared_robot_state_;
+  robot_state::RobotStatePtr shared_robot_state_; // Note: call loadSharedRobotState() before using this
 
   // Marker id counters
   int arrow_id_;
@@ -280,14 +280,21 @@ public:
 
   /**
    * \brief Pre-load rviz markers for better efficiency
+   * \return converted pose   * \return true on sucess
    */
-  void loadRvizMarkers();
+  bool loadRvizMarkers();
 
   /**
    * \brief Load a planning scene monitor if one was not passed into the constructor
    * \return true if successful in loading
    */
   bool loadPlanningSceneMonitor();
+
+  /**
+   * \brief Load robot state only as needed
+   * \return pointer to an editable robot state
+   */
+  robot_state::RobotStatePtr loadSharedRobotState();
 
   /**
    * \brief Caches the meshes and geometry of a robot. NOTE: perhaps not maintained...
@@ -397,39 +404,45 @@ public:
    * \param grasp
    * \param ee_parent_link - end effector's attachment link
    * \param animate_speed - how fast the gripper approach is animated
+   * \return true on sucess
    */
-  void animateGrasp(const moveit_msgs::Grasp &grasp, const std::string &ee_parent_link, double animate_speed);
+  bool animateGrasp(const moveit_msgs::Grasp &grasp, const std::string &ee_parent_link, double animate_speed);
 
   /**
    * \brief Remove all collision objects that this class has added to the MoveIt! planning scene
+   * \return true on sucess
    */
-  void removeAllCollisionObjects();
+  bool removeAllCollisionObjects();
 
   /**
    * \brief Remove a collision object from the planning scene
    * \param Name of object
+   * \return true on sucess
    */
-  void cleanupCO(std::string name);
+  bool cleanupCO(std::string name);
 
   /**
    * \brief Remove an active collision object from the planning scene
    * \param Name of object
+   * \return true on sucess
    */
-  void cleanupACO(const std::string& name);
+  bool cleanupACO(const std::string& name);
 
   /**
    * \brief Attach a collision object from the planning scene
    * \param Name of object
+   * \return true on sucess
    */
-  void attachCO(const std::string& name);
+  bool attachCO(const std::string& name);
 
   /**
    * \brief Create a MoveIt Collision block at the given pose
    * \param pose - location of center of block
    * \param name - semantic name of MoveIt collision object
    * \param size - height=width=depth=size
+   * \return true on sucess
    **/
-  void publishCollisionBlock(geometry_msgs::Pose block_pose, std::string block_name, double block_size);
+  bool publishCollisionBlock(geometry_msgs::Pose block_pose, std::string block_name, double block_size);
 
   /**
    * \brief Create a MoveIt Collision cylinder between two points
@@ -437,9 +450,10 @@ public:
    * \param point b - x,y,z in space of a point
    * \param name - semantic name of MoveIt collision object
    * \param radius - size of cylinder
+   * \return true on sucess
    */
-  void publishCollisionCylinder(geometry_msgs::Point a, geometry_msgs::Point b, std::string object_name, double radius);
-  void publishCollisionCylinder(Eigen::Vector3d a, Eigen::Vector3d b, std::string object_name, double radius);
+  bool publishCollisionCylinder(geometry_msgs::Point a, geometry_msgs::Point b, std::string object_name, double radius);
+  bool publishCollisionCylinder(Eigen::Vector3d a, Eigen::Vector3d b, std::string object_name, double radius);
 
   /**
    * \brief Create a MoveIt Collision cylinder with a center point pose
@@ -447,16 +461,18 @@ public:
    * \param name - semantic name of MoveIt collision object
    * \param radius - size of cylinder
    * \param height - size of cylinder
+   * \return true on sucess
    */
-  void publishCollisionCylinder(Eigen::Affine3d object_pose, std::string object_name, double radius, double height);
-  void publishCollisionCylinder(geometry_msgs::Pose object_pose, std::string object_name, double radius, double height);
+  bool publishCollisionCylinder(Eigen::Affine3d object_pose, std::string object_name, double radius, double height);
+  bool publishCollisionCylinder(geometry_msgs::Pose object_pose, std::string object_name, double radius, double height);
 
   /**
    * \brief Publish a connected birectional tree that is a graph
    * \param graph of nodes and edges
    * \param name of collision object
+   * \return true on sucess
    */
-  void publishCollisionTree(const graph_msgs::GeometryGraph &geo_graph, const std::string &object_name, double radius);
+  bool publishCollisionTree(const graph_msgs::GeometryGraph &geo_graph, const std::string &object_name, double radius);
 
   /**
    * \brief Publish a typical room wall
@@ -465,8 +481,9 @@ public:
    * \param angle
    * \param width
    * \param name
+   * \return true on sucess
    */
-  void publishCollisionWall(double x, double y, double angle, double width, const std::string name);
+  bool publishCollisionWall(double x, double y, double angle, double width, const std::string name);
 
   /**
    * \brief Publish a typical room table
@@ -477,8 +494,9 @@ public:
    * \param height
    * \param depth
    * \param name
+   * \return true on sucess
    */
-  void publishCollisionTable(double x, double y, double angle, double width, double height,
+  bool publishCollisionTable(double x, double y, double angle, double width, double height,
     double depth, const std::string name);
 
   /**
@@ -490,7 +508,7 @@ public:
    * \param trajectory_pts - a single joint configuration
    * \param group_name - the MoveIt planning group the trajectory applies to
    * \param display_time - amount of time for the trajectory to "execute"
-   * \return true if no errors
+   * \return true on success
    */
   bool publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt, const std::string &group_name,
     double display_time = 0.1);
@@ -499,7 +517,7 @@ public:
    * \brief Animate trajectory in rviz
    * \param trajectory_msg the actual plan
    * \param blocking whether we need to wait for the animation to complete
-   * \return true if no errors
+   * \return true on success
    */
   bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg, bool blocking = false);
 
@@ -511,22 +529,23 @@ public:
   bool publishRobotState(const robot_state::RobotState &robot_state);
 
   /**
-   * \brief TODO
-   * \param input - description
-   * \param input - description
-   * \return 
+   * \brief Publish a MoveIt robot state to a topic that the Rviz "RobotState" display can show
+   * \param robot_state
+   * \return true on success
    */
   bool publishRobotState(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt, const std::string &group_name);
 
   /**
    * \brief Converts an Eigen pose to a geometry_msg pose
    * \param pose
+   * \return converted pose
    */
   geometry_msgs::Pose convertPose(const Eigen::Affine3d &pose);
 
   /**
    * \brief Converts a geometry_msg point to an Eigen point
    * \param point
+   * \return converted pose
    */
   Eigen::Vector3d convertPoint(const geometry_msgs::Point &point);
 
