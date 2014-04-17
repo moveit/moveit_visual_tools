@@ -71,7 +71,7 @@ VisualTools::VisualTools(std::string base_link, std::string marker_topic)
     base_link_(base_link),
     floor_to_base_height_(0),
     marker_lifetime_(ros::Duration(30.0)),
-    muted_(true),
+    muted_(false),
     alpha_(0.8)
 {
   // Initialize counters to zero
@@ -1309,6 +1309,7 @@ bool VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_grap
   ROS_INFO_STREAM_NAMED("temp","Done creating collision objects");
 
   //ROS_INFO_STREAM_NAMED("pick_place","CollisionObject: \n " << collision_obj);
+  ROS_DEBUG_STREAM_NAMED("temp","result: \n" << collision_obj);
   pub_collision_obj_.publish(collision_obj);
   ros::spinOnce();
 
@@ -1504,6 +1505,17 @@ bool VisualTools::publishRobotState(const trajectory_msgs::JointTrajectoryPoint&
   return true;
 }
 
+bool VisualTools::publishTest()
+{
+  // Create pose
+  geometry_msgs::Pose pose;
+  generateRandomPose(pose);
+
+  // Publish arrow vector of pose
+  ROS_INFO_STREAM_NAMED("test","Publishing Arrow");
+  publishArrow(pose, moveit_visual_tools::RED, moveit_visual_tools::LARGE);
+}
+
 geometry_msgs::Pose VisualTools::convertPose(const Eigen::Affine3d &pose)
 {
   geometry_msgs::Pose pose_msg;
@@ -1520,5 +1532,26 @@ Eigen::Vector3d VisualTools::convertPoint(const geometry_msgs::Point &point)
   return point_eigen;
 }
 
+void VisualTools::generateRandomPose(geometry_msgs::Pose& pose)
+  {
+    // Position
+    pose.position.x = dRand(0, 1);
+    pose.position.y = dRand(0, 1);
+    pose.position.z = dRand(0, 1);
+  
+    // Orientation on place
+    double angle = M_PI * dRand(0.1,1);
+    Eigen::Quaterniond quat(Eigen::AngleAxis<double>(double(angle), Eigen::Vector3d::UnitZ()));
+    pose.orientation.x = quat.x();
+    pose.orientation.y = quat.y();
+    pose.orientation.z = quat.z();
+    pose.orientation.w = quat.w();
+  }
+
+double VisualTools::dRand(double dMin, double dMax)
+  {
+    double d = (double)rand() / RAND_MAX;
+    return dMin + d * (dMax - dMin);
+  } 
 
 } // namespace

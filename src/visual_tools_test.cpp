@@ -71,7 +71,6 @@ public:
     visual_tools_.reset(new moveit_visual_tools::VisualTools("base","/moveit_visual_tools"));
     visual_tools_->setEEGroupName(EE_GROUP);
     visual_tools_->setPlanningGroupName(PLANNING_GROUP_NAME);
-    visual_tools_->setMuted(false);
 
     runTest();
 
@@ -91,14 +90,7 @@ public:
    */
   void runTest()
   {
-    // Create pose
-    Eigen::Affine3d pose;
-    pose = Eigen::AngleAxisd(M_PI/4, Eigen::Vector3d::UnitY()); // rotate along X axis by 45 degrees
-    pose.translation() = Eigen::Vector3d( 0.1, 0.1, 0.1 ); // translate x,y,z
-
-    // Publish arrow vector of pose
-    ROS_INFO_STREAM_NAMED("test","Publishing Arrow");
-    visual_tools_->publishArrow(pose, moveit_visual_tools::RED, moveit_visual_tools::LARGE);
+    visual_tools_->publishTest();
   }
 
 }; // end class

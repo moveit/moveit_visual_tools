@@ -536,6 +536,12 @@ public:
   bool publishRobotState(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt, const std::string &group_name);
 
   /**
+   * \brief Run a simple test of all visual_tool's features
+   * \return true on success
+   */
+  bool publishTest();
+
+  /**
    * \brief Converts an Eigen pose to a geometry_msg pose
    * \param pose
    * \return converted pose
@@ -548,6 +554,18 @@ public:
    * \return converted pose
    */
   Eigen::Vector3d convertPoint(const geometry_msgs::Point &point);
+
+  /**
+   * \brief Create a random pose
+   * \param Pose to fill in
+   */
+  void generateRandomPose(geometry_msgs::Pose& pose);
+
+  /**
+   * \brief Get random double between min and max
+   */
+  double dRand(double dMin, double dMax);
+
 
 }; // class
 
