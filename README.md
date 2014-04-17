@@ -1,4 +1,4 @@
-moveit_visual_tools
+MoveIt! Visual Tools
 ==========================
 
 Helper functions for displaying and debugging MoveIt! data in Rviz via published markers and MoveIt! collision objects. Very useful for debugging complex software
