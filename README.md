@@ -76,7 +76,6 @@ Start rviz and create a new marker using the 'Add' button at the bottom right. C
 
 In the following snippet we create a pose at xyz (0.1, 0.1, 0.1) and rotate the pose down 45 degrees along the Y axis. Then we publish the pose as a arrow for visualziation in Rviz. Make sure your Rviz fixed frame is the same as the one chosen in the code.
 
-    ```
     // Create pose
     Eigen::Affine3d pose;
     pose = Eigen::AngleAxisd(M_PI/4, Eigen::Vector3d::UnitY()); // rotate along X axis by 45 degrees
@@ -85,20 +84,20 @@ In the following snippet we create a pose at xyz (0.1, 0.1, 0.1) and rotate the 
     // Publish arrow vector of pose
     ROS_INFO_STREAM_NAMED("test","Publishing Arrow");
     visual_tools_->publishArrow(pose, moveit_visual_tools::RED, moveit_visual_tools::LARGE);
-    ```
 
 
-### Publishing Functions
+### Basic Publishing Functions
 
-See ``moveit_visual_tools.h`` for more details and documentation on the following functions:
+See ``visual_tools.h`` for more details and documentation on the following functions:
 
- - publishSphere
  - publishEEMarkers
+ - publishSphere
  - publishArrow
  - publishRectangle
  - publishLine
  - publishBlock
  - publishText
+ - publishTest
 
 ### Collision Object Functions
 
@@ -108,14 +107,30 @@ Helpers for adding and removing objects from the MoveIt! planning scene. CO stan
  - cleanupACO
  - attachCO
  - publishCollisionBlock
- - publishCollisionWall
+ - publishCollisionCylinder
+ - publishCollisionTree
  - publishCollisionTable
+ - publishCollisionWall
 
 ### Animate Trajectories
 
-Note: this might not currently be working
+Higher level robot ans trajectory functions
 
  - publishTrajectoryPath
+ - publishTrajectoryPoint
+ - publishRobotState
+ - publishAnimatedGrasps
+ - publishIKSolutions
+
+### Helper Functions
+
+Convenience functions
+ 
+ - convertPose
+ - generateRandomPose
+ - dRand
+ - getCenterPoint
+ - getVectorBetweenPoints
 
 ### Available Colors
 
