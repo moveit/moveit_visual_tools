@@ -1,7 +1,14 @@
 MoveIt! Visual Tools
 ==========================
 
-Helper functions for displaying and debugging MoveIt! data in Rviz via published markers and MoveIt! collision objects. Very useful for debugging complex software
+Helper functions for displaying and debugging MoveIt! data in Rviz via published markers, trajectories, and MoveIt! collision objects. It is sometimes hard to understand everything that is going on internally with MoveIt!, but using these quick convenience functions allows one to easily visualize their code. 
+
+This package includes:
+
+ - Basic geometric markers for Rviz
+ - MoveIt! collision object tools
+ - Trajectory visualization tools
+ - Robot state tools
 
 By [Dave Coleman](http://dav.ee) at the Correll Robotics Lab, University of Colorado Boulder
 
