@@ -140,9 +140,6 @@ private:
   int rectangle_id_;
   int line_id_;
 
-  // Track all collision objects we've added
-  std::vector<std::string> collision_objects_; // \todo remove this functionality
-
 public:
 
   /**

@@ -1081,28 +1081,6 @@ bool VisualTools::removeAllCollisionObjects()
   pub_planning_scene_diff_.publish(planning_scene);
   ros::spinOnce();
 
-  /* METHOD 2: remove individually
-     moveit_msgs::PlanningScene planning_scene;
-     planning_scene.is_diff = true;
-     planning_scene.world.collision_objects.clear();
-
-     for (std::size_t i = 0; i < collision_objects_.size(); ++i)
-     {
-     // Clean up old collision objects
-     moveit_msgs::CollisionObject remove_object;
-     remove_object.header.frame_id = base_link_;
-     remove_object.id = collision_objects_[i];
-     remove_object.operation = moveit_msgs::CollisionObject::REMOVE;
-
-     planning_scene.world.collision_objects.push_back(remove_object);
-     ROS_INFO_STREAM_NAMED("temp","removing co named: " << remove_object.id);
-     //pub_collision_obj_.publish(co);
-     }
-
-     // Publish
-     pub_planning_scene_diff_.publish(planning_scene);
-     ros::WallDuration(0.1).sleep();
-  */
   return true;
 }
 
@@ -1175,8 +1153,6 @@ bool VisualTools::publishCollisionBlock(geometry_msgs::Pose block_pose, std::str
 
   pub_collision_obj_.publish(collision_obj);
   ros::spinOnce();
-  // Save the collision object name so we can optionally remove them later
-  collision_objects_.push_back(block_name);
 
   ROS_DEBUG_STREAM_NAMED("visual_tools","Published collision object " << block_name);
   return true;
@@ -1232,16 +1208,13 @@ bool VisualTools::publishCollisionCylinder(geometry_msgs::Pose object_pose, std:
   pub_collision_obj_.publish(collision_obj);
   ros::spinOnce();
 
-  // Save the collision object name so we can optionally remove them later
-  collision_objects_.push_back(object_name);
-
   //ROS_DEBUG_STREAM_NAMED("visual_tools","Published collision object " << object_name);
   return true;
 }
 
 bool VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_graph, const std::string &object_name, double radius)
 {
-  ROS_INFO_STREAM_NAMED("temp","Preparing to create collision tree");
+  ROS_INFO_STREAM_NAMED("publishCollisionTree","Preparing to create collision tree");
 
   // The tree is one collision object with many primitives
   moveit_msgs::CollisionObject collision_obj;
@@ -1306,16 +1279,10 @@ bool VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_grap
     }
   }
 
-  ROS_INFO_STREAM_NAMED("temp","Done creating collision objects");
-
   //ROS_INFO_STREAM_NAMED("pick_place","CollisionObject: \n " << collision_obj);
-  ROS_DEBUG_STREAM_NAMED("temp","result: \n" << collision_obj);
+  //ROS_DEBUG_STREAM_NAMED("temp","result: \n" << collision_obj);
   pub_collision_obj_.publish(collision_obj);
   ros::spinOnce();
-
-  // Save the collision object name so we can optionally remove them later
-  collision_objects_.push_back(object_name);
-
 
   //visual_tools_->removeAllCollisionObjects();
 
@@ -1370,9 +1337,6 @@ bool VisualTools::publishCollisionWall(double x, double y, double angle, double 
   pub_collision_obj_.publish(collision_obj);
   ros::spinOnce();
 
-  // Save the collision object name so we can optionally remove them later
-  collision_objects_.push_back(name);
-
   return true;
 }
 
@@ -1412,9 +1376,6 @@ bool VisualTools::publishCollisionTable(double x, double y, double angle, double
 
   pub_collision_obj_.publish(collision_obj);
   ros::spinOnce();
-
-  // Save the collision object name so we can optionally remove them later
-  collision_objects_.push_back(name);
 
   return true;
 }
