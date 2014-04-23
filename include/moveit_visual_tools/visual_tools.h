@@ -40,6 +40,8 @@
  *           contains so many components
  *
  * Standard: all publish() ROS topics should be followed by a ros::spinOnce();
+ *
+ * Standard: all publishers should only be loaded as needed
  */
 
 #ifndef MOVEIT_VISUAL_TOOLS__VISUAL_TOOLS_H_
@@ -158,6 +160,16 @@ public:
    * \brief Deconstructor
    */
   ~VisualTools();
+
+  /**
+   * \brief Load publishers as neede
+   */
+  void loadMarkerPub();
+  void loadCollisionPub();
+  void loadAttachedPub();
+  void loadPlanningPub();
+  void loadPathPub();
+  void loadRobotPub();
 
   /**
    * \brief Return if we are in verbose mode

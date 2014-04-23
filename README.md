@@ -22,7 +22,6 @@ By [Dave Coleman](http://dav.ee) at the Correll Robotics Lab, University of Colo
 
 ### Ubuntu Debian
 
-Available next hydro release:
 ```
 sudo apt-get install ros-hydro-moveit-visual-tools
 ```
@@ -31,11 +30,6 @@ sudo apt-get install ros-hydro-moveit-visual-tools
 
 ```
 git clone git@github.com:davetcoleman/moveit_visual_tools.git
-```
-
-Dependencies (available in hydro next release):
-```
-git clone git@github.com:davetcoleman/graph_msgs.git
 ```
 
 ## Usage
