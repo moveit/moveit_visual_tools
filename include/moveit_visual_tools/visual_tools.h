@@ -124,6 +124,7 @@ private:
   visualization_msgs::Marker arrow_marker_;
   visualization_msgs::Marker sphere_marker_;
   visualization_msgs::Marker block_marker_;
+  visualization_msgs::Marker cylinder_marker_;
   visualization_msgs::Marker text_marker_;
   visualization_msgs::Marker rectangle_marker_;
   visualization_msgs::Marker line_marker_;
@@ -138,6 +139,7 @@ private:
   int arrow_id_;
   int sphere_id_;
   int block_id_;
+  int cylinder_id_;
   int text_id_;
   int rectangle_id_;
   int line_id_;
@@ -381,13 +383,23 @@ public:
   bool publishBlock(const geometry_msgs::Pose &pose, const rviz_colors color = BLUE, const double &block_size = 0.1);
 
   /**
+   * \brief Publish an marker of a cylinder to Rviz
+   * \param pose - the location to publish the marker with respect to the base frame
+   * \param color - an enum pre-defined name of a color
+   * \param height - geometry of cylinder
+   * \param radius - geometry of cylinder
+   * \return true on success
+   */
+  bool publishCylinder(const geometry_msgs::Pose &pose, const rviz_colors color = BLUE, double height = 0.1, double radius = 0.1);
+
+  /**
    * \brief Publish a graph
    * \param graph of nodes and edges
    * \param color - an enum pre-defined name of a color
    * \param radius - width of cylinders
    * \return true on success
    */
-  bool publishGraph(const graph_msgs::GeometryGraph &graph, const rviz_colors color = GREEN, double radius);
+  bool publishGraph(const graph_msgs::GeometryGraph &graph, const rviz_colors color, double radius);
 
   /**
    * \brief Publish an marker of a text to Rviz
@@ -485,12 +497,12 @@ public:
   bool publishCollisionCylinder(geometry_msgs::Pose object_pose, std::string object_name, double radius, double height);
 
   /**
-   * \brief Publish a connected birectional tree that is a graph
+   * \brief Publish a connected birectional graph
    * \param graph of nodes and edges
    * \param name of collision object
    * \return true on sucess
    */
-  bool publishCollisionTree(const graph_msgs::GeometryGraph &geo_graph, const std::string &object_name, double radius);
+  bool publishCollisionGraph(const graph_msgs::GeometryGraph &graph, const std::string &object_name, double radius);
 
   /**
    * \brief Publish a typical room wall

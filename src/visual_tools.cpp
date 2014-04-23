@@ -77,18 +77,8 @@ VisualTools::VisualTools(std::string base_link, std::string marker_topic)
   // Initialize counters to zero
   resetMarkerCounts();
 
-
-
-
-
-
-
   // Cache the reusable markers
-  loadRvizMarkers();
-
-  // Wait
-  ros::spinOnce();
-  ros::Duration(0.1).sleep();
+  loadRvizMarkers(); // TODO: is it ok to not load this!?
 }
 
 VisualTools::~VisualTools()
@@ -105,7 +95,8 @@ void VisualTools::loadMarkerPub()
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing Rviz markers on topic " << marker_topic_);
 
   ros::spinOnce();
-  ros::Duration(0.1).sleep();
+  ros::Duration(0.5).sleep();
+  ros::spinOnce();
 }
 
 void VisualTools::loadCollisionPub()
@@ -118,7 +109,8 @@ void VisualTools::loadCollisionPub()
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing collision objects on topic " << COLLISION_TOPIC);
 
   ros::spinOnce();
-  ros::Duration(0.1).sleep();
+  ros::Duration(0.5).sleep();
+  ros::spinOnce();
 }
 
 void VisualTools::loadAttachedPub()
@@ -131,7 +123,8 @@ void VisualTools::loadAttachedPub()
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing attached collision objects on topic " << ATTACHED_COLLISION_TOPIC);
 
   ros::spinOnce();
-  ros::Duration(0.1).sleep();
+  ros::Duration(0.5).sleep();
+  ros::spinOnce();
 }
 
 void VisualTools::loadPlanningPub()
@@ -144,7 +137,8 @@ void VisualTools::loadPlanningPub()
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing planning scene on topic " << PLANNING_SCENE_TOPIC);
 
   ros::spinOnce();
-  ros::Duration(0.1).sleep();
+  ros::Duration(0.5).sleep();
+  ros::spinOnce();
 }
 
 void VisualTools::loadPathPub()
@@ -157,7 +151,8 @@ void VisualTools::loadPathPub()
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing MoveIt trajectory on topic " << DISPLAY_PLANNED_PATH_TOPIC);
 
   ros::spinOnce();
-  ros::Duration(0.1).sleep();
+  ros::Duration(0.5).sleep();
+  ros::spinOnce();
 }
 
 void VisualTools::loadRobotPub()
@@ -170,7 +165,8 @@ void VisualTools::loadRobotPub()
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing MoveIt Robot State on topic " << DISPLAY_ROBOT_STATE_TOPIC);
 
   ros::spinOnce();
-  ros::Duration(0.1).sleep();
+  ros::Duration(0.5).sleep();
+  ros::spinOnce();
 }
 
 void VisualTools::setFloorToBaseHeight(double floor_to_base_height)
@@ -193,6 +189,7 @@ void VisualTools::setLifetime(double lifetime)
   line_marker_.lifetime = marker_lifetime_;
   sphere_marker_.lifetime = marker_lifetime_;
   block_marker_.lifetime = marker_lifetime_;
+  cylinder_marker_.lifetime = marker_lifetime_;
   text_marker_.lifetime = marker_lifetime_;
 }
 
@@ -417,6 +414,17 @@ bool VisualTools::loadRvizMarkers()
   block_marker_.type = visualization_msgs::Marker::CUBE;
   // Lifetime
   block_marker_.lifetime = marker_lifetime_;
+
+  // Load Cylinder ----------------------------------------------------
+  cylinder_marker_.header.frame_id = base_link_;
+  // Set the namespace and id for this marker.  This serves to create a unique ID
+  cylinder_marker_.ns = "Cylinder";
+  // Set the marker action.  Options are ADD and DELETE
+  cylinder_marker_.action = visualization_msgs::Marker::ADD;
+  // Set the marker type.
+  cylinder_marker_.type = visualization_msgs::Marker::CYLINDER;
+  // Lifetime
+  cylinder_marker_.lifetime = marker_lifetime_;
 
   // Load Sphere -------------------------------------------------
   sphere_marker_.header.frame_id = base_link_;
@@ -648,6 +656,7 @@ void VisualTools::resetMarkerCounts()
   arrow_id_ = 0;
   sphere_id_ = 0;
   block_id_ = 0;
+  cylinder_id_ = 0;
   text_id_ = 0;
   rectangle_id_ = 0;
   line_id_ = 0;
@@ -900,9 +909,82 @@ bool VisualTools::publishBlock(const geometry_msgs::Pose &pose, const rviz_color
   return true;
 }
 
-bool VisualTools::publishGraph(const graph_msgs::GeometryGraph &graph, const rviz_colors color, const rviz_scales scale)
+bool VisualTools::publishCylinder(const geometry_msgs::Pose &pose, const rviz_colors color, double height, double radius)
 {
-  ROS_ERROR_STREAM_NAMED("temp","TODO");
+  if(muted_)
+    return true;
+
+  // Set the timestamp
+  cylinder_marker_.header.stamp = ros::Time::now();
+
+  cylinder_marker_.id = ++cylinder_id_;
+
+  // Set the pose
+  cylinder_marker_.pose = pose;
+
+  // Set marker size
+  cylinder_marker_.scale.x = radius;
+  cylinder_marker_.scale.y = radius;
+  cylinder_marker_.scale.z = height;
+
+  // Set marker color
+  cylinder_marker_.color = getColor( color );
+
+  loadMarkerPub(); // always check this before publishing
+  pub_rviz_marker_.publish( cylinder_marker_ );
+  ros::spinOnce();
+
+  return true;
+}
+
+bool VisualTools::publishGraph(const graph_msgs::GeometryGraph &graph, const rviz_colors color, double radius)
+{
+  // Track which pairs of nodes we've already connected since graph is bi-directional
+  typedef std::pair<std::size_t, std::size_t> node_ids;
+  std::set<node_ids> added_edges;
+  std::pair<std::set<node_ids>::iterator,bool> return_value;
+
+  Eigen::Vector3d a, b;
+  for (std::size_t i = 0; i < graph.nodes.size(); ++i)
+  {
+    for (std::size_t j = 0; j < graph.edges[i].node_ids.size(); ++j)
+    {
+      // Check if we've already added this pair of nodes (edge)
+      return_value = added_edges.insert( node_ids(i,j) );
+      if (return_value.second == false)
+      {
+        // Element already existed in set, so don't add a new collision object
+      }
+      else
+      {
+        // Create a cylinder from two points
+        a = convertPoint(graph.nodes[i]);
+        b = convertPoint(graph.nodes[graph.edges[i].node_ids[j]]);
+
+        // add other direction of edge
+        added_edges.insert( node_ids(j,i) );
+
+        // Distance between two points
+        double height = (a - b).lpNorm<2>();
+
+        // Find center point
+        Eigen::Vector3d pt_center = getCenterPoint(a, b);
+
+        // Create vector
+        Eigen::Affine3d pose;
+        pose = getVectorBetweenPoints(pt_center, b);
+
+        // Convert pose to be normal to cylindar axis
+        Eigen::Affine3d rotation;
+        rotation = Eigen::AngleAxisd(0.5*M_PI, Eigen::Vector3d::UnitY());
+        pose = pose * rotation;
+
+        // Publish individually
+        publishCylinder(convertPose(pose), color, height, radius);
+      }
+    }
+  }
+
 }
 
 bool VisualTools::publishRectangle(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2, const rviz_colors color)
@@ -1291,11 +1373,11 @@ bool VisualTools::publishCollisionCylinder(geometry_msgs::Pose object_pose, std:
   return true;
 }
 
-bool VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_graph, const std::string &object_name, double radius)
+bool VisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph &graph, const std::string &object_name, double radius)
 {
-  ROS_INFO_STREAM_NAMED("publishCollisionTree","Preparing to create collision tree");
+  ROS_INFO_STREAM_NAMED("publishCollisionGraph","Preparing to create collision graph");
 
-  // The tree is one collision object with many primitives
+  // The graph is one collision object with many primitives
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
   collision_obj.header.frame_id = base_link_;
@@ -1308,9 +1390,9 @@ bool VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_grap
   std::pair<std::set<node_ids>::iterator,bool> return_value;
 
   Eigen::Vector3d a, b;
-  for (std::size_t i = 0; i < geo_graph.nodes.size(); ++i)
+  for (std::size_t i = 0; i < graph.nodes.size(); ++i)
   {
-    for (std::size_t j = 0; j < geo_graph.edges[i].node_ids.size(); ++j)
+    for (std::size_t j = 0; j < graph.edges[i].node_ids.size(); ++j)
     {
       // Check if we've already added this pair of nodes (edge)
       return_value = added_edges.insert( node_ids(i,j) );
@@ -1321,8 +1403,8 @@ bool VisualTools::publishCollisionTree(const graph_msgs::GeometryGraph &geo_grap
       else
       {
         // Create a cylinder from two points
-        a = convertPoint(geo_graph.nodes[i]);
-        b = convertPoint(geo_graph.nodes[geo_graph.edges[i].node_ids[j]]);
+        a = convertPoint(graph.nodes[i]);
+        b = convertPoint(graph.nodes[graph.edges[i].node_ids[j]]);
 
         // add other direction of edge
         added_edges.insert( node_ids(j,i) );
