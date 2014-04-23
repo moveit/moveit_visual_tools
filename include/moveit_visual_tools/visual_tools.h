@@ -381,6 +381,15 @@ public:
   bool publishBlock(const geometry_msgs::Pose &pose, const rviz_colors color = BLUE, const double &block_size = 0.1);
 
   /**
+   * \brief Publish a graph
+   * \param graph of nodes and edges
+   * \param color - an enum pre-defined name of a color
+   * \param radius - width of cylinders
+   * \return true on success
+   */
+  bool publishGraph(const graph_msgs::GeometryGraph &graph, const rviz_colors color = GREEN, double radius);
+
+  /**
    * \brief Publish an marker of a text to Rviz
    * \param pose - the location to publish the marker with respect to the base frame
    * \param text - what to display

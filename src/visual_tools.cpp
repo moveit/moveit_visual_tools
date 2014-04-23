@@ -900,6 +900,11 @@ bool VisualTools::publishBlock(const geometry_msgs::Pose &pose, const rviz_color
   return true;
 }
 
+bool VisualTools::publishGraph(const graph_msgs::GeometryGraph &graph, const rviz_colors color, const rviz_scales scale)
+{
+  ROS_ERROR_STREAM_NAMED("temp","TODO");
+}
+
 bool VisualTools::publishRectangle(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2, const rviz_colors color)
 {
   if(muted_)
