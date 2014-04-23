@@ -297,19 +297,29 @@ const std::string& VisualTools::getEEParentLink()
 
 planning_scene_monitor::PlanningSceneMonitorPtr VisualTools::getPlanningSceneMonitor()
 {
+  ROS_DEBUG_STREAM_NAMED("temp","getPlanningSceneMonitor");
   if( !planning_scene_monitor_ )
   {
     loadPlanningSceneMonitor();
+    ros::spinOnce();
+    ros::Duration(1).sleep();
   }
-
   return planning_scene_monitor_;
 }
 
-robot_state::RobotStatePtr VisualTools::loadSharedRobotState()
+bool VisualTools::loadSharedRobotState()
 {
   // Get robot state
   if (!shared_robot_state_)
-    shared_robot_state_.reset(new robot_state::RobotState(getPlanningSceneMonitor()->getRobotModel()));
+  {
+    planning_scene_monitor::PlanningSceneMonitorPtr psm = getPlanningSceneMonitor();
+    ROS_DEBUG_STREAM_NAMED("temp","getRobotModel");
+
+    shared_robot_state_.reset(new robot_state::RobotState(psm->getRobotModel() ));
+    ROS_DEBUG_STREAM_NAMED("temp","done getRobotModel");
+  }
+
+  return true;
 }
 
 Eigen::Vector3d VisualTools::getCenterPoint(Eigen::Vector3d a, Eigen::Vector3d b)
@@ -464,6 +474,7 @@ bool VisualTools::loadRvizMarkers()
 
 bool VisualTools::loadPlanningSceneMonitor()
 {
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Loading planning scene monitor");
   // ---------------------------------------------------------------------------------------------
   // Create planning scene monitor
   planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(ROBOT_DESCRIPTION));
@@ -571,7 +582,7 @@ bool VisualTools::loadRobotMarkers()
 
 bool VisualTools::loadEEMarker()
 {
-  // Always oad the robot state before using
+  // Always load the robot state before using
   loadSharedRobotState();
 
   // Check if we have already loaded the EE markers
@@ -585,7 +596,7 @@ bool VisualTools::loadEEMarker()
   std_msgs::ColorRGBA marker_color = getColor( GREY );
 
   // Get robot model
-  robot_model::RobotModelConstPtr robot_model = getPlanningSceneMonitor()->getRobotModel();
+  robot_model::RobotModelConstPtr robot_model = shared_robot_state_->getRobotModel();
   // Get joint state group
   const robot_model::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(ee_group_name_);
   if( joint_model_group == NULL ) // make sure EE_GROUP exists
@@ -593,10 +604,8 @@ bool VisualTools::loadEEMarker()
     ROS_ERROR_STREAM_NAMED("visual_tools","Unable to find joint model group '" << ee_group_name_ << "'");
     return false;
   }
-
   // Get link names that are in end effector
   const std::vector<std::string> &ee_link_names = joint_model_group->getLinkModelNames();
-
   ROS_DEBUG_STREAM_NAMED("visual_tools","Number of links in group " << ee_group_name_ << ": " << ee_link_names.size());
   //std::copy(ee_link_names.begin(), ee_link_names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
 
@@ -622,11 +631,6 @@ bool VisualTools::loadEEMarker()
 
   // -----------------------------------------------------------------------------------------------
   // Get EE link markers for Rviz
-
-  /*ROS_ERROR_STREAM_NAMED("temp","before printing");
-    robot_state.printStateInfo();
-    robot_state.printTransforms();
-  */
 
   shared_robot_state_->getRobotMarkers(ee_marker_array_, ee_link_names, marker_color, eef.eef_group, ros::Duration());
   ROS_DEBUG_STREAM_NAMED("visual_tools","Number of rviz markers in end effector: " << ee_marker_array_.markers.size());
@@ -667,7 +671,7 @@ bool VisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_c
   if(muted_)
     return true;
 
-  // Load EE Markers
+  // Load EE Markers  
   if( !loadEEMarker() )
   {
     ROS_ERROR_STREAM_NAMED("visual_tools","Unable to publish EE marker");
@@ -769,7 +773,6 @@ bool VisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_c
  // Set the marker type.
  marker.type = visualization_msgs::Marker::MESH_RESOURCE;
  marker.mesh_resource = "package://clam_description/stl/gripper_base_link.STL";
- ROS_ERROR_STREAM_NAMED("temp","TODO - add mesh resource");
 
  // Set the marker action.  Options are ADD and DELETE
  marker.action = visualization_msgs::Marker::ADD;
@@ -1061,18 +1064,45 @@ bool VisualTools::publishText(const geometry_msgs::Pose &pose, const std::string
   return true;
 }
 
-
-bool VisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
-  const std::string &ee_parent_link, double animate_speed)
+bool VisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
+  const std::string &ee_parent_link)
 {
-
   if(muted_)
   {
     ROS_DEBUG_STREAM_NAMED("visual_tools","Not visualizing grasps - muted.");
     return false;
   }
 
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing " << possible_grasps.size() << " grasps");
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing " << possible_grasps.size() << " grasps with parent link " 
+    << ee_parent_link);
+
+  // Loop through all grasps
+  for (std::size_t i = 0; i < possible_grasps.size(); ++i)
+  {
+    if( !ros::ok() )  // Check that ROS is still ok and that user isn't trying to quit
+      break;
+
+    ROS_DEBUG_STREAM_NAMED("grasp","Visualizing grasp pose " << i);
+
+    publishEEMarkers(possible_grasps[i].grasp_pose.pose);
+
+    ros::Duration(0.1).sleep();
+  }
+
+  return true;
+}
+
+bool VisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
+  const std::string &ee_parent_link, double animate_speed)
+{
+  if(muted_)
+  {
+    ROS_DEBUG_STREAM_NAMED("visual_tools","Not visualizing grasps - muted.");
+    return false;
+  }
+
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing " << possible_grasps.size() << " grasps with parent link " 
+    << ee_parent_link << " at speed " << animate_speed);
 
   // Loop through all grasps
   for (std::size_t i = 0; i < possible_grasps.size(); ++i)
@@ -1082,7 +1112,7 @@ bool VisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Grasp>& p
 
     //ROS_DEBUG_STREAM_NAMED("grasp","Visualizing grasp pose " << i);
 
-    animateGrasp(possible_grasps[i], ee_parent_link, animate_speed);
+    publishAnimatedGrasp(possible_grasps[i], ee_parent_link, animate_speed);
 
     ros::Duration(0.1).sleep();
   }
@@ -1090,71 +1120,7 @@ bool VisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Grasp>& p
   return true;
 }
 
-bool VisualTools::publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions, double display_time)
-{
-  if(muted_)
-  {
-    ROS_DEBUG_STREAM_NAMED("visual_tools","Not visualizing inverse kinematic solutions - muted.");
-    return false;
-  }
-
-  if (ik_solutions.empty())
-  {
-    ROS_WARN_STREAM_NAMED("visual_tools","Empty ik_solutions vector passed into publishIKSolutions()");
-    return false;
-  }
-
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing " << ik_solutions.size() << " inverse kinematic solutions");
-
-  // Get robot model
-  robot_model::RobotModelConstPtr robot_model = getPlanningSceneMonitor()->getRobotModel();
-  // Get joint state group
-  const robot_model::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(planning_group_name_);
-
-  if (joint_model_group == NULL) // not found
-  {
-    ROS_ERROR_STREAM_NAMED("temp","Could not find joint model group " << planning_group_name_);
-    return false;
-  }
-
-  // Apply the time to the trajectory
-  trajectory_msgs::JointTrajectoryPoint trajectory_pt_timed;
-
-  // Create a trajectory with one point
-  moveit_msgs::RobotTrajectory trajectory_msg;
-  trajectory_msg.joint_trajectory.header.frame_id = base_link_;
-  trajectory_msg.joint_trajectory.joint_names = joint_model_group->getJointModelNames();
-
-  // Overall length of trajectory
-  double running_time = 0;
-
-  // Loop through all inverse kinematic solutions
-  for (std::size_t i = 0; i < ik_solutions.size(); ++i)
-  {
-    if( !ros::ok() )  // Check that ROS is still ok and that user isn't trying to quit
-      break;
-
-    trajectory_pt_timed = ik_solutions[i];
-    trajectory_pt_timed.time_from_start = ros::Duration(running_time);
-    trajectory_msg.joint_trajectory.points.push_back(trajectory_pt_timed);
-
-    running_time += display_time;
-
-    //ROS_DEBUG_STREAM_NAMED("grasp","Visualizing ik solution " << i);
-
-    // Other method:
-    //publishRobotState(ik_solutions[i], planning_group_name_); // a different method to do this
-  }
-
-  // Re-add final position so the last point is displayed fully
-  trajectory_pt_timed = trajectory_msg.joint_trajectory.points.back();
-  trajectory_pt_timed.time_from_start = ros::Duration(running_time);
-  trajectory_msg.joint_trajectory.points.push_back(trajectory_pt_timed);
-
-  return publishTrajectoryPath(trajectory_msg, true);
-}
-
-bool VisualTools::animateGrasp(const moveit_msgs::Grasp &grasp, const std::string &ee_parent_link, double animate_speed)
+bool VisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, const std::string &ee_parent_link, double animate_speed)
 {
   // Grasp Pose Variables
   geometry_msgs::Pose grasp_pose = grasp.grasp_pose.pose;
@@ -1215,6 +1181,72 @@ bool VisualTools::animateGrasp(const moveit_msgs::Grasp &grasp, const std::strin
     ros::Duration(animate_speed).sleep();
   }
   return true;
+}
+
+bool VisualTools::publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions, double display_time)
+{
+  if(muted_)
+  {
+    ROS_DEBUG_STREAM_NAMED("visual_tools","Not visualizing inverse kinematic solutions - muted.");
+    return false;
+  }
+
+  if (ik_solutions.empty())
+  {
+    ROS_WARN_STREAM_NAMED("visual_tools","Empty ik_solutions vector passed into publishIKSolutions()");
+    return false;
+  }
+
+  loadSharedRobotState();
+
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing " << ik_solutions.size() << " inverse kinematic solutions");
+
+  // Get robot model
+  robot_model::RobotModelConstPtr robot_model = shared_robot_state_->getRobotModel();
+  // Get joint state group
+  const robot_model::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(planning_group_name_);
+
+  if (joint_model_group == NULL) // not found
+  {
+    ROS_ERROR_STREAM_NAMED("publishIKSolutions","Could not find joint model group " << planning_group_name_);
+    return false;
+  }
+
+  // Apply the time to the trajectory
+  trajectory_msgs::JointTrajectoryPoint trajectory_pt_timed;
+
+  // Create a trajectory with one point
+  moveit_msgs::RobotTrajectory trajectory_msg;
+  trajectory_msg.joint_trajectory.header.frame_id = base_link_;
+  trajectory_msg.joint_trajectory.joint_names = joint_model_group->getJointModelNames();
+
+  // Overall length of trajectory
+  double running_time = 0;
+
+  // Loop through all inverse kinematic solutions
+  for (std::size_t i = 0; i < ik_solutions.size(); ++i)
+  {
+    if( !ros::ok() )  // Check that ROS is still ok and that user isn't trying to quit
+      break;
+
+    trajectory_pt_timed = ik_solutions[i];
+    trajectory_pt_timed.time_from_start = ros::Duration(running_time);
+    trajectory_msg.joint_trajectory.points.push_back(trajectory_pt_timed);
+
+    running_time += display_time;
+
+    //ROS_DEBUG_STREAM_NAMED("grasp","Visualizing ik solution " << i);
+
+    // Other method:
+    //publishRobotState(ik_solutions[i], planning_group_name_); // a different method to do this
+  }
+
+  // Re-add final position so the last point is displayed fully
+  trajectory_pt_timed = trajectory_msg.joint_trajectory.points.back();
+  trajectory_pt_timed.time_from_start = ros::Duration(running_time);
+  trajectory_msg.joint_trajectory.points.push_back(trajectory_pt_timed);
+
+  return publishTrajectoryPath(trajectory_msg, true);
 }
 
 bool VisualTools::removeAllCollisionObjects()
@@ -1547,14 +1579,16 @@ bool VisualTools::publishCollisionTable(double x, double y, double angle, double
 bool VisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
   const std::string &group_name, double display_time)
 {
+  loadSharedRobotState();
+
   // Get robot model
-  robot_model::RobotModelConstPtr robot_model = getPlanningSceneMonitor()->getRobotModel();
+  robot_model::RobotModelConstPtr robot_model = shared_robot_state_->getRobotModel();
   // Get joint state group
   const robot_model::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(group_name);
 
   if (joint_model_group == NULL) // not found
   {
-    ROS_ERROR_STREAM_NAMED("temp","Could not find joint model group " << group_name);
+    ROS_ERROR_STREAM_NAMED("publishTrajectoryPoint","Could not find joint model group " << group_name);
     return false;
   }
 

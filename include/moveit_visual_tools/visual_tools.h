@@ -303,9 +303,9 @@ public:
 
   /**
    * \brief Load robot state only as needed
-   * \return pointer to an editable robot state
+   * \return true if successful in loading
    */
-  robot_state::RobotStatePtr loadSharedRobotState();
+  bool loadSharedRobotState();
 
   /**
    * \brief Caches the meshes and geometry of a robot. NOTE: perhaps not maintained...
@@ -412,6 +412,14 @@ public:
     const rviz_colors &color = WHITE);
 
   /**
+   * \brief Show grasps generated from moveit_simple_grasps or other MoveIt Grasp message sources
+   * \param possible_grasps - a set of grasp positions to visualize
+   * \param ee_parent_link - end effector's attachment link
+   */
+  bool publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
+    const std::string &ee_parent_link);
+
+  /**
    * \brief Display an animated vector of grasps including its approach movement in Rviz
    * \param possible_grasps - a set of grasp positions to visualize
    * \param ee_parent_link - end effector's attachment link
@@ -421,6 +429,15 @@ public:
     const std::string &ee_parent_link, double animate_speed = 0.01);
 
   /**
+   * \brief Animate a single grasp in its movement direction
+   * \param grasp
+   * \param ee_parent_link - end effector's attachment link
+   * \param animate_speed - how fast the gripper approach is animated
+   * \return true on sucess
+   */
+  bool publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, const std::string &ee_parent_link, double animate_speed);
+
+  /**
    * \brief Display an vector of inverse kinematic solutions for the IK service in Rviz
    *        Note: this is published to the 'Planned Path' section of the 'MotionPlanning' display in Rviz
    *        Note: make sure you call setPlanningGroupName first
@@ -428,15 +445,6 @@ public:
    * \param display_time - amount of time to sleep between sending trajectories, optional
    */
   bool publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions, double display_time = 0.4);
-
-  /**
-   * \brief Animate a single grasp in its movement direction
-   * \param grasp
-   * \param ee_parent_link - end effector's attachment link
-   * \param animate_speed - how fast the gripper approach is animated
-   * \return true on sucess
-   */
-  bool animateGrasp(const moveit_msgs::Grasp &grasp, const std::string &ee_parent_link, double animate_speed);
 
   /**
    * \brief Remove all collision objects that this class has added to the MoveIt! planning scene
