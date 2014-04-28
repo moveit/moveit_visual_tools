@@ -1,7 +1,11 @@
 // stacktrace.h (c) 2008, Timo Bingmann from http://idlebox.net/
 // published under the WTFPL v2.0
 
-// Desc: call print_stacktrace() anywhere in your code to see a unmangled backtrace without needing to use gdb
+/*
+ *  Desc: call print_stacktrace() anywhere in your code to see a unmangled backtrace without needing to use gdb
+ * 
+ *  From: http://panthema.net/2008/0901-stacktrace-demangled/
+ */
 
 #ifndef MOVEIT_VISUAL_TOOLS__STACKTRACE_H_
 #define MOVEIT_VISUAL_TOOLS__STACKTRACE_H_
