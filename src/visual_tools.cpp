@@ -311,11 +311,12 @@ bool VisualTools::loadSharedRobotState()
   // Get robot state
   if (!shared_robot_state_)
   {
+    //ROS_DEBUG_STREAM_NAMED("temp","getPlanningSceneMonitor");
     planning_scene_monitor::PlanningSceneMonitorPtr psm = getPlanningSceneMonitor();
-    ROS_DEBUG_STREAM_NAMED("temp","getRobotModel");
+    //ROS_DEBUG_STREAM_NAMED("temp","getRobotModel");
 
     shared_robot_state_.reset(new robot_state::RobotState(psm->getRobotModel() ));
-    ROS_DEBUG_STREAM_NAMED("temp","done getRobotModel");
+    //ROS_DEBUG_STREAM_NAMED("temp","done getRobotModel");
   }
 
   return true;
@@ -519,7 +520,6 @@ bool VisualTools::loadPlanningSceneMonitor()
   ros::spinOnce();
   ros::Duration(1.0).sleep();
   ros::spinOnce();
-
   return true;
 }
 

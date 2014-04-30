@@ -71,7 +71,7 @@ namespace moveit_visual_tools
 {
 
 // Default constants
-static const std::string ROBOT_DESCRIPTION="robot_description";
+static const std::string ROBOT_DESCRIPTION = "robot_description";
 static const std::string COLLISION_TOPIC = "/collision_object";
 static const std::string ATTACHED_COLLISION_TOPIC = "/attached_collision_object";
 static const std::string RVIZ_MARKER_TOPIC = "/end_effector_marker";
@@ -146,6 +146,9 @@ private:
   int text_id_;
   int rectangle_id_;
   int line_id_;
+
+
+
 
 public:
 
