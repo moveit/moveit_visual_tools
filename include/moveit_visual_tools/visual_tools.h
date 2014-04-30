@@ -42,6 +42,8 @@
  * Standard: all publish() ROS topics should be followed by a ros::spinOnce();
  *
  * Standard: all publishers should only be loaded as needed
+ * 
+ * Note: our planning scene copy does not load kinematic solvers to save on loading time
  */
 
 #ifndef MOVEIT_VISUAL_TOOLS__VISUAL_TOOLS_H_
@@ -97,6 +99,7 @@ private:
 
   // Pointer to a Planning Scene Monitor
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+  robot_model_loader::RobotModelLoaderPtr rm_loader_; // so that we can specify our own options
 
   // Strings
   std::string marker_topic_; // topic to publish to rviz

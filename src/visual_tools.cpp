@@ -297,7 +297,6 @@ const std::string& VisualTools::getEEParentLink()
 
 planning_scene_monitor::PlanningSceneMonitorPtr VisualTools::getPlanningSceneMonitor()
 {
-  ROS_DEBUG_STREAM_NAMED("temp","getPlanningSceneMonitor");
   if( !planning_scene_monitor_ )
   {
     loadPlanningSceneMonitor();
@@ -475,12 +474,31 @@ bool VisualTools::loadRvizMarkers()
 bool VisualTools::loadPlanningSceneMonitor()
 {
   ROS_DEBUG_STREAM_NAMED("visual_tools","Loading planning scene monitor");
+
   // ---------------------------------------------------------------------------------------------
   // Create planning scene monitor
+  // We create it the harder, more manual way so that we can tell MoveIt! to skip loading IK solvers, since we will
+  // never use them within the context of moveit_visual_tools. This saves loading time
+
+  /*
+  robot_model_loader::RobotModelLoader::Options rml_options(ROBOT_DESCRIPTION);
+  rml_options.load_kinematics_solvers_ = false;
+  rm_loader_.reset(new robot_model_loader::RobotModelLoader(rml_options));
+
+  std::string monitor_name = "visual_tools_planning_scene_monitor";
+
+  planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(
+      planning_scene::PlanningScenePtr(),
+      rm_loader_,
+      boost::shared_ptr<tf::Transformer>(),
+      monitor_name
+      ));
+  */
+  //planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(false, ROBOT_DESCRIPTION)); // requires the new constructor template
   planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(ROBOT_DESCRIPTION));
 
   ros::spinOnce();
-  ros::Duration(0.5).sleep();
+  ros::Duration(0.5).sleep(); // todo: reduce this time?
   ros::spinOnce();
 
   if (planning_scene_monitor_->getPlanningScene())
@@ -493,12 +511,13 @@ bool VisualTools::loadPlanningSceneMonitor()
   }
   else
   {
-    ROS_FATAL_STREAM_NAMED("visual_tools","Planning scene not configured");
+    ROS_ERROR_STREAM_NAMED("visual_tools","Planning scene not configured");
     return false;
   }
 
+  // todo: remove this?
   ros::spinOnce();
-  ros::Duration(0.5).sleep();
+  ros::Duration(1.0).sleep();
   ros::spinOnce();
 
   return true;
