@@ -75,7 +75,7 @@ void VisualTools::initialize()
   resetMarkerCounts();
 
   // Cache the reusable markers
-  loadRvizMarkers(); // TODO: is it ok to not load this!?
+  loadRvizMarkers();
 }
 
 void VisualTools::loadMarkerPub()
@@ -296,12 +296,9 @@ bool VisualTools::loadSharedRobotState()
   // Get robot state
   if (!shared_robot_state_)
   {
-    //ROS_DEBUG_STREAM_NAMED("temp","getPlanningSceneMonitor");
     planning_scene_monitor::PlanningSceneMonitorPtr psm = getPlanningSceneMonitor();
-    //ROS_DEBUG_STREAM_NAMED("temp","getRobotModel");
 
     shared_robot_state_.reset(new robot_state::RobotState(psm->getRobotModel() ));
-    //ROS_DEBUG_STREAM_NAMED("temp","done getRobotModel");
   }
 
   return true;
@@ -461,11 +458,9 @@ bool VisualTools::loadPlanningSceneMonitor()
 {
   ROS_DEBUG_STREAM_NAMED("visual_tools","Loading planning scene monitor");
 
-  // ---------------------------------------------------------------------------------------------
   // Create planning scene monitor
   // We create it the harder, more manual way so that we can tell MoveIt! to skip loading IK solvers, since we will
   // never use them within the context of moveit_visual_tools. This saves loading time
-
   /*
   robot_model_loader::RobotModelLoader::Options rml_options(ROBOT_DESCRIPTION);
   rml_options.load_kinematics_solvers_ = false;
@@ -480,20 +475,21 @@ bool VisualTools::loadPlanningSceneMonitor()
       monitor_name
       ));
   */
-  //planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(false, ROBOT_DESCRIPTION)); // requires the new constructor template
+
+  // Regular version b/c the other one causes problems with recognizing end effectors
   planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(ROBOT_DESCRIPTION));
 
   ros::spinOnce();
-  ros::Duration(0.5).sleep(); // todo: reduce this time?
+  ros::Duration(0.5).sleep();
   ros::spinOnce();
 
   if (planning_scene_monitor_->getPlanningScene())
   {
+    // Optional monitors to start:
     //planning_scene_monitor_->startWorldGeometryMonitor();
     //planning_scene_monitor_->startSceneMonitor("/move_group/monitored_planning_scene");
     //planning_scene_monitor_->startStateMonitor("/joint_states", "/attached_collision_object");
-    //planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
-    //  "test_planning_scene");
+    //planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE, "test_planning_scene");
   }
   else
   {
@@ -501,43 +497,8 @@ bool VisualTools::loadPlanningSceneMonitor()
     return false;
   }
 
-  // todo: remove this?
-  ros::spinOnce();
-  ros::Duration(1.0).sleep();
-  ros::spinOnce();
   return true;
 }
-
-
-/**
- * \brief Move the robot arm to the ik solution in rviz
- * \param joint_values - the in-order list of values to set the robot's joints
- * \return true if it is successful
- *
- */
-/*
-  bool VisualTools::publishPlanningScene(std::vector<double> joint_values)
-  {
-  if(muted_)
-  return true; // this function will only work if we have loaded the publishers
-
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing planning scene");
-
-  // Output debug
-  //ROS_INFO_STREAM_NAMED("visual_tools","Joint values being sent to planning scene:");
-  //std::copy(joint_values.begin(),joint_values.end(), std::ostream_iterator<double>(std::cout, "\n"));
-
-  // Update planning scene
-  robot_state::JointStateGroup* joint_state_group = getPlanningSceneMonitor()->getPlanningScene()->getCurrentStateNonConst()
-  .getJointStateGroup(planning_group_name_);
-  joint_state_group->setVariableValues(joint_values);
-
-  //    getPlanningSceneMonitor()->updateFrameTransforms();
-  getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
-
-  return true;
-  }
-*/
 
 bool VisualTools::loadRobotMarkers()
 {
@@ -550,13 +511,7 @@ bool VisualTools::loadRobotMarkers()
   ROS_DEBUG_STREAM_NAMED("visual_tools","Number of links in robot: " << link_names.size());
   //    std::copy(link_names.begin(), link_names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
 
-  // -----------------------------------------------------------------------------------------------
   // Get EE link markers for Rviz
-
-  //robot_state.updateLinkTransforms(); // TODO remove this?
-  //robot_state.printStateInfo();
-  //robot_state.printTransforms();
-
   visualization_msgs::MarkerArray robot_marker_array;
   shared_robot_state_->getRobotMarkers(robot_marker_array, link_names, getColor( GREY ), "test", ros::Duration());
 
@@ -732,12 +687,9 @@ bool VisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_c
     // Simple conversion from geometry_msgs::Pose to tf::Pose
     tf::poseMsgToTF(pose, tf_root_to_marker);
     tf::poseMsgToTF(marker_poses_[i], tf_root_to_mesh);
-    // tf::poseMsgToTF(grasp_pose_to_eef_pose_, tf_pose_to_eef); // \todo REMOVE
 
     // Conversions
     tf::Pose tf_eef_to_mesh = tf_root_to_link_.inverse() * tf_root_to_mesh;
-    // REMOVED tf::Pose tf_marker_to_mesh = tf_pose_to_eef * tf_eef_to_mesh;
-    //tf::Pose tf_root_to_mesh_new = tf_root_to_marker * tf_marker_to_mesh;
     tf::Pose tf_root_to_mesh_new = tf_root_to_marker * tf_eef_to_mesh;
     tf::poseTFToMsg(tf_root_to_mesh_new, ee_marker_array_.markers[i].pose);
     // -----------------------------------------------------------------------------------------------
@@ -751,70 +703,6 @@ bool VisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_c
 
   return true;
 }
-
-/**
- * \brief Publish an marker of a mesh to rviz
- * \return true if it is successful
- *
- bool publishMesh(const geometry_msgs::Pose &pose, const rviz_colors &color = WHITE,
- const std::string &ns="mesh")
- {
- if(muted_)
- return true; // this function will only work if we have loaded the publishers
-
- visualization_msgs::Marker marker;
- // Set the frame ID and timestamp.  See the TF tutorials for information on these.
- marker.header.frame_id = base_link_;
- marker.header.stamp = ros::Time::now();
-
- // Set the namespace and id for this marker.  This serves to create a unique ID
- marker.ns = "Mesh";
-
- // Set the marker type.
- marker.type = visualization_msgs::Marker::MESH_RESOURCE;
- marker.mesh_resource = "package://clam_description/stl/gripper_base_link.STL";
-
- // Set the marker action.  Options are ADD and DELETE
- marker.action = visualization_msgs::Marker::ADD;
- marker.id = 0;
-
- marker.pose.position.x = x;
- marker.pose.position.y = y;
- marker.pose.position.z = z;
-
- marker.pose.orientation.x = qx;
- marker.pose.orientation.y = qy;
- marker.pose.orientation.z = qz;
- marker.pose.orientation.w = qw;
-
- marker.scale.x = 0.001;
- marker.scale.y = 0.001;
- marker.scale.z = 0.001;
-
- marker.color = getColor( RED );
-
- // Make line color
- std_msgs::ColorRGBA color = getColor( RED );
-
- // Point
- geometry_msgs::Point point_a;
- point_a.x = x;
- point_a.y = y;
- point_a.z = z;
-
- // Add the point pair to the line message
- marker.points.push_back( point_a );
- marker.colors.push_back( color );
-
- marker.lifetime = marker_lifetime_;
-
- loadMarkerPub(); // always check this before publishing
- pub_rviz_marker_.publish( marker );
- ros::spinOnce();
-
- return true;
- }
-*/
 
 bool VisualTools::publishSphere(const Eigen::Affine3d &pose, const rviz_colors color, const rviz_scales scale)
 {
@@ -1110,8 +998,6 @@ bool VisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Grasp>& p
     if( !ros::ok() )  // Check that ROS is still ok and that user isn't trying to quit
       break;
 
-    //ROS_DEBUG_STREAM_NAMED("grasp","Visualizing grasp pose " << i);
-
     publishAnimatedGrasp(possible_grasps[i], ee_parent_link, animate_speed);
 
     ros::Duration(0.1).sleep();
@@ -1249,7 +1135,7 @@ bool VisualTools::publishIKSolutions(const std::vector<trajectory_msgs::JointTra
 
 bool VisualTools::removeAllCollisionObjects()
 {
-  // Method 1: Publish an empty REMOVE message so as to remove all of them
+  // Publish an empty REMOVE message so as to remove all of them
 
   moveit_msgs::PlanningScene planning_scene;
   planning_scene.is_diff = true;
@@ -1470,19 +1356,9 @@ bool VisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph &graph, 
     }
   }
 
-  //ROS_INFO_STREAM_NAMED("pick_place","CollisionObject: \n " << collision_obj);
-  //ROS_DEBUG_STREAM_NAMED("temp","result: \n" << collision_obj);
   loadCollisionPub(); // always call this before publishing
   pub_collision_obj_.publish(collision_obj);
   ros::spinOnce();
-
-  //visual_tools_->removeAllCollisionObjects();
-
-  // Remove attached object
-  //visual_tools_->cleanupACO(object.name);
-
-  // Remove collision object
-  //visual_tools_->cleanupCO(object.name);
 
   return true;
 }
@@ -1723,5 +1599,100 @@ void VisualTools::print()
   std::cout << "muted_: " << muted_ << std::endl;
   std::cout << "alpha_: " << alpha_ << std::endl;
 }
+
+/**
+ * \brief Move the robot arm to the ik solution in rviz
+ * \param joint_values - the in-order list of values to set the robot's joints
+ * \return true if it is successful
+ *
+ */
+/*
+  bool VisualTools::publishPlanningScene(std::vector<double> joint_values)
+  {
+  if(muted_)
+  return true; // this function will only work if we have loaded the publishers
+
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing planning scene");
+
+  // Output debug
+  //ROS_INFO_STREAM_NAMED("visual_tools","Joint values being sent to planning scene:");
+  //std::copy(joint_values.begin(),joint_values.end(), std::ostream_iterator<double>(std::cout, "\n"));
+
+  // Update planning scene
+  robot_state::JointStateGroup* joint_state_group = getPlanningSceneMonitor()->getPlanningScene()->getCurrentStateNonConst()
+  .getJointStateGroup(planning_group_name_);
+  joint_state_group->setVariableValues(joint_values);
+
+  //    getPlanningSceneMonitor()->updateFrameTransforms();
+  getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
+
+  return true;
+  }
+*/
+
+/**
+ * \brief Publish an marker of a mesh to rviz
+ * \return true if it is successful
+ *
+ bool publishMesh(const geometry_msgs::Pose &pose, const rviz_colors &color = WHITE,
+ const std::string &ns="mesh")
+ {
+ if(muted_)
+ return true; // this function will only work if we have loaded the publishers
+
+ visualization_msgs::Marker marker;
+ // Set the frame ID and timestamp.  See the TF tutorials for information on these.
+ marker.header.frame_id = base_link_;
+ marker.header.stamp = ros::Time::now();
+
+ // Set the namespace and id for this marker.  This serves to create a unique ID
+ marker.ns = "Mesh";
+
+ // Set the marker type.
+ marker.type = visualization_msgs::Marker::MESH_RESOURCE;
+ marker.mesh_resource = "package://clam_description/stl/gripper_base_link.STL";
+
+ // Set the marker action.  Options are ADD and DELETE
+ marker.action = visualization_msgs::Marker::ADD;
+ marker.id = 0;
+
+ marker.pose.position.x = x;
+ marker.pose.position.y = y;
+ marker.pose.position.z = z;
+
+ marker.pose.orientation.x = qx;
+ marker.pose.orientation.y = qy;
+ marker.pose.orientation.z = qz;
+ marker.pose.orientation.w = qw;
+
+ marker.scale.x = 0.001;
+ marker.scale.y = 0.001;
+ marker.scale.z = 0.001;
+
+ marker.color = getColor( RED );
+
+ // Make line color
+ std_msgs::ColorRGBA color = getColor( RED );
+
+ // Point
+ geometry_msgs::Point point_a;
+ point_a.x = x;
+ point_a.y = y;
+ point_a.z = z;
+
+ // Add the point pair to the line message
+ marker.points.push_back( point_a );
+ marker.colors.push_back( color );
+
+ marker.lifetime = marker_lifetime_;
+
+ loadMarkerPub(); // always check this before publishing
+ pub_rviz_marker_.publish( marker );
+ ros::spinOnce();
+
+ return true;
+ }
+*/
+
 
 } // namespace
