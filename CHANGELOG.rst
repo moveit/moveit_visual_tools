@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.0 (2014-05-05)
+------------------
 * Enabled dual arm manipulation 
 * Removed notions of a global planning group, ee group name, or ee parent link. 
 * Changed functionality of loadEEMarker
