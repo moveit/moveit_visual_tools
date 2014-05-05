@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, University of Colorado, Boulder
+ *  Copyright (c) 2014, University of Colorado, Boulder
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -66,8 +66,6 @@ VisualTools::VisualTools(const std::string& base_link,
 
 void VisualTools::initialize()
 {
-  ee_group_name_ = "unknown";
-  planning_group_name_ = "unknown";
   floor_to_base_height_ = 0;
   marker_lifetime_ = ros::Duration(30.0);
   muted_ = false;
@@ -280,14 +278,6 @@ geometry_msgs::Vector3 VisualTools::getScale(const rviz_scales &scale, bool arro
   }
 
   return result;
-}
-
-const std::string& VisualTools::getEEParentLink()
-{
-  // Make sure we already loaded the EE markers
-  loadEEMarker();
-
-  return ee_parent_link_;
 }
 
 planning_scene_monitor::PlanningSceneMonitorPtr VisualTools::getPlanningSceneMonitor()
@@ -594,14 +584,10 @@ bool VisualTools::loadRobotMarkers()
   return true;
 }
 
-bool VisualTools::loadEEMarker()
+bool VisualTools::loadEEMarker(const std::string& ee_group_name, const std::string& planning_group)
 {
   // Always load the robot state before using
   loadSharedRobotState();
-
-  // Check if we have already loaded the EE markers
-  if( ee_marker_array_.markers.size() > 0 ) // already loaded
-    return true;
 
   // -----------------------------------------------------------------------------------------------
   // Get end effector group
@@ -612,22 +598,22 @@ bool VisualTools::loadEEMarker()
   // Get robot model
   robot_model::RobotModelConstPtr robot_model = shared_robot_state_->getRobotModel();
   // Get joint state group
-  const robot_model::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(ee_group_name_);
+  const robot_model::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(ee_group_name);
   if( joint_model_group == NULL ) // make sure EE_GROUP exists
   {
-    ROS_ERROR_STREAM_NAMED("visual_tools","Unable to find joint model group '" << ee_group_name_ << "'");
+    ROS_ERROR_STREAM_NAMED("visual_tools","Unable to find joint model group '" << ee_group_name << "'");
     return false;
   }
   // Get link names that are in end effector
   const std::vector<std::string> &ee_link_names = joint_model_group->getLinkModelNames();
-  //ROS_DEBUG_STREAM_NAMED("visual_tools","Number of links in group " << ee_group_name_ << ": " << ee_link_names.size());
+  //ROS_DEBUG_STREAM_NAMED("visual_tools","Number of links in group " << ee_group_name << ": " << ee_link_names.size());
   //std::copy(ee_link_names.begin(), ee_link_names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
 
   // Robot Interaction - finds the end effector associated with a planning group
   robot_interaction::RobotInteraction robot_interaction( robot_model );
 
   // Decide active end effectors
-  robot_interaction.decideActiveComponents(planning_group_name_);
+  robot_interaction.decideActiveComponents(planning_group);
 
   // Get active EE
   std::vector<robot_interaction::RobotInteraction::EndEffector> active_eef =
@@ -652,12 +638,12 @@ bool VisualTools::loadEEMarker()
   // Change pose from Eigen to TF
   try
   {
-    ee_parent_link_ = eef.parent_link; // save the name of the link for later use
+    //ee_parent_link_ = eef.parent_link; // save the name of the link for later use
     tf::poseEigenToTF(shared_robot_state_->getGlobalLinkTransform(eef.parent_link), tf_root_to_link_);
   }
   catch(...)
   {
-    ROS_ERROR_STREAM_NAMED("visual_tools","Didn't find link state for " << ee_parent_link_);
+    ROS_ERROR_STREAM_NAMED("visual_tools","Didn't find link state for " << eef.parent_link);
   }
 
   // Copy original marker poses to a vector
@@ -685,10 +671,10 @@ bool VisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_c
   if(muted_)
     return true;
 
-  // Load EE Markers  
-  if( !loadEEMarker() )
+  // Check if we have already loaded the EE markers
+  if( ee_marker_array_.markers.empty() ) 
   {
-    ROS_ERROR_STREAM_NAMED("visual_tools","Unable to publish EE marker");
+    ROS_ERROR_STREAM_NAMED("visual_tools","Unable to publish EE marker because marker has not been loaded yet");
     return false;
   }
 
@@ -1197,7 +1183,8 @@ bool VisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, const st
   return true;
 }
 
-bool VisualTools::publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions, double display_time)
+bool VisualTools::publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions, 
+  const std::string& planning_group, double display_time)
 {
   if(muted_)
   {
@@ -1218,11 +1205,11 @@ bool VisualTools::publishIKSolutions(const std::vector<trajectory_msgs::JointTra
   // Get robot model
   robot_model::RobotModelConstPtr robot_model = shared_robot_state_->getRobotModel();
   // Get joint state group
-  const robot_model::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(planning_group_name_);
+  const robot_model::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(planning_group);
 
   if (joint_model_group == NULL) // not found
   {
-    ROS_ERROR_STREAM_NAMED("publishIKSolutions","Could not find joint model group " << planning_group_name_);
+    ROS_ERROR_STREAM_NAMED("publishIKSolutions","Could not find joint model group " << planning_group);
     return false;
   }
 
@@ -1250,9 +1237,6 @@ bool VisualTools::publishIKSolutions(const std::vector<trajectory_msgs::JointTra
     running_time += display_time;
 
     //ROS_DEBUG_STREAM_NAMED("grasp","Visualizing ik solution " << i);
-
-    // Other method:
-    //publishRobotState(ik_solutions[i], planning_group_name_); // a different method to do this
   }
 
   // Re-add final position so the last point is displayed fully
@@ -1311,7 +1295,7 @@ bool VisualTools::cleanupACO(const std::string& name)
   //aco.object.id = name;
   aco.object.operation = moveit_msgs::CollisionObject::REMOVE;
 
-  aco.link_name = ee_parent_link_;
+  //aco.link_name = ee_parent_link_;
 
   loadAttachedPub(); // always call this before publishing
   pub_attach_collision_obj_.publish(aco);
@@ -1319,7 +1303,7 @@ bool VisualTools::cleanupACO(const std::string& name)
   return true;
 }
 
-bool VisualTools::attachCO(const std::string& name)
+bool VisualTools::attachCO(const std::string& name, const std::string& ee_parent_link)
 {
   // Clean up old attached collision object
   moveit_msgs::AttachedCollisionObject aco;
@@ -1330,7 +1314,7 @@ bool VisualTools::attachCO(const std::string& name)
   aco.object.operation = moveit_msgs::CollisionObject::ADD;
 
   // Link to attach the object to
-  aco.link_name = ee_parent_link_;
+  aco.link_name = ee_parent_link;
 
   loadAttachedPub(); // always call this before publishing
   pub_attach_collision_obj_.publish(aco);
@@ -1733,10 +1717,7 @@ void VisualTools::print()
 {
   ROS_WARN_STREAM_NAMED("visual_tools","Debug Visual Tools variable values:");  
   std::cout << "marker_topic_: " << marker_topic_ << std::endl;
-  std::cout << "ee_group_name_: " << ee_group_name_ << std::endl;
-  std::cout << "planning_group_name_: " << planning_group_name_ << std::endl;
   std::cout << "base_link_: " << base_link_ << std::endl;
-  std::cout << "ee_parent_link_" << ee_parent_link_ << std::endl;
   std::cout << "floor_to_base_height_: " << floor_to_base_height_ << std::endl;
   std::cout << "marker_lifetime_: " << marker_lifetime_.toSec() << std::endl;
   std::cout << "muted_: " << muted_ << std::endl;

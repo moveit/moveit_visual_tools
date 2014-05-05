@@ -69,8 +69,6 @@ public:
   VisualToolsTest()
   {
     visual_tools_.reset(new moveit_visual_tools::VisualTools("base","/moveit_visual_tools"));
-    visual_tools_->setEEGroupName(EE_GROUP);
-    visual_tools_->setPlanningGroupName(PLANNING_GROUP_NAME);
 
     runTest();
 

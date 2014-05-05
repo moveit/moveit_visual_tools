@@ -103,10 +103,7 @@ private:
 
   // Strings
   std::string marker_topic_; // topic to publish to rviz
-  std::string ee_group_name_; // end effector group name
-  std::string planning_group_name_; // planning group we are working with
   std::string base_link_; // name of base link of robot
-  std::string ee_parent_link_; // parent link of end effector, loaded from MoveIt!
 
   double floor_to_base_height_; // allows an offset between base link and floor where objects are built
 
@@ -212,25 +209,6 @@ public:
   void setGraspPoseToEEFPose(geometry_msgs::Pose grasp_pose_to_eef_pose);
 
   /**
-   * \brief Set the name of the end effector
-   */
-  void setEEGroupName(const std::string& ee_group_name)
-  {
-    if (ee_group_name.empty())
-      ROS_ERROR_STREAM_NAMED("visual_tools","Set EE group name to empty string, will probably fail.");
-
-    ee_group_name_ = ee_group_name;
-  }
-
-  /**
-   * \brief Provide the name of the planning group moveit will use
-   */
-  void setPlanningGroupName(const std::string& planning_group_name)
-  {
-    planning_group_name_ = planning_group_name;
-  }
-
-  /**
    * \brief Change the transparency of all markers published
    * \param alpha - value 0 - 1 where 0 is invisible
    */
@@ -312,9 +290,11 @@ public:
 
   /**
    * \brief Call this once at begining to load the robot marker
+   * \param
+   * \param
    * \return true if it is successful
    */
-  bool loadEEMarker();
+  bool loadEEMarker(const std::string& ee_group_name, const std::string& planning_group);
 
   /**
    * \brief Reset the id's of all published markers so that they overwrite themselves in the future
@@ -441,7 +421,8 @@ public:
    * \param ik_solutions - a set of corresponding arm positions to achieve each grasp
    * \param display_time - amount of time to sleep between sending trajectories, optional
    */
-  bool publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions, double display_time = 0.4);
+  bool publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions, 
+    const std::string& planning_group, double display_time = 0.4);
 
   /**
    * \brief Remove all collision objects that this class has added to the MoveIt! planning scene
@@ -466,9 +447,10 @@ public:
   /**
    * \brief Attach a collision object from the planning scene
    * \param Name of object
+   * \param 
    * \return true on sucess
    */
-  bool attachCO(const std::string& name);
+  bool attachCO(const std::string& name, const std::string& ee_parent_link);
 
   /**
    * \brief Create a MoveIt Collision block at the given pose
