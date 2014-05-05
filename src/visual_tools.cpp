@@ -54,35 +54,30 @@
 namespace moveit_visual_tools
 {
 
-VisualTools::VisualTools(std::string base_link,
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor,
-  std::string marker_topic)
-  : planning_scene_monitor_(planning_scene_monitor)
+VisualTools::VisualTools(const std::string& base_link,
+  const std::string& marker_topic,
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
+  :  base_link_(base_link),
+     marker_topic_(marker_topic),
+     planning_scene_monitor_(planning_scene_monitor)
 {
-  // Pass to next contructor
-  VisualTools(base_link, marker_topic);
+  initialize();
 }
 
-VisualTools::VisualTools(std::string base_link, std::string marker_topic)
-  : nh_("~"),
-    marker_topic_(marker_topic),
-    ee_group_name_("unknown"),
-    planning_group_name_("unknown"),
-    base_link_(base_link),
-    floor_to_base_height_(0),
-    marker_lifetime_(ros::Duration(30.0)),
-    muted_(false),
-    alpha_(0.8)
+void VisualTools::initialize()
 {
+  ee_group_name_ = "unknown";
+  planning_group_name_ = "unknown";
+  floor_to_base_height_ = 0;
+  marker_lifetime_ = ros::Duration(30.0);
+  muted_ = false;
+  alpha_ = 0.8;
+
   // Initialize counters to zero
   resetMarkerCounts();
 
   // Cache the reusable markers
   loadRvizMarkers(); // TODO: is it ok to not load this!?
-}
-
-VisualTools::~VisualTools()
-{
 }
 
 void VisualTools::loadMarkerPub()
@@ -141,7 +136,7 @@ void VisualTools::loadPlanningPub()
   ros::spinOnce();
 }
 
-void VisualTools::loadPathPub()
+void VisualTools::loadTrajectoryPub()
 {
   if (pub_display_path_)
     return;
@@ -625,7 +620,7 @@ bool VisualTools::loadEEMarker()
   }
   // Get link names that are in end effector
   const std::vector<std::string> &ee_link_names = joint_model_group->getLinkModelNames();
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Number of links in group " << ee_group_name_ << ": " << ee_link_names.size());
+  //ROS_DEBUG_STREAM_NAMED("visual_tools","Number of links in group " << ee_group_name_ << ": " << ee_link_names.size());
   //std::copy(ee_link_names.begin(), ee_link_names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
 
   // Robot Interaction - finds the end effector associated with a planning group
@@ -1637,7 +1632,7 @@ bool VisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& traj
   rviz_display.trajectory[0] = trajectory_msg;
 
   // Publish message
-  loadPathPub(); // always call this before publishinga
+  loadTrajectoryPub(); // always call this before publishing
   pub_display_path_.publish(rviz_display);
   ros::spinOnce();
 
@@ -1652,7 +1647,7 @@ bool VisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& traj
     while (ros::ok() && counter < trajectory_msg.joint_trajectory.points.back().time_from_start.toSec())
     {
       counter += 0.25; // check every fourth second
-      ros::Duration(0.5).sleep();
+      ros::Duration(0.25).sleep();
     }
   }
 
@@ -1732,6 +1727,20 @@ double VisualTools::dRand(double dMin, double dMax)
 {
   double d = (double)rand() / RAND_MAX;
   return dMin + d * (dMax - dMin);
+}
+
+void VisualTools::print()
+{
+  ROS_WARN_STREAM_NAMED("visual_tools","Debug Visual Tools variable values:");  
+  std::cout << "marker_topic_: " << marker_topic_ << std::endl;
+  std::cout << "ee_group_name_: " << ee_group_name_ << std::endl;
+  std::cout << "planning_group_name_: " << planning_group_name_ << std::endl;
+  std::cout << "base_link_: " << base_link_ << std::endl;
+  std::cout << "ee_parent_link_" << ee_parent_link_ << std::endl;
+  std::cout << "floor_to_base_height_: " << floor_to_base_height_ << std::endl;
+  std::cout << "marker_lifetime_: " << marker_lifetime_.toSec() << std::endl;
+  std::cout << "muted_: " << muted_ << std::endl;
+  std::cout << "alpha_: " << alpha_ << std::endl;
 }
 
 } // namespace

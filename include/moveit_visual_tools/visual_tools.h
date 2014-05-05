@@ -148,35 +148,38 @@ private:
   int line_id_;
 
 
-
+private:
+  /**
+   * \brief Shared function for initilization by constructors
+   */
+  void initialize();
 
 public:
 
   /**
-   * \brief Constructor with planning scene
+   * \brief Constructor
+   * \param base_link - common base for all visualization markers, usually "base_link"
+   * \param marker_topic - rostopic to publish markers to - your Rviz display should match
+   * \param planning_scene_monitor - optionally pass in a pre-loaded planning scene monitor to avoid having to re-load
+   *        the URDF, kinematic solvers, etc
    */
-  VisualTools(std::string base_link,
-    planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor,
-    std::string marker_topic = RVIZ_MARKER_TOPIC);
-
-  /**
-   * \brief Constructor w/o planning scene passed in
-   */
-  VisualTools(std::string base_link = "base", std::string marker_topic = RVIZ_MARKER_TOPIC);
+  VisualTools(const std::string& base_link,
+    const std::string& marker_topic = RVIZ_MARKER_TOPIC,
+    planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor = planning_scene_monitor::PlanningSceneMonitorPtr());
 
   /**
    * \brief Deconstructor
    */
-  ~VisualTools();
+  ~VisualTools() {};
 
   /**
-   * \brief Load publishers as neede
+   * \brief Load publishers as needed
    */
   void loadMarkerPub();
   void loadCollisionPub();
   void loadAttachedPub();
   void loadPlanningPub();
-  void loadPathPub();
+  void loadTrajectoryPub();
   void loadRobotPub();
 
   /**
@@ -257,18 +260,6 @@ public:
    * \return vector of 3 scales
    */
   geometry_msgs::Vector3 getScale(const rviz_scales &scale, bool arrow_scale = false, double marker_scale = 1.0);
-
-  /**
-   * \brief Get the end effector parent link as loaded from the SRDF
-   * \return string of name of end effector parent link
-   */
-  const std::string& getEEParentLink();
-
-  /**
-   * @brief Get the planning scene monitor that this class is using
-   * @return a ptr to a planning scene
-   */
-  planning_scene_monitor::PlanningSceneMonitorPtr getPlanningSceneMonitor();
 
   /**
    * \brief Create a vector that points from point a to point b
@@ -609,6 +600,25 @@ public:
    * \brief Get random double between min and max
    */
   double dRand(double dMin, double dMax);
+
+  /**
+   * \brief Debug variables to console
+   */
+  void print();
+
+private:
+
+  /**
+   * \brief Get the end effector parent link as loaded from the SRDF
+   * \return string of name of end effector parent link
+   */
+  const std::string& getEEParentLink();
+
+  /**
+   * @brief Get the planning scene monitor that this class is using
+   * @return a ptr to a planning scene
+   */
+  planning_scene_monitor::PlanningSceneMonitorPtr getPlanningSceneMonitor();
 
 
 }; // class
