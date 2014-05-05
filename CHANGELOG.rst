@@ -2,6 +2,28 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Enabled dual arm manipulation 
+* Removed notions of a global planning group, ee group name, or ee parent link. 
+* Changed functionality of loadEEMarker
+* Added new print function
+* Made getPlanningSceneMonitor() private function
+* Renamed loadPathPub()
+* Added tool for visualizing unmangled stack trace
+* Created function for publishing non-animated grasps
+* Created new publishGraph function. Renamed publishCollisionTree to publishCollisionGraph
+* Created functions for loading publishers with a delay
+* Removed old method of removing all collision objects
+* Created better testing functionality
+* Changed return type from void to bool for many functions
+* Changed way trajectory is timed
+* Created new publishIKSolutions() function for grasp poses, etc
+* Added new MoveIt robot state functionality
+* Added visualize grasp functionality
+* Removed unnecessary run dependencies
+* Updated README
+
 0.2.0 (2014-04-11)
 ------------------
 * Improved header comments are re-ordered functions into groups
