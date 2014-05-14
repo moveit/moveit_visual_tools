@@ -57,9 +57,9 @@ namespace moveit_visual_tools
 VisualTools::VisualTools(const std::string& base_link,
   const std::string& marker_topic,
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
-  :  base_link_(base_link),
+  :  planning_scene_monitor_(planning_scene_monitor),
      marker_topic_(marker_topic),
-     planning_scene_monitor_(planning_scene_monitor)
+     base_link_(base_link)
 {
   initialize();
 }
@@ -452,6 +452,8 @@ bool VisualTools::loadRvizMarkers()
   text_marker_.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
   // Lifetime
   text_marker_.lifetime = marker_lifetime_;
+
+  return true;
 }
 
 bool VisualTools::loadPlanningSceneMonitor()
@@ -876,6 +878,7 @@ bool VisualTools::publishGraph(const graph_msgs::GeometryGraph &graph, const rvi
     }
   }
 
+  return true;
 }
 
 bool VisualTools::publishRectangle(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2, const rviz_colors color)
@@ -1549,6 +1552,8 @@ bool VisualTools::publishTest()
   // Publish arrow vector of pose
   ROS_INFO_STREAM_NAMED("test","Publishing Arrow");
   publishArrow(pose, moveit_visual_tools::RED, moveit_visual_tools::LARGE);
+
+  return true;
 }
 
 geometry_msgs::Pose VisualTools::convertPose(const Eigen::Affine3d &pose)
