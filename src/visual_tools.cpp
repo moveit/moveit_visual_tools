@@ -240,7 +240,7 @@ std_msgs::ColorRGBA VisualTools::getColor(const rviz_colors &color)
 geometry_msgs::Vector3 VisualTools::getScale(const rviz_scales &scale, bool arrow_scale, double marker_scale)
 {
   geometry_msgs::Vector3 result;
-  double val;
+  double val(0.0);
   switch(scale)
   {
     case XXSMALL:
