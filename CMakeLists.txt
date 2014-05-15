@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(moveit_visual_tools)
 
-find_package(Eigen REQUIRED)
-find_package(Boost REQUIRED thread system)
-
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED COMPONENTS
   eigen_conversions 
@@ -16,7 +13,11 @@ find_package(catkin REQUIRED COMPONENTS
   graph_msgs
   std_msgs
   trajectory_msgs
+  cmake_modules
 )
+
+find_package(Eigen REQUIRED)
+find_package(Boost REQUIRED thread system)
 
 # Catkin
 catkin_package(
