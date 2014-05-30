@@ -10,7 +10,7 @@ This package includes:
  - Trajectory visualization tools
  - Robot state tools
 
-By [Dave Coleman](http://dav.ee) at the Correll Robotics Lab, University of Colorado Boulder
+Developed by [Dave Coleman](http://dav.ee) at the Correll Robotics Lab, University of Colorado Boulder with outside contributors.
 
 <img align="right" src="https://raw.github.com/davetcoleman/moveit_visual_tools/hydro-devel/resources/demo.png" />
 
@@ -28,8 +28,9 @@ sudo apt-get install ros-hydro-moveit-visual-tools
 
 ### Install From Source
 
+Clone this repository into a catkin workspace, then use the rosdep install tool to automatically download its dependencies. Depending on your current version of ROS, use:
 ```
-git clone git@github.com:davetcoleman/moveit_visual_tools.git
+rosdep install --from-paths src --ignore-src --rosdistro indigo
 ```
 
 ## Usage
