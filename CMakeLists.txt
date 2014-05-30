@@ -61,7 +61,8 @@ target_link_libraries(visual_tools_test
 )
 
 # Install
-install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+install(TARGETS ${PROJECT_NAME} 
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 
 # Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/
