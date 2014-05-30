@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.1 (2014-05-30)
+------------------
 * Updated README
 * Indigo support
 * Fix for strict cppcheck and g++ warnings/errors
