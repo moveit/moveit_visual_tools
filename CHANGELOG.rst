@@ -2,6 +2,16 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Updated README
+* Indigo support
+* Fix for strict cppcheck and g++ warnings/errors
+* Compatibilty fix for Eigen package in ROS Indigo
+* Fix uninitialized
+* Fix functions with no return statement and other cppcheck errors
+* Contributors: Bence Magyar, Dave Coleman, Jordi Pages
+
 1.0.0 (2014-05-05)
 ------------------
 * Enabled dual arm manipulation 
