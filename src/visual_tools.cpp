@@ -1580,7 +1580,7 @@ void VisualTools::generateRandomPose(geometry_msgs::Pose& pose)
   pose.position.z = dRand(0, 1);
 
   // Orientation on place
-  double angle = M_PI * dRand(0.1,1);
+  double angle = M_PI * dRand(0.1,1.0);
   Eigen::Quaterniond quat(Eigen::AngleAxis<double>(double(angle), Eigen::Vector3d::UnitZ()));
   pose.orientation.x = quat.x();
   pose.orientation.y = quat.y();
@@ -1591,6 +1591,18 @@ void VisualTools::generateRandomPose(geometry_msgs::Pose& pose)
 double VisualTools::dRand(double dMin, double dMax)
 {
   double d = (double)rand() / RAND_MAX;
+  return dMin + d * (dMax - dMin);
+}
+
+float VisualTools::fRand(float dMin, float dMax)
+{
+  float d = (float)rand() / RAND_MAX;
+  return dMin + d * (dMax - dMin);
+}
+
+int VisualTools::iRand(int dMin, int dMax)
+{
+  int d = (int)rand() / RAND_MAX;
   return dMin + d * (dMax - dMin);
 }
 

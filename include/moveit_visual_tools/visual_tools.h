@@ -417,7 +417,6 @@ public:
   /**
    * \brief Display an vector of inverse kinematic solutions for the IK service in Rviz
    *        Note: this is published to the 'Planned Path' section of the 'MotionPlanning' display in Rviz
-   *        Note: make sure you call setPlanningGroupName first
    * \param ik_solutions - a set of corresponding arm positions to achieve each grasp
    * \param display_time - amount of time to sleep between sending trajectories, optional
    */
@@ -579,9 +578,11 @@ public:
   void generateRandomPose(geometry_msgs::Pose& pose);
 
   /**
-   * \brief Get random double between min and max
+   * \brief Get random between min and max
    */
-  double dRand(double dMin, double dMax);
+  static double dRand(double dMin, double dMax);
+  static float fRand(float dMin, float dMax);
+  static int iRand(int dMin, int dMax);
 
   /**
    * \brief Debug variables to console
