@@ -134,6 +134,7 @@ private:
 
   // MoveIt cached objects
   robot_state::RobotStatePtr shared_robot_state_; // Note: call loadSharedRobotState() before using this
+  robot_state::RobotModelConstPtr robot_model_;
 
   // Marker id counters
   int arrow_id_;
@@ -165,9 +166,51 @@ public:
     planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor = planning_scene_monitor::PlanningSceneMonitorPtr());
 
   /**
+   * \brief Constructor
+   * \param base_link - common base for all visualization markers, usually "base_link"
+   * \param marker_topic - rostopic to publish markers to - your Rviz display should match
+   * \param robot_model - load robot model pointer so that we don't have do re-parse it here
+   */
+  VisualTools(const std::string& base_link,
+    const std::string& marker_topic,
+    robot_model::RobotModelConstPtr robot_model);
+
+  /**
    * \brief Deconstructor
    */
   ~VisualTools() {};
+
+  /**
+   * \brief Pre-load rviz markers for better efficiency
+   * \return converted pose   * \return true on sucess
+   */
+  bool loadRvizMarkers();
+
+  /**
+   * \brief Load a planning scene monitor if one was not passed into the constructor
+   * \return true if successful in loading
+   */
+  bool loadPlanningSceneMonitor();
+
+  /**
+   * \brief Load robot state only as needed
+   * \return true if successful in loading
+   */
+  bool loadSharedRobotState();
+
+  /**
+   * \brief Caches the meshes and geometry of a robot. NOTE: perhaps not maintained...
+   * \return true if successful in loading
+   */
+  bool loadRobotMarkers();
+
+  /**
+   * \brief Call this once at begining to load the robot marker
+   * \param
+   * \param
+   * \return true if it is successful
+   */
+  bool loadEEMarker(const std::string& ee_group_name, const std::string& planning_group);
 
   /**
    * \brief Load publishers as needed
@@ -177,7 +220,7 @@ public:
   void loadAttachedPub();
   void loadPlanningPub();
   void loadTrajectoryPub();
-  void loadRobotPub();
+  void loadRobotStatePub(const std::string &marker_topic = DISPLAY_ROBOT_STATE_TOPIC);
 
   /**
    * \brief Return if we are in verbose mode
@@ -263,38 +306,6 @@ public:
   {
     return base_link_;
   }
-
-  /**
-   * \brief Pre-load rviz markers for better efficiency
-   * \return converted pose   * \return true on sucess
-   */
-  bool loadRvizMarkers();
-
-  /**
-   * \brief Load a planning scene monitor if one was not passed into the constructor
-   * \return true if successful in loading
-   */
-  bool loadPlanningSceneMonitor();
-
-  /**
-   * \brief Load robot state only as needed
-   * \return true if successful in loading
-   */
-  bool loadSharedRobotState();
-
-  /**
-   * \brief Caches the meshes and geometry of a robot. NOTE: perhaps not maintained...
-   * \return true if successful in loading
-   */
-  bool loadRobotMarkers();
-
-  /**
-   * \brief Call this once at begining to load the robot marker
-   * \param
-   * \param
-   * \return true if it is successful
-   */
-  bool loadEEMarker(const std::string& ee_group_name, const std::string& planning_group);
 
   /**
    * \brief Reset the id's of all published markers so that they overwrite themselves in the future
@@ -543,6 +554,7 @@ public:
    * \param robot_state
    */
   bool publishRobotState(const robot_state::RobotState &robot_state);
+  bool publishRobotState(const robot_state::RobotStatePtr &robot_state);
 
   /**
    * \brief Publish a MoveIt robot state to a topic that the Rviz "RobotState" display can show
@@ -562,14 +574,14 @@ public:
    * \param pose
    * \return converted pose
    */
-  geometry_msgs::Pose convertPose(const Eigen::Affine3d &pose);
+  static geometry_msgs::Pose convertPose(const Eigen::Affine3d &pose);
 
   /**
    * \brief Converts a geometry_msg point to an Eigen point
    * \param point
    * \return converted pose
    */
-  Eigen::Vector3d convertPoint(const geometry_msgs::Point &point);
+  static Eigen::Vector3d convertPoint(const geometry_msgs::Point &point);
 
   /**
    * \brief Create a random pose
