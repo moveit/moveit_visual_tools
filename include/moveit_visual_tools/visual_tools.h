@@ -79,7 +79,7 @@ static const std::string PLANNING_SCENE_TOPIC = "/move_group/monitored_planning_
 static const std::string DISPLAY_PLANNED_PATH_TOPIC = "/move_group/display_planned_path";
 static const std::string DISPLAY_ROBOT_STATE_TOPIC = "/move_group/robot_state";
 
-enum rviz_colors { RED, GREEN, BLUE, GREY, WHITE, ORANGE, BLACK, YELLOW };
+enum rviz_colors { RED, GREEN, BLUE, GREY, WHITE, ORANGE, BLACK, YELLOW, TRANSLUCENT, RAND };
 enum rviz_scales { XXSMALL, XSMALL, SMALL, REGULAR, LARGE, XLARGE };
 
 class VisualTools
@@ -162,8 +162,8 @@ public:
    *        the URDF, kinematic solvers, etc
    */
   VisualTools(const std::string& base_link,
-    const std::string& marker_topic = RVIZ_MARKER_TOPIC,
-    planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor = planning_scene_monitor::PlanningSceneMonitorPtr());
+    const std::string& marker_topic,
+    planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor);
 
   /**
    * \brief Constructor
@@ -172,8 +172,8 @@ public:
    * \param robot_model - load robot model pointer so that we don't have do re-parse it here
    */
   VisualTools(const std::string& base_link,
-    const std::string& marker_topic,
-    robot_model::RobotModelConstPtr robot_model);
+              const std::string& marker_topic = RVIZ_MARKER_TOPIC,
+              robot_model::RobotModelConstPtr robot_model = robot_model::RobotModelConstPtr());
 
   /**
    * \brief Deconstructor

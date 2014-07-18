@@ -481,6 +481,12 @@ std_msgs::ColorRGBA VisualTools::getColor(const rviz_colors &color)
       result.g = 0.5;
       result.b = 0.0;
       break;
+    case TRANSLUCENT:
+      result.r = 0.1;
+      result.g = 0.1;
+      result.b = 0.8;
+      result.a = 0.3;
+      break;
     case BLACK:
       result.r = 0.0;
       result.g = 0.0;
@@ -490,6 +496,15 @@ std_msgs::ColorRGBA VisualTools::getColor(const rviz_colors &color)
       result.r = 1.0;
       result.g = 1.0;
       result.b = 0.0;
+      break;
+    case RAND:
+      // Make sure color is not *too* light
+      do
+      {
+        result.r = fRand(0.0,1.0);
+        result.g = fRand(0.0,1.0);
+        result.b = fRand(0.0,1.0);
+      } while (result.r + result.g + result.b < 2); // 3 would be white
       break;
     case BLUE:
     default:
