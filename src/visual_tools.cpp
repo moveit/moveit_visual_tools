@@ -88,8 +88,19 @@ void VisualTools::initialize()
   loadRvizMarkers();
 }
 
+void VisualTools::deleteAllMarkers()
+{
+  pub_rviz_marker_.publish( reset_marker_ );
+  ros::spinOnce();
+}
+
 bool VisualTools::loadRvizMarkers()
 {
+  // Load reset marker -------------------------------------------------
+  reset_marker_.header.frame_id = base_link_;
+  reset_marker_.header.stamp = ros::Time();
+  reset_marker_.action = 3; // In ROS-J: visualization_msgs::Marker::DELETEALL;
+
   // Load arrow ----------------------------------------------------
 
   arrow_marker_.header.frame_id = base_link_;
@@ -349,7 +360,7 @@ void VisualTools::loadMarkerPub()
 
   // Rviz marker publisher
   pub_rviz_marker_ = nh_.advertise<visualization_msgs::Marker>(marker_topic_, 10);
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing Rviz markers on topic " << marker_topic_);
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing Rviz markers on topic " << pub_rviz_marker_.getTopic());
 
   ros::spinOnce();
   ros::Duration(0.5).sleep();
@@ -419,7 +430,7 @@ void VisualTools::loadRobotStatePub(const std::string &marker_topic)
 
   // RobotState Message
   pub_robot_state_ = nh_.advertise<moveit_msgs::DisplayRobotState>(marker_topic, 1 );
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing MoveIt Robot State on topic " << marker_topic);
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing MoveIt robot state on topic " << marker_topic);
 
   ros::spinOnce();
   ros::Duration(0.5).sleep();
@@ -580,6 +591,7 @@ bool VisualTools::loadSharedRobotState()
     {
       // Fall back on using planning scene monitor.
       // Deprecated?
+      ROS_WARN_STREAM_NAMED("temp","Falling back to using planning scene monitor for loading a robot state");
       planning_scene_monitor::PlanningSceneMonitorPtr psm = getPlanningSceneMonitor();
       robot_model_ = psm->getRobotModel();
     }
@@ -738,26 +750,26 @@ bool VisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_c
   return true;
 }
 
-bool VisualTools::publishSphere(const Eigen::Affine3d &pose, const rviz_colors color, const rviz_scales scale)
+bool VisualTools::publishSphere(const Eigen::Affine3d &pose, const rviz_colors color, const rviz_scales scale, const std::string& ns)
 {
-  return publishSphere(convertPose(pose), color, scale);
+  return publishSphere(convertPose(pose), color, scale, ns);
 }
 
-bool VisualTools::publishSphere(const Eigen::Vector3d &point, const rviz_colors color, const rviz_scales scale)
+bool VisualTools::publishSphere(const Eigen::Vector3d &point, const rviz_colors color, const rviz_scales scale, const std::string& ns)
 {
   geometry_msgs::Pose pose_msg;
   tf::pointEigenToMsg(point, pose_msg.position);
-  return publishSphere(pose_msg, color, scale);
+  return publishSphere(pose_msg, color, scale, ns);
 }
 
-bool VisualTools::publishSphere(const geometry_msgs::Point &point, const rviz_colors color, const rviz_scales scale)
+bool VisualTools::publishSphere(const geometry_msgs::Point &point, const rviz_colors color, const rviz_scales scale, const std::string& ns)
 {
   geometry_msgs::Pose pose_msg;
   pose_msg.position = point;
-  return publishSphere(pose_msg, color, scale);
+  return publishSphere(pose_msg, color, scale, ns);
 }
 
-bool VisualTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color, const rviz_scales scale)
+bool VisualTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color, const rviz_scales scale, const std::string& ns)
 {
   if(muted_)
     return true; // this function will only work if we have loaded the publishers
@@ -768,10 +780,13 @@ bool VisualTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colo
   sphere_marker_.id = ++sphere_id_;
   sphere_marker_.color = getColor(color);
   sphere_marker_.scale = getScale(scale, false, 0.1);
+  sphere_marker_.ns = ns;
 
   // Update the single point with new pose
   sphere_marker_.points[0] = pose.position;
   sphere_marker_.colors[0] = getColor(color);
+
+  ROS_DEBUG_STREAM_NAMED("publishSphere","Publishing:\n" << sphere_marker_);
 
   // Publish
   loadMarkerPub(); // always check this before publishing
@@ -1515,8 +1530,29 @@ bool VisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryP
   return publishTrajectoryPath(trajectory_msg, true);
 }
 
-bool VisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg,
-  bool blocking)
+bool VisualTools::publishTrajectoryPath(const robot_trajectory::RobotTrajectory& trajectory, bool blocking)
+{
+  moveit_msgs::RobotTrajectory trajectory_msg;
+  trajectory.getRobotTrajectoryMsg(trajectory_msg);
+
+  // Add time from start if none specified
+  if (trajectory_msg.joint_trajectory.points.size() > 1)
+  {
+    if (trajectory_msg.joint_trajectory.points[1].time_from_start == ros::Duration(0)) // assume no timestamps exist
+    {
+      for (std::size_t i = 0; i < trajectory_msg.joint_trajectory.points.size(); ++i)
+      {
+        trajectory_msg.joint_trajectory.points[i].time_from_start = ros::Duration(i); // 1 hz
+      }
+    }
+  }
+
+  std::cout << "trajectory_msg:\n " << trajectory_msg << std::endl;
+
+  publishTrajectoryPath(trajectory_msg, blocking);
+}
+
+bool VisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg, bool blocking)
 {
   loadSharedRobotState();
 

@@ -84,7 +84,7 @@ enum rviz_scales { XXSMALL, XSMALL, SMALL, REGULAR, LARGE, XLARGE };
 
 class VisualTools
 {
-private:
+protected:
 
   // A shared node handle
   ros::NodeHandle nh_;
@@ -128,6 +128,7 @@ private:
   visualization_msgs::Marker text_marker_;
   visualization_msgs::Marker rectangle_marker_;
   visualization_msgs::Marker line_marker_;
+  visualization_msgs::Marker reset_marker_;
 
   // MoveIt cached markers
   moveit_msgs::DisplayRobotState display_robot_msg_;
@@ -179,6 +180,11 @@ public:
    * \brief Deconstructor
    */
   ~VisualTools() {};
+
+  /**
+   * \brief Tell Rviz to clear all markers on a particular display. Note: only works on ROS Indigo and newer
+   */
+  void deleteAllMarkers();
 
   /**
    * \brief Pre-load rviz markers for better efficiency
@@ -326,10 +332,10 @@ public:
    * \param scale - an enum pre-defined name of a size
    * \return true on success
    */
-  bool publishSphere(const Eigen::Affine3d &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
-  bool publishSphere(const Eigen::Vector3d &point, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
-  bool publishSphere(const geometry_msgs::Point &point, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
-  bool publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
+  bool publishSphere(const Eigen::Affine3d &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, const std::string& ns = "Sphere");
+  bool publishSphere(const Eigen::Vector3d &point, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, const std::string& ns = "Sphere");
+  bool publishSphere(const geometry_msgs::Point &point, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, const std::string& ns = "Sphere");
+  bool publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, const std::string& ns = "Sphere");
 
   /**
    * \brief Publish an marker of an arrow to rviz
@@ -546,6 +552,7 @@ public:
    * \param blocking whether we need to wait for the animation to complete
    * \return true on success
    */
+  bool publishTrajectoryPath(const robot_trajectory::RobotTrajectory& trajectory, bool blocking = false);
   bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg, bool blocking = false);
 
   /**
