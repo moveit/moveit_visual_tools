@@ -555,7 +555,7 @@ std_msgs::ColorRGBA VisualTools::getColor(const rviz_colors &color)
         result.r = fRand(0.0,1.0);
         result.g = fRand(0.0,1.0);
         result.b = fRand(0.0,1.0);
-      } while (result.r + result.g + result.b < 2); // 3 would be white
+      } while (result.r + result.g + result.b < 1.5); // 3 would be white
       break;
     case BLUE:
     default:
