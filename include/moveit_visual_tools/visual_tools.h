@@ -57,6 +57,7 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit_msgs/Grasp.h>
 #include <moveit_msgs/DisplayRobotState.h>
+#include <moveit/macros/deprecation.h>
 
 // Boost
 #include <boost/shared_ptr.hpp>
@@ -128,6 +129,8 @@ protected:
   visualization_msgs::Marker text_marker_;
   visualization_msgs::Marker rectangle_marker_;
   visualization_msgs::Marker line_marker_;
+  visualization_msgs::Marker path_marker_;
+  visualization_msgs::Marker spheres_marker_;
   visualization_msgs::Marker reset_marker_;
 
   // MoveIt cached markers
@@ -136,16 +139,6 @@ protected:
   // MoveIt cached objects
   robot_state::RobotStatePtr shared_robot_state_; // Note: call loadSharedRobotState() before using this
   robot_state::RobotModelConstPtr robot_model_;
-
-  // Marker id counters
-  int arrow_id_;
-  int sphere_id_;
-  int block_id_;
-  int cylinder_id_;
-  int text_id_;
-  int rectangle_id_;
-  int line_id_;
-
 
 private:
   /**
@@ -315,8 +308,13 @@ public:
 
   /**
    * \brief Reset the id's of all published markers so that they overwrite themselves in the future
+   *        NOTE this has been deprecated in favor of deleteAllMarkers()
    */
-  void resetMarkerCounts();
+  MOVEIT_DEPRECATED void resetMarkerCounts()
+  {
+    ROS_ERROR_NAMED("resetMarkerCounts","The function resetMarkerCounts() has been deprecated in favor of a new Rviz reset method deleteAllMarkers()");
+    deleteAllMarkers();
+  }
 
   /**
    * \brief Publish an end effector to rviz
@@ -368,6 +366,17 @@ public:
     const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
 
   /**
+   * \brief Publish an marker of a series of connected lines to rviz
+   * \param path - a series of points to connect with lines
+   * \param color - an enum pre-defined name of a color
+   * \param scale - an enum pre-defined name of a size
+   * \param ns - namespace of marker
+   * \return true on success
+   */
+  bool publishPath(const std::vector<geometry_msgs::Point> &path, const rviz_colors color = RED, const rviz_scales scale = REGULAR, 
+                   const std::string& ns = "Path");
+
+  /**
    * \brief Publish an marker of a block to Rviz
    * \param pose - the location to publish the marker with respect to the base frame
    * \param color - an enum pre-defined name of a color
@@ -394,6 +403,18 @@ public:
    * \return true on success
    */
   bool publishGraph(const graph_msgs::GeometryGraph &graph, const rviz_colors color, double radius);
+
+
+  /**
+   * \brief Publish an marker of a series of spheres to rviz
+   * \param spheres - where to publish them
+   * \param color - an enum pre-defined name of a color
+   * \param scale - an enum pre-defined name of a size
+   * \param ns - namespace of marker
+   * \return true on success
+   */
+  bool publishSpheres(const std::vector<geometry_msgs::Point> &points, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, 
+                      const std::string& ns = "Spheres");
 
   /**
    * \brief Publish an marker of a text to Rviz
@@ -582,6 +603,13 @@ public:
    * \return converted pose
    */
   static geometry_msgs::Pose convertPose(const Eigen::Affine3d &pose);
+
+  /**
+   * \brief Converts an Eigen pose to a geometry_msg point
+   * \param pose
+   * \return converted point with orientation discarded
+   */
+  static geometry_msgs::Point convertPoseToPoint(const Eigen::Affine3d &pose);
 
   /**
    * \brief Converts a geometry_msg point to an Eigen point

@@ -127,6 +127,10 @@ Higher level robot ans trajectory functions
 
 ### Helper Functions
 
+Reset function
+
+ - ``deleteAllMarkers`` - tells Rviz to clear out all current markers from being displayed. Only withs in ROS Indigo and newer.
+
 Convenience functions
  
  - convertPose

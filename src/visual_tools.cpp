@@ -57,7 +57,8 @@ namespace moveit_visual_tools
 VisualTools::VisualTools(const std::string& base_link,
   const std::string& marker_topic,
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
-  :  planning_scene_monitor_(planning_scene_monitor),
+  :  nh_("~"),
+     planning_scene_monitor_(planning_scene_monitor),
      marker_topic_(marker_topic),
      base_link_(base_link)
 {
@@ -77,12 +78,9 @@ VisualTools::VisualTools(const std::string& base_link,
 void VisualTools::initialize()
 {
   floor_to_base_height_ = 0;
-  marker_lifetime_ = ros::Duration(30.0);
+  marker_lifetime_ = ros::Duration(0.0); // 0 - unlimited
   muted_ = false;
   alpha_ = 0.8;
-
-  // Initialize counters to zero
-  resetMarkerCounts();
 
   // Cache the reusable markers
   loadRvizMarkers();
@@ -136,6 +134,48 @@ bool VisualTools::loadRvizMarkers()
   line_marker_.action = visualization_msgs::Marker::ADD;
   // Lifetime
   line_marker_.lifetime = marker_lifetime_;
+
+  // Load path ----------------------------------------------------
+
+  path_marker_.header.frame_id = base_link_;
+  // Set the namespace and id for this marker.  This serves to create a unique ID
+  path_marker_.ns = "Path";
+  // Set the marker type.
+  path_marker_.type = visualization_msgs::Marker::LINE_LIST;
+  // Set the marker action.  Options are ADD and DELETE
+  path_marker_.action = visualization_msgs::Marker::ADD;
+  // Lifetime
+  path_marker_.lifetime = marker_lifetime_;
+  // Constants
+  path_marker_.pose.position.x = 0.0;
+  path_marker_.pose.position.y = 0.0;
+  path_marker_.pose.position.z = 0.0;
+
+  path_marker_.pose.orientation.x = 0.0;
+  path_marker_.pose.orientation.y = 0.0;
+  path_marker_.pose.orientation.z = 0.0;
+  path_marker_.pose.orientation.w = 1.0;
+
+  // Load sphers ----------------------------------------------------
+
+  spheres_marker_.header.frame_id = base_link_;
+  // Set the namespace and id for this marker.  This serves to create a unique ID
+  spheres_marker_.ns = "Spheres";
+  // Set the marker type.
+  spheres_marker_.type = visualization_msgs::Marker::SPHERE_LIST;
+  // Set the marker action.  Options are ADD and DELETE
+  spheres_marker_.action = visualization_msgs::Marker::ADD;
+  // Lifetime
+  spheres_marker_.lifetime = marker_lifetime_;
+  // Constants
+  spheres_marker_.pose.position.x = 0.0;
+  spheres_marker_.pose.position.y = 0.0;
+  spheres_marker_.pose.position.z = 0.0;
+
+  spheres_marker_.pose.orientation.x = 0.0;
+  spheres_marker_.pose.orientation.y = 0.0;
+  spheres_marker_.pose.orientation.z = 0.0;
+  spheres_marker_.pose.orientation.w = 1.0;
 
   // Load Block ----------------------------------------------------
   block_marker_.header.frame_id = base_link_;
@@ -374,7 +414,7 @@ void VisualTools::loadCollisionPub()
 
   // Collision object creator
   pub_collision_obj_ = nh_.advertise<moveit_msgs::CollisionObject>(COLLISION_TOPIC, 10);
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing collision objects on topic " << COLLISION_TOPIC);
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing collision objects on topic " << pub_collision_obj_.getTopic());
 
   ros::spinOnce();
   ros::Duration(0.5).sleep();
@@ -388,7 +428,7 @@ void VisualTools::loadAttachedPub()
 
   // Collision object attacher
   pub_attach_collision_obj_ = nh_.advertise<moveit_msgs::AttachedCollisionObject>(ATTACHED_COLLISION_TOPIC, 10);
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing attached collision objects on topic " << ATTACHED_COLLISION_TOPIC);
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing attached collision objects on topic " << pub_attach_collision_obj_.getTopic());
 
   ros::spinOnce();
   ros::Duration(0.5).sleep();
@@ -402,7 +442,7 @@ void VisualTools::loadPlanningPub()
 
   // Planning scene diff publisher
   pub_planning_scene_diff_ = nh_.advertise<moveit_msgs::PlanningScene>(PLANNING_SCENE_TOPIC, 1);
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing planning scene on topic " << PLANNING_SCENE_TOPIC);
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing planning scene on topic " << pub_planning_scene_diff_.getTopic());
 
   ros::spinOnce();
   ros::Duration(0.5).sleep();
@@ -416,7 +456,7 @@ void VisualTools::loadTrajectoryPub()
 
   // Trajectory paths
   pub_display_path_ = nh_.advertise<moveit_msgs::DisplayTrajectory>(DISPLAY_PLANNED_PATH_TOPIC, 10, false);
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing MoveIt trajectory on topic " << DISPLAY_PLANNED_PATH_TOPIC);
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing MoveIt trajectory on topic " << pub_display_path_.getTopic());
 
   ros::spinOnce();
   ros::Duration(0.5).sleep();
@@ -427,10 +467,12 @@ void VisualTools::loadRobotStatePub(const std::string &marker_topic)
 {
   if (pub_robot_state_)
     return;
-
+  std::cout << "debug " << std::endl;
   // RobotState Message
   pub_robot_state_ = nh_.advertise<moveit_msgs::DisplayRobotState>(marker_topic, 1 );
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing MoveIt robot state on topic " << marker_topic);
+  std::cout << "debug " << std::endl;
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing MoveIt robot state on topic " << pub_robot_state_.getTopic());
+  std::cout << "debug " << std::endl;
 
   ros::spinOnce();
   ros::Duration(0.5).sleep();
@@ -656,17 +698,6 @@ Eigen::Affine3d VisualTools::getVectorBetweenPoints(Eigen::Vector3d a, Eigen::Ve
   return pose;
 }
 
-void VisualTools::resetMarkerCounts()
-{
-  arrow_id_ = 0;
-  sphere_id_ = 0;
-  block_id_ = 0;
-  cylinder_id_ = 0;
-  text_id_ = 0;
-  rectangle_id_ = 0;
-  line_id_ = 0;
-}
-
 bool VisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_colors &color, const std::string &ns)
 {
   if(muted_)
@@ -777,7 +808,7 @@ bool VisualTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colo
   // Set the frame ID and timestamp.  See the TF tutorials for information on these.
   sphere_marker_.header.stamp = ros::Time::now();
 
-  sphere_marker_.id = ++sphere_id_;
+  sphere_marker_.id++;
   sphere_marker_.color = getColor(color);
   sphere_marker_.scale = getScale(scale, false, 0.1);
   sphere_marker_.ns = ns;
@@ -809,7 +840,7 @@ bool VisualTools::publishArrow(const geometry_msgs::Pose &pose, const rviz_color
   // Set the frame ID and timestamp.  See the TF tutorials for information on these.
   arrow_marker_.header.stamp = ros::Time::now();
 
-  arrow_marker_.id = ++arrow_id_;
+  arrow_marker_.id++;
   arrow_marker_.pose = pose;
   arrow_marker_.color = getColor(color);
   arrow_marker_.scale = getScale(scale, true);
@@ -829,7 +860,7 @@ bool VisualTools::publishBlock(const geometry_msgs::Pose &pose, const rviz_color
   // Set the timestamp
   block_marker_.header.stamp = ros::Time::now();
 
-  block_marker_.id = ++block_id_;
+  block_marker_.id++;
 
   // Set the pose
   block_marker_.pose = pose;
@@ -857,7 +888,7 @@ bool VisualTools::publishCylinder(const geometry_msgs::Pose &pose, const rviz_co
   // Set the timestamp
   cylinder_marker_.header.stamp = ros::Time::now();
 
-  cylinder_marker_.id = ++cylinder_id_;
+  cylinder_marker_.id++;
 
   // Set the pose
   cylinder_marker_.pose = pose;
@@ -936,7 +967,7 @@ bool VisualTools::publishRectangle(const geometry_msgs::Point &point1, const geo
   // Set the timestamp
   rectangle_marker_.header.stamp = ros::Time::now();
 
-  rectangle_marker_.id = ++rectangle_id_;
+  rectangle_marker_.id++;
   rectangle_marker_.color = getColor(color);
 
   // Calculate pose
@@ -967,7 +998,7 @@ bool VisualTools::publishLine(const geometry_msgs::Point &point1, const geometry
   // Set the timestamp
   line_marker_.header.stamp = ros::Time::now();
 
-  line_marker_.id = ++line_id_;
+  line_marker_.id++;
   line_marker_.color = getColor(color);
   line_marker_.scale = getScale( scale, false, 0.1 );
 
@@ -978,6 +1009,72 @@ bool VisualTools::publishLine(const geometry_msgs::Point &point1, const geometry
   loadMarkerPub(); // always check this before publishing
   pub_rviz_marker_.publish( line_marker_ );
   ros::spinOnce();
+
+  return true;
+}
+
+bool VisualTools::publishPath(const std::vector<geometry_msgs::Point> &path, const rviz_colors color, const rviz_scales scale, const std::string& ns)
+{
+  if (path.size() < 2)
+  {
+    ROS_WARN_STREAM_NAMED("publishPath","Skipping path because " << path.size() << " points passed in.");
+    return true;
+  }
+
+  path_marker_.header.stamp = ros::Time();
+  path_marker_.ns = ns;
+
+  // Provide a new id every call to this function
+  path_marker_.id++;
+
+  std_msgs::ColorRGBA this_color = getColor( color );
+  path_marker_.scale = getScale(scale, false, 0.25);
+  path_marker_.color = this_color;
+  path_marker_.points.clear();
+  path_marker_.colors.clear();
+
+  // Convert path coordinates
+  for( std::size_t i = 1; i < path.size(); ++i )
+  {
+    // Add the point pair to the line message
+    path_marker_.points.push_back( path[i-1] );
+    path_marker_.points.push_back( path[i] );
+    path_marker_.colors.push_back( this_color );
+    path_marker_.colors.push_back( this_color );
+  }
+
+  // Send to Rviz
+  pub_rviz_marker_.publish( path_marker_ );
+  ros::spinOnce();  
+
+  return true;
+}
+
+bool VisualTools::publishSpheres(const std::vector<geometry_msgs::Point> &points, const rviz_colors color, const rviz_scales scale, const std::string& ns)
+{
+  spheres_marker_.header.stamp = ros::Time();
+  spheres_marker_.ns = ns;
+
+  // Provide a new id every call to this function
+  spheres_marker_.id++;
+
+  std_msgs::ColorRGBA this_color = getColor( color );
+  spheres_marker_.scale = getScale(scale, false, 0.25);
+  spheres_marker_.color = this_color;
+  //spheres_marker_.points.clear();
+  spheres_marker_.colors.clear();
+
+  spheres_marker_.points = points; // straight copy
+
+  // Convert path coordinates
+  for( std::size_t i = 0; i < points.size(); ++i )
+  {
+    spheres_marker_.colors.push_back( this_color );
+  }
+
+  // Send to Rviz
+  pub_rviz_marker_.publish( spheres_marker_ );
+  ros::spinOnce();  
 
   return true;
 }
@@ -1542,7 +1639,7 @@ bool VisualTools::publishTrajectoryPath(const robot_trajectory::RobotTrajectory&
     {
       for (std::size_t i = 0; i < trajectory_msg.joint_trajectory.points.size(); ++i)
       {
-        trajectory_msg.joint_trajectory.points[i].time_from_start = ros::Duration(i); // 1 hz
+        trajectory_msg.joint_trajectory.points[i].time_from_start = ros::Duration(i*2); // 1 hz
       }
     }
   }
@@ -1556,17 +1653,18 @@ bool VisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& traj
 {
   loadSharedRobotState();
 
-  // Create the message
-  moveit_msgs::DisplayTrajectory rviz_display;
-  rviz_display.model_id = robot_model_->getName();
+  // Create the message  TODO move to member function to load less often
+  moveit_msgs::DisplayTrajectory display_trajectory_msg;
+  display_trajectory_msg.model_id = robot_model_->getName();
 
-  //    rviz_display.trajectory_start = start_state;
-  rviz_display.trajectory.resize(1);
-  rviz_display.trajectory[0] = trajectory_msg;
+  //    display_trajectory_msg.trajectory_start = start_state;
+  display_trajectory_msg.trajectory.resize(1);
+  display_trajectory_msg.trajectory[0] = trajectory_msg;
 
   // Publish message
   loadTrajectoryPub(); // always call this before publishing
-  pub_display_path_.publish(rviz_display);
+  std::cout << "visual_tools: " << display_trajectory_msg << std::endl;
+  pub_display_path_.publish(display_trajectory_msg);
   ros::spinOnce();
 
   // Wait the duration of the trajectory
@@ -1638,6 +1736,13 @@ geometry_msgs::Pose VisualTools::convertPose(const Eigen::Affine3d &pose)
   geometry_msgs::Pose pose_msg;
   tf::poseEigenToMsg(pose, pose_msg);
   return pose_msg;
+}
+
+geometry_msgs::Point convertPoseToPoint(const Eigen::Affine3d &pose)
+{
+  geometry_msgs::Pose pose_msg;
+  tf::poseEigenToMsg(pose, pose_msg);
+  return pose_msg.position;
 }
 
 Eigen::Vector3d VisualTools::convertPoint(const geometry_msgs::Point &point)
