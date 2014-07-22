@@ -467,12 +467,10 @@ void VisualTools::loadRobotStatePub(const std::string &marker_topic)
 {
   if (pub_robot_state_)
     return;
-  std::cout << "debug " << std::endl;
+
   // RobotState Message
   pub_robot_state_ = nh_.advertise<moveit_msgs::DisplayRobotState>(marker_topic, 1 );
-  std::cout << "debug " << std::endl;
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing MoveIt robot state on topic " << pub_robot_state_.getTopic());
-  std::cout << "debug " << std::endl;
 
   ros::spinOnce();
   ros::Duration(0.5).sleep();
@@ -1644,7 +1642,7 @@ bool VisualTools::publishTrajectoryPath(const robot_trajectory::RobotTrajectory&
     }
   }
 
-  std::cout << "trajectory_msg:\n " << trajectory_msg << std::endl;
+  //std::cout << "trajectory_msg:\n " << trajectory_msg << std::endl;
 
   publishTrajectoryPath(trajectory_msg, blocking);
 }
@@ -1663,7 +1661,7 @@ bool VisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& traj
 
   // Publish message
   loadTrajectoryPub(); // always call this before publishing
-  std::cout << "visual_tools: " << display_trajectory_msg << std::endl;
+  //std::cout << "visual_tools: " << display_trajectory_msg << std::endl;
   pub_display_path_.publish(display_trajectory_msg);
   ros::spinOnce();
 
