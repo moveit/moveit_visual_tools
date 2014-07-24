@@ -88,6 +88,7 @@ void VisualTools::initialize()
 
 void VisualTools::deleteAllMarkers()
 {
+  loadMarkerPub(); // always check this before publishing
   pub_rviz_marker_.publish( reset_marker_ );
   ros::spinOnce();
 }
@@ -285,7 +286,7 @@ bool VisualTools::loadPlanningSceneMonitor()
 
 bool VisualTools::loadRobotMarkers()
 {
-  // Always oad the robot state before using
+  // Always load the robot state before using
   loadSharedRobotState();
 
   // Get all link names
@@ -315,6 +316,7 @@ bool VisualTools::loadRobotMarkers()
     if( robot_marker_array.markers[i].type == visualization_msgs::Marker::MESH_RESOURCE )
       robot_marker_array.markers[i].mesh_use_embedded_materials = true;
 
+    loadMarkerPub(); // always check this before publishing
     pub_rviz_marker_.publish( robot_marker_array.markers[i] );
     ros::spinOnce();
   }
@@ -1508,9 +1510,9 @@ bool VisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph &graph, 
   return true;
 }
 
-bool VisualTools::publishCollisionWall(double x, double y, double angle, double width, const std::string name)
+void VisualTools::getCollisionWallMsg(double x, double y, double angle, double width, const std::string name, 
+                                      moveit_msgs::CollisionObject &collision_obj)
 {
-  moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
   collision_obj.header.frame_id = base_link_;
   collision_obj.operation = moveit_msgs::CollisionObject::ADD;
@@ -1546,6 +1548,12 @@ bool VisualTools::publishCollisionWall(double x, double y, double angle, double 
 
   collision_obj.primitive_poses.resize(1);
   collision_obj.primitive_poses[0] = rec_pose;
+}
+
+bool VisualTools::publishCollisionWall(double x, double y, double angle, double width, const std::string name)
+{
+  moveit_msgs::CollisionObject collision_obj;
+  getCollisionWallMsg(x, y, angle, width, name, collision_obj);
 
   loadCollisionPub(); // always call this before publishing
   pub_collision_obj_.publish(collision_obj);

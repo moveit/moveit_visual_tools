@@ -529,6 +529,12 @@ public:
   bool publishCollisionGraph(const graph_msgs::GeometryGraph &graph, const std::string &object_name, double radius);
 
   /**
+   * \brief Helper for publishCollisionWall 
+   */
+  void getCollisionWallMsg(double x, double y, double angle, double width, const std::string name, 
+                           moveit_msgs::CollisionObject &collision_obj);
+  
+  /**
    * \brief Publish a typical room wall
    * \param x
    * \param y
