@@ -66,6 +66,7 @@
 #include <std_msgs/ColorRGBA.h>
 #include <graph_msgs/GeometryGraph.h>
 #include <geometry_msgs/PoseArray.h>
+#include <geometry_msgs/Polygon.h>
 #include <trajectory_msgs/JointTrajectory.h>
 
 namespace moveit_visual_tools
@@ -324,7 +325,7 @@ public:
   bool publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_colors &color = WHITE, const std::string &ns="end_effector");
 
   /**
-   * \brief Publish an marker of a sphere to rviz
+   * \brief Publish a marker of a sphere to rviz
    * \param pose - the location to publish the sphere with respect to the base frame
    * \param color - an enum pre-defined name of a color
    * \param scale - an enum pre-defined name of a size
@@ -336,7 +337,7 @@ public:
   bool publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, const std::string& ns = "Sphere");
 
   /**
-   * \brief Publish an marker of an arrow to rviz
+   * \brief Publish a marker of an arrow to rviz
    * \param pose - the location to publish the marker with respect to the base frame
    * \param color - an enum pre-defined name of a color
    * \param scale - an enum pre-defined name of a size
@@ -346,7 +347,7 @@ public:
   bool publishArrow(const geometry_msgs::Pose &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
 
   /**
-   * \brief Publish an marker of rectangle to rviz
+   * \brief Publish a marker of rectangle to rviz
    * \param point1 - x,y,z top corner location of box
    * \param point2 - x,y,z bottom opposite corner location of box
    * \param color - an enum pre-defined name of a color
@@ -355,7 +356,7 @@ public:
   bool publishRectangle(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2, const rviz_colors color = BLUE);
 
   /**
-   * \brief Publish an marker of line to rviz
+   * \brief Publish a marker of line to rviz
    * \param point1 - x,y,z of start of line
    * \param point2 - x,y,z of end of line
    * \param color - an enum pre-defined name of a color
@@ -366,7 +367,7 @@ public:
     const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
 
   /**
-   * \brief Publish an marker of a series of connected lines to rviz
+   * \brief Publish a marker of a series of connected lines to rviz
    * \param path - a series of points to connect with lines
    * \param color - an enum pre-defined name of a color
    * \param scale - an enum pre-defined name of a size
@@ -377,7 +378,18 @@ public:
                    const std::string& ns = "Path");
 
   /**
-   * \brief Publish an marker of a block to Rviz
+   * \brief Publish a marker of a polygon to Rviz
+   * \param polygon - a series of points to connect with lines
+   * \param color - an enum pre-defined name of a color
+   * \param scale - an enum pre-defined name of a size
+   * \param ns - namespace of marker
+   * \return true on success
+   */
+  bool publishPolygon(const geometry_msgs::Polygon &polygon, const rviz_colors color = RED, const rviz_scales scale = REGULAR, 
+                      const std::string& ns = "Polygon");
+
+  /**
+   * \brief Publish a marker of a block to Rviz
    * \param pose - the location to publish the marker with respect to the base frame
    * \param color - an enum pre-defined name of a color
    * \param size - height=width=depth=size
@@ -386,7 +398,7 @@ public:
   bool publishBlock(const geometry_msgs::Pose &pose, const rviz_colors color = BLUE, const double &block_size = 0.1);
 
   /**
-   * \brief Publish an marker of a cylinder to Rviz
+   * \brief Publish a marker of a cylinder to Rviz
    * \param pose - the location to publish the marker with respect to the base frame
    * \param color - an enum pre-defined name of a color
    * \param height - geometry of cylinder
@@ -406,7 +418,7 @@ public:
 
 
   /**
-   * \brief Publish an marker of a series of spheres to rviz
+   * \brief Publish a marker of a series of spheres to rviz
    * \param spheres - where to publish them
    * \param color - an enum pre-defined name of a color
    * \param scale - an enum pre-defined name of a size
@@ -417,7 +429,7 @@ public:
                       const std::string& ns = "Spheres");
 
   /**
-   * \brief Publish an marker of a text to Rviz
+   * \brief Publish a marker of a text to Rviz
    * \param pose - the location to publish the marker with respect to the base frame
    * \param text - what to display
    * \param color - an enum pre-defined name of a color
@@ -425,6 +437,13 @@ public:
    */
   bool publishText(const geometry_msgs::Pose &pose, const std::string &text,
     const rviz_colors &color = WHITE);
+
+  /**
+   * \brief Publish a visualization_msgs Marker of a custom type. Allows reuse of the ros publisher
+   * \param marker - a pre-made marker ready to be published
+   * \return true on success
+   */
+  bool publishMarker(const visualization_msgs::Marker &marker);
 
   /**
    * \brief Show grasps generated from moveit_simple_grasps or other MoveIt Grasp message sources
@@ -604,25 +623,60 @@ public:
   bool publishTest();
 
   /**
-   * \brief Converts an Eigen pose to a geometry_msg pose
+   * \brief Convert an Eigen pose to a geometry_msg pose
+   *        Note: NOT memory efficient
    * \param pose
    * \return converted pose
    */
   static geometry_msgs::Pose convertPose(const Eigen::Affine3d &pose);
 
   /**
-   * \brief Converts an Eigen pose to a geometry_msg point
+   * \brief Convert a geometry_msg pose to an Eigen pose
+   *        Note: NOT memory efficient
+   * \param pose
+   * \return converted pose
+   */
+  static Eigen::Affine3d convertPose(const geometry_msgs::Pose &pose);
+
+  /**
+   * \brief Convert a geometry_msg point (32bit) to an Eigen pose
+   *        Note: NOT memory efficient
+   * \param pose
+   * \return converted point with default rotation matrix
+   */
+  static Eigen::Affine3d convertPointToPose(const geometry_msgs::Point32 &point);
+
+  /**
+   * \brief Convert an Eigen pose to a geometry_msg point
+   *        Note: NOT memory efficient
    * \param pose
    * \return converted point with orientation discarded
    */
   static geometry_msgs::Point convertPoseToPoint(const Eigen::Affine3d &pose);
 
   /**
-   * \brief Converts a geometry_msg point to an Eigen point
+   * \brief Convert a geometry_msg point to an Eigen point
+   *        Note: NOT memory efficient
    * \param point
    * \return converted pose
    */
   static Eigen::Vector3d convertPoint(const geometry_msgs::Point &point);
+
+  /**
+   * \brief Convert a geometry_msg point to an Eigen point
+   *        Note: NOT memory efficient
+   * \param point
+   * \return converted pose
+   */
+  static Eigen::Vector3d convertPoint32(const geometry_msgs::Point32 &point);
+
+  /**
+   * \brief Convert an Eigen point to a 32 bit geometry_msg point
+   *        Note: NOT memory efficient
+   * \param point
+   * \return converted pose
+   */
+  static geometry_msgs::Point32 convertPoint32(const Eigen::Vector3d &point);
 
   /**
    * \brief Create a random pose

@@ -910,6 +910,9 @@ bool VisualTools::publishCylinder(const geometry_msgs::Pose &pose, const rviz_co
 
 bool VisualTools::publishGraph(const graph_msgs::GeometryGraph &graph, const rviz_colors color, double radius)
 {
+  if(muted_)
+    return true;
+
   // Track which pairs of nodes we've already connected since graph is bi-directional
   typedef std::pair<std::size_t, std::size_t> node_ids;
   std::set<node_ids> added_edges;
@@ -1015,6 +1018,9 @@ bool VisualTools::publishLine(const geometry_msgs::Point &point1, const geometry
 
 bool VisualTools::publishPath(const std::vector<geometry_msgs::Point> &path, const rviz_colors color, const rviz_scales scale, const std::string& ns)
 {
+  if(muted_)
+    return true;
+
   if (path.size() < 2)
   {
     ROS_WARN_STREAM_NAMED("publishPath","Skipping path because " << path.size() << " points passed in.");
@@ -1050,8 +1056,30 @@ bool VisualTools::publishPath(const std::vector<geometry_msgs::Point> &path, con
   return true;
 }
 
+bool VisualTools::publishPolygon(const geometry_msgs::Polygon &polygon, const rviz_colors color, const rviz_scales scale, const std::string& ns)
+{
+  std::vector<geometry_msgs::Point> points;
+  geometry_msgs::Point temp;
+  geometry_msgs::Point first; // remember first point because we will connect first and last points for last line
+  for (std::size_t i = 0; i < polygon.points.size(); ++i)
+  {
+    temp.x = polygon.points[i].x;
+    temp.y = polygon.points[i].y;
+    temp.z = polygon.points[i].z;
+    if (i == 0)
+      first = temp;
+    points.push_back(temp);
+  }
+  points.push_back(first); // connect first and last points for last line
+
+  publishPath(points, color, scale, ns);
+}
+
 bool VisualTools::publishSpheres(const std::vector<geometry_msgs::Point> &points, const rviz_colors color, const rviz_scales scale, const std::string& ns)
 {
+  if(muted_)
+    return true;
+
   spheres_marker_.header.stamp = ros::Time();
   spheres_marker_.ns = ns;
 
@@ -1094,6 +1122,18 @@ bool VisualTools::publishText(const geometry_msgs::Pose &pose, const std::string
 
   loadMarkerPub(); // always check this before publishing
   pub_rviz_marker_.publish( text_marker_ );
+  ros::spinOnce();
+
+  return true;
+}
+
+bool VisualTools::publishMarker(const visualization_msgs::Marker &marker)
+{
+  if(muted_)
+    return true;
+
+  loadMarkerPub(); // always check this before publishing
+  pub_rviz_marker_.publish( marker );
   ros::spinOnce();
 
   return true;
@@ -1155,6 +1195,9 @@ bool VisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Grasp>& p
 
 bool VisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, const std::string &ee_parent_link, double animate_speed)
 {
+  if(muted_)
+    return true;
+
   // Grasp Pose Variables
   geometry_msgs::Pose grasp_pose = grasp.grasp_pose.pose;
   Eigen::Affine3d grasp_pose_eigen;
@@ -1744,6 +1787,22 @@ geometry_msgs::Pose VisualTools::convertPose(const Eigen::Affine3d &pose)
   return pose_msg;
 }
 
+Eigen::Affine3d VisualTools::convertPose(const geometry_msgs::Pose &pose)
+{
+  Eigen::Affine3d pose_eigen;
+  tf::poseMsgToEigen(pose, pose_eigen);
+  return pose_eigen;
+}
+
+Eigen::Affine3d VisualTools::convertPointToPose(const geometry_msgs::Point32 &point)
+{
+  Eigen::Affine3d pose_eigen;
+  pose_eigen.translation().x() = point.x;
+  pose_eigen.translation().y() = point.y;
+  pose_eigen.translation().z() = point.z;
+  return pose_eigen;
+}
+
 geometry_msgs::Point convertPoseToPoint(const Eigen::Affine3d &pose)
 {
   geometry_msgs::Pose pose_msg;
@@ -1758,6 +1817,24 @@ Eigen::Vector3d VisualTools::convertPoint(const geometry_msgs::Point &point)
   point_eigen[1] = point.y;
   point_eigen[2] = point.z;
   return point_eigen;
+}
+
+Eigen::Vector3d VisualTools::convertPoint32(const geometry_msgs::Point32 &point)
+{
+  Eigen::Vector3d point_eigen;
+  point_eigen[0] = point.x;
+  point_eigen[1] = point.y;
+  point_eigen[2] = point.z;
+  return point_eigen;
+}
+
+geometry_msgs::Point32 VisualTools::convertPoint32(const Eigen::Vector3d &point)
+{
+  geometry_msgs::Point32 point_msg;
+  point_msg.x = point[0];
+  point_msg.y = point[1];
+  point_msg.z = point[2];
+  return point_msg;
 }
 
 void VisualTools::generateRandomPose(geometry_msgs::Pose& pose)
