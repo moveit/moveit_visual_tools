@@ -169,6 +169,19 @@ resetMarkerCounts();
 ```
 This will cause all new markers to overwrite older ones.
 
+You can also delete all markers (new in ROS Indigo) by calling
+```
+deleteAllMarkers();
+```
+
+## Developers Notes
+
+Useful notes for anyone wanting to dig in deeper:
+
+ -  All poses are published with respect to the world frame e.g. /world, /odom, or maybe /base
+ -  All publish() ROS topics should be followed by a ``ros::spinOnce();`` but no sleep
+ -  Do not want to load any features/publishers until they are actually needed since this library contains so many components
+
 ### Stacktrace Tool
 
 An additional tool, that perhaps should not live in this repo, allows one to see the backtrace of their code without using gdb or compiling in debug mode. To use:

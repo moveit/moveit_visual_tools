@@ -36,14 +36,8 @@
  * \desc    Helper functions for displaying and debugging MoveIt! data in Rviz via published markers
  *          and MoveIt! collision objects. Very useful for debugging complex software
  *
- * Standard: we do not want to load any features until they are actually needed since this library
- *           contains so many components
- *
- * Standard: all publish() ROS topics should be followed by a ros::spinOnce();
- *
- * Standard: all publishers should only be loaded as needed
+ *          See README.md for developers notes.
  * 
- * Note: our planning scene copy does not load kinematic solvers to save on loading time
  */
 
 #ifndef MOVEIT_VISUAL_TOOLS__VISUAL_TOOLS_H_
@@ -57,7 +51,7 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit_msgs/Grasp.h>
 #include <moveit_msgs/DisplayRobotState.h>
-#include <moveit/macros/deprecation.h>
+//#include <moveit/macros/deprecation.h>
 
 // Boost
 #include <boost/shared_ptr.hpp>
@@ -179,6 +173,12 @@ public:
    * \brief Tell Rviz to clear all markers on a particular display. Note: only works on ROS Indigo and newer
    */
   void deleteAllMarkers();
+
+  /**
+   * \brief Reset the id's of all published markers so that they overwrite themselves in the future
+   *        NOTE you may prefer deleteAllMarkers()
+   */
+  void resetMarkerCounts();
 
   /**
    * \brief Pre-load rviz markers for better efficiency
@@ -308,16 +308,6 @@ public:
   }
 
   /**
-   * \brief Reset the id's of all published markers so that they overwrite themselves in the future
-   *        NOTE this has been deprecated in favor of deleteAllMarkers()
-   */
-  MOVEIT_DEPRECATED void resetMarkerCounts()
-  {
-    ROS_ERROR_NAMED("resetMarkerCounts","The function resetMarkerCounts() has been deprecated in favor of a new Rviz reset method deleteAllMarkers()");
-    deleteAllMarkers();
-  }
-
-  /**
    * \brief Publish an end effector to rviz
    * \param pose - the location to publish the marker with respect to the base frame
    * \return true on success
@@ -432,11 +422,12 @@ public:
    * \brief Publish a marker of a text to Rviz
    * \param pose - the location to publish the marker with respect to the base frame
    * \param text - what to display
-   * \param color - an enum pre-defined name of a color
+   * \param color - an enum pre-defined name of a colo
+   * \param scale - an enum pre-defined name of a size
    * \return true on success
    */
   bool publishText(const geometry_msgs::Pose &pose, const std::string &text,
-    const rviz_colors &color = WHITE);
+                   const rviz_colors &color = WHITE, const rviz_scales scale = REGULAR);
 
   /**
    * \brief Publish a visualization_msgs Marker of a custom type. Allows reuse of the ros publisher
@@ -644,7 +635,7 @@ public:
    * \param pose
    * \return converted point with default rotation matrix
    */
-  static Eigen::Affine3d convertPointToPose(const geometry_msgs::Point32 &point);
+  static Eigen::Affine3d convertPoint32ToPose(const geometry_msgs::Point32 &point);
 
   /**
    * \brief Convert an Eigen pose to a geometry_msg point

@@ -93,6 +93,19 @@ void VisualTools::deleteAllMarkers()
   ros::spinOnce();
 }
 
+void VisualTools::resetMarkerCounts()
+{
+    arrow_marker_.id++;
+    sphere_marker_.id++;
+    block_marker_.id++;
+    cylinder_marker_.id++;
+    text_marker_.id++;
+    rectangle_marker_.id++;
+    line_marker_.id++;
+    path_marker_.id++;
+    spheres_marker_.id++;
+}
+
 bool VisualTools::loadRvizMarkers()
 {
   // Load reset marker -------------------------------------------------
@@ -1107,7 +1120,7 @@ bool VisualTools::publishSpheres(const std::vector<geometry_msgs::Point> &points
   return true;
 }
 
-bool VisualTools::publishText(const geometry_msgs::Pose &pose, const std::string &text, const rviz_colors &color)
+bool VisualTools::publishText(const geometry_msgs::Pose &pose, const std::string &text, const rviz_colors &color, const rviz_scales scale)
 {
   if(muted_)
     return true;
@@ -1118,7 +1131,8 @@ bool VisualTools::publishText(const geometry_msgs::Pose &pose, const std::string
   text_marker_.text = text;
   text_marker_.pose = pose;
   text_marker_.color = getColor( color );
-  text_marker_.scale.z = 0.01;    // only z is required (size of an "A")
+  text_marker_.scale = getScale(scale); // only z is required (size of an "A")
+  //text_marker_.scale.z = 0.01;    
 
   loadMarkerPub(); // always check this before publishing
   pub_rviz_marker_.publish( text_marker_ );
@@ -1794,9 +1808,9 @@ Eigen::Affine3d VisualTools::convertPose(const geometry_msgs::Pose &pose)
   return pose_eigen;
 }
 
-Eigen::Affine3d VisualTools::convertPointToPose(const geometry_msgs::Point32 &point)
+Eigen::Affine3d VisualTools::convertPoint32ToPose(const geometry_msgs::Point32 &point)
 {
-  Eigen::Affine3d pose_eigen;
+  Eigen::Affine3d pose_eigen = Eigen::Affine3d::Identity();
   pose_eigen.translation().x() = point.x;
   pose_eigen.translation().y() = point.y;
   pose_eigen.translation().z() = point.z;
