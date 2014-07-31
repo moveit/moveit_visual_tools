@@ -36,7 +36,7 @@ catkin_package(
 )
 
 # Enable gdb to show line numbers
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -W -Wall -Wno-unused-parameter -fno-strict-aliasing")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -W -Wall -Wno-unused-parameter -fno-strict-aliasing")
 #set(CMAKE_BUILD_TYPE Debug)
 
 ## Build 

@@ -36,14 +36,8 @@
  * \desc    Helper functions for displaying and debugging MoveIt! data in Rviz via published markers
  *          and MoveIt! collision objects. Very useful for debugging complex software
  *
- * Standard: we do not want to load any features until they are actually needed since this library
- *           contains so many components
- *
- * Standard: all publish() ROS topics should be followed by a ros::spinOnce();
- *
- * Standard: all publishers should only be loaded as needed
+ *          See README.md for developers notes.
  * 
- * Note: our planning scene copy does not load kinematic solvers to save on loading time
  */
 
 #ifndef MOVEIT_VISUAL_TOOLS__VISUAL_TOOLS_H_
@@ -57,6 +51,7 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit_msgs/Grasp.h>
 #include <moveit_msgs/DisplayRobotState.h>
+//#include <moveit/macros/deprecation.h>
 
 // Boost
 #include <boost/shared_ptr.hpp>
@@ -65,6 +60,7 @@
 #include <std_msgs/ColorRGBA.h>
 #include <graph_msgs/GeometryGraph.h>
 #include <geometry_msgs/PoseArray.h>
+#include <geometry_msgs/Polygon.h>
 #include <trajectory_msgs/JointTrajectory.h>
 
 namespace moveit_visual_tools
@@ -79,12 +75,12 @@ static const std::string PLANNING_SCENE_TOPIC = "/move_group/monitored_planning_
 static const std::string DISPLAY_PLANNED_PATH_TOPIC = "/move_group/display_planned_path";
 static const std::string DISPLAY_ROBOT_STATE_TOPIC = "/move_group/robot_state";
 
-enum rviz_colors { RED, GREEN, BLUE, GREY, WHITE, ORANGE, BLACK, YELLOW };
+enum rviz_colors { RED, GREEN, BLUE, GREY, WHITE, ORANGE, BLACK, YELLOW, TRANSLUCENT, RAND };
 enum rviz_scales { XXSMALL, XSMALL, SMALL, REGULAR, LARGE, XLARGE };
 
 class VisualTools
 {
-private:
+protected:
 
   // A shared node handle
   ros::NodeHandle nh_;
@@ -128,6 +124,9 @@ private:
   visualization_msgs::Marker text_marker_;
   visualization_msgs::Marker rectangle_marker_;
   visualization_msgs::Marker line_marker_;
+  visualization_msgs::Marker path_marker_;
+  visualization_msgs::Marker spheres_marker_;
+  visualization_msgs::Marker reset_marker_;
 
   // MoveIt cached markers
   moveit_msgs::DisplayRobotState display_robot_msg_;
@@ -135,16 +134,6 @@ private:
   // MoveIt cached objects
   robot_state::RobotStatePtr shared_robot_state_; // Note: call loadSharedRobotState() before using this
   robot_state::RobotModelConstPtr robot_model_;
-
-  // Marker id counters
-  int arrow_id_;
-  int sphere_id_;
-  int block_id_;
-  int cylinder_id_;
-  int text_id_;
-  int rectangle_id_;
-  int line_id_;
-
 
 private:
   /**
@@ -162,8 +151,8 @@ public:
    *        the URDF, kinematic solvers, etc
    */
   VisualTools(const std::string& base_link,
-    const std::string& marker_topic = RVIZ_MARKER_TOPIC,
-    planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor = planning_scene_monitor::PlanningSceneMonitorPtr());
+    const std::string& marker_topic,
+    planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor);
 
   /**
    * \brief Constructor
@@ -172,13 +161,24 @@ public:
    * \param robot_model - load robot model pointer so that we don't have do re-parse it here
    */
   VisualTools(const std::string& base_link,
-    const std::string& marker_topic,
-    robot_model::RobotModelConstPtr robot_model);
+              const std::string& marker_topic = RVIZ_MARKER_TOPIC,
+              robot_model::RobotModelConstPtr robot_model = robot_model::RobotModelConstPtr());
 
   /**
    * \brief Deconstructor
    */
   ~VisualTools() {};
+
+  /**
+   * \brief Tell Rviz to clear all markers on a particular display. Note: only works on ROS Indigo and newer
+   */
+  void deleteAllMarkers();
+
+  /**
+   * \brief Reset the id's of all published markers so that they overwrite themselves in the future
+   *        NOTE you may prefer deleteAllMarkers()
+   */
+  void resetMarkerCounts();
 
   /**
    * \brief Pre-load rviz markers for better efficiency
@@ -308,11 +308,6 @@ public:
   }
 
   /**
-   * \brief Reset the id's of all published markers so that they overwrite themselves in the future
-   */
-  void resetMarkerCounts();
-
-  /**
    * \brief Publish an end effector to rviz
    * \param pose - the location to publish the marker with respect to the base frame
    * \return true on success
@@ -320,19 +315,19 @@ public:
   bool publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_colors &color = WHITE, const std::string &ns="end_effector");
 
   /**
-   * \brief Publish an marker of a sphere to rviz
+   * \brief Publish a marker of a sphere to rviz
    * \param pose - the location to publish the sphere with respect to the base frame
    * \param color - an enum pre-defined name of a color
    * \param scale - an enum pre-defined name of a size
    * \return true on success
    */
-  bool publishSphere(const Eigen::Affine3d &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
-  bool publishSphere(const Eigen::Vector3d &point, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
-  bool publishSphere(const geometry_msgs::Point &point, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
-  bool publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
+  bool publishSphere(const Eigen::Affine3d &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, const std::string& ns = "Sphere");
+  bool publishSphere(const Eigen::Vector3d &point, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, const std::string& ns = "Sphere");
+  bool publishSphere(const geometry_msgs::Point &point, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, const std::string& ns = "Sphere");
+  bool publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, const std::string& ns = "Sphere");
 
   /**
-   * \brief Publish an marker of an arrow to rviz
+   * \brief Publish a marker of an arrow to rviz
    * \param pose - the location to publish the marker with respect to the base frame
    * \param color - an enum pre-defined name of a color
    * \param scale - an enum pre-defined name of a size
@@ -342,7 +337,7 @@ public:
   bool publishArrow(const geometry_msgs::Pose &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
 
   /**
-   * \brief Publish an marker of rectangle to rviz
+   * \brief Publish a marker of rectangle to rviz
    * \param point1 - x,y,z top corner location of box
    * \param point2 - x,y,z bottom opposite corner location of box
    * \param color - an enum pre-defined name of a color
@@ -351,7 +346,7 @@ public:
   bool publishRectangle(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2, const rviz_colors color = BLUE);
 
   /**
-   * \brief Publish an marker of line to rviz
+   * \brief Publish a marker of line to rviz
    * \param point1 - x,y,z of start of line
    * \param point2 - x,y,z of end of line
    * \param color - an enum pre-defined name of a color
@@ -362,7 +357,29 @@ public:
     const rviz_colors color = BLUE, const rviz_scales scale = REGULAR);
 
   /**
-   * \brief Publish an marker of a block to Rviz
+   * \brief Publish a marker of a series of connected lines to rviz
+   * \param path - a series of points to connect with lines
+   * \param color - an enum pre-defined name of a color
+   * \param scale - an enum pre-defined name of a size
+   * \param ns - namespace of marker
+   * \return true on success
+   */
+  bool publishPath(const std::vector<geometry_msgs::Point> &path, const rviz_colors color = RED, const rviz_scales scale = REGULAR, 
+                   const std::string& ns = "Path");
+
+  /**
+   * \brief Publish a marker of a polygon to Rviz
+   * \param polygon - a series of points to connect with lines
+   * \param color - an enum pre-defined name of a color
+   * \param scale - an enum pre-defined name of a size
+   * \param ns - namespace of marker
+   * \return true on success
+   */
+  bool publishPolygon(const geometry_msgs::Polygon &polygon, const rviz_colors color = RED, const rviz_scales scale = REGULAR, 
+                      const std::string& ns = "Polygon");
+
+  /**
+   * \brief Publish a marker of a block to Rviz
    * \param pose - the location to publish the marker with respect to the base frame
    * \param color - an enum pre-defined name of a color
    * \param size - height=width=depth=size
@@ -371,7 +388,7 @@ public:
   bool publishBlock(const geometry_msgs::Pose &pose, const rviz_colors color = BLUE, const double &block_size = 0.1);
 
   /**
-   * \brief Publish an marker of a cylinder to Rviz
+   * \brief Publish a marker of a cylinder to Rviz
    * \param pose - the location to publish the marker with respect to the base frame
    * \param color - an enum pre-defined name of a color
    * \param height - geometry of cylinder
@@ -389,15 +406,35 @@ public:
    */
   bool publishGraph(const graph_msgs::GeometryGraph &graph, const rviz_colors color, double radius);
 
+
   /**
-   * \brief Publish an marker of a text to Rviz
+   * \brief Publish a marker of a series of spheres to rviz
+   * \param spheres - where to publish them
+   * \param color - an enum pre-defined name of a color
+   * \param scale - an enum pre-defined name of a size
+   * \param ns - namespace of marker
+   * \return true on success
+   */
+  bool publishSpheres(const std::vector<geometry_msgs::Point> &points, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, 
+                      const std::string& ns = "Spheres");
+
+  /**
+   * \brief Publish a marker of a text to Rviz
    * \param pose - the location to publish the marker with respect to the base frame
    * \param text - what to display
-   * \param color - an enum pre-defined name of a color
+   * \param color - an enum pre-defined name of a colo
+   * \param scale - an enum pre-defined name of a size
    * \return true on success
    */
   bool publishText(const geometry_msgs::Pose &pose, const std::string &text,
-    const rviz_colors &color = WHITE);
+                   const rviz_colors &color = WHITE, const rviz_scales scale = REGULAR);
+
+  /**
+   * \brief Publish a visualization_msgs Marker of a custom type. Allows reuse of the ros publisher
+   * \param marker - a pre-made marker ready to be published
+   * \return true on success
+   */
+  bool publishMarker(const visualization_msgs::Marker &marker);
 
   /**
    * \brief Show grasps generated from moveit_simple_grasps or other MoveIt Grasp message sources
@@ -502,6 +539,12 @@ public:
   bool publishCollisionGraph(const graph_msgs::GeometryGraph &graph, const std::string &object_name, double radius);
 
   /**
+   * \brief Helper for publishCollisionWall 
+   */
+  void getCollisionWallMsg(double x, double y, double angle, double width, const std::string name, 
+                           moveit_msgs::CollisionObject &collision_obj);
+  
+  /**
    * \brief Publish a typical room wall
    * \param x
    * \param y
@@ -546,6 +589,7 @@ public:
    * \param blocking whether we need to wait for the animation to complete
    * \return true on success
    */
+  bool publishTrajectoryPath(const robot_trajectory::RobotTrajectory& trajectory, bool blocking = false);
   bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg, bool blocking = false);
 
   /**
@@ -570,18 +614,60 @@ public:
   bool publishTest();
 
   /**
-   * \brief Converts an Eigen pose to a geometry_msg pose
+   * \brief Convert an Eigen pose to a geometry_msg pose
+   *        Note: NOT memory efficient
    * \param pose
    * \return converted pose
    */
   static geometry_msgs::Pose convertPose(const Eigen::Affine3d &pose);
 
   /**
-   * \brief Converts a geometry_msg point to an Eigen point
+   * \brief Convert a geometry_msg pose to an Eigen pose
+   *        Note: NOT memory efficient
+   * \param pose
+   * \return converted pose
+   */
+  static Eigen::Affine3d convertPose(const geometry_msgs::Pose &pose);
+
+  /**
+   * \brief Convert a geometry_msg point (32bit) to an Eigen pose
+   *        Note: NOT memory efficient
+   * \param pose
+   * \return converted point with default rotation matrix
+   */
+  static Eigen::Affine3d convertPoint32ToPose(const geometry_msgs::Point32 &point);
+
+  /**
+   * \brief Convert an Eigen pose to a geometry_msg point
+   *        Note: NOT memory efficient
+   * \param pose
+   * \return converted point with orientation discarded
+   */
+  static geometry_msgs::Point convertPoseToPoint(const Eigen::Affine3d &pose);
+
+  /**
+   * \brief Convert a geometry_msg point to an Eigen point
+   *        Note: NOT memory efficient
    * \param point
    * \return converted pose
    */
   static Eigen::Vector3d convertPoint(const geometry_msgs::Point &point);
+
+  /**
+   * \brief Convert a geometry_msg point to an Eigen point
+   *        Note: NOT memory efficient
+   * \param point
+   * \return converted pose
+   */
+  static Eigen::Vector3d convertPoint32(const geometry_msgs::Point32 &point);
+
+  /**
+   * \brief Convert an Eigen point to a 32 bit geometry_msg point
+   *        Note: NOT memory efficient
+   * \param point
+   * \return converted pose
+   */
+  static geometry_msgs::Point32 convertPoint32(const Eigen::Vector3d &point);
 
   /**
    * \brief Create a random pose
