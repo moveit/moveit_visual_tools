@@ -55,8 +55,8 @@ namespace moveit_visual_tools
 {
 
 VisualTools::VisualTools(const std::string& base_link,
-  const std::string& marker_topic,
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
+                         const std::string& marker_topic,
+                         planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
   :  nh_("~"),
      planning_scene_monitor_(planning_scene_monitor),
      marker_topic_(marker_topic),
@@ -66,8 +66,8 @@ VisualTools::VisualTools(const std::string& base_link,
 }
 
 VisualTools::VisualTools(const std::string& base_link,
-  const std::string& marker_topic,
-  robot_model::RobotModelConstPtr robot_model)
+                         const std::string& marker_topic,
+                         robot_model::RobotModelConstPtr robot_model)
   :  robot_model_(robot_model),
      marker_topic_(marker_topic),
      base_link_(base_link)
@@ -95,15 +95,15 @@ void VisualTools::deleteAllMarkers()
 
 void VisualTools::resetMarkerCounts()
 {
-    arrow_marker_.id++;
-    sphere_marker_.id++;
-    block_marker_.id++;
-    cylinder_marker_.id++;
-    text_marker_.id++;
-    rectangle_marker_.id++;
-    line_marker_.id++;
-    path_marker_.id++;
-    spheres_marker_.id++;
+  arrow_marker_.id++;
+  sphere_marker_.id++;
+  block_marker_.id++;
+  cylinder_marker_.id++;
+  text_marker_.id++;
+  rectangle_marker_.id++;
+  line_marker_.id++;
+  path_marker_.id++;
+  spheres_marker_.id++;
 }
 
 bool VisualTools::loadRvizMarkers()
@@ -259,18 +259,18 @@ bool VisualTools::loadPlanningSceneMonitor()
   // We create it the harder, more manual way so that we can tell MoveIt! to skip loading IK solvers, since we will
   // never use them within the context of moveit_visual_tools. This saves loading time
   /*
-  robot_model_loader::RobotModelLoader::Options rml_options(ROBOT_DESCRIPTION);
-  rml_options.load_kinematics_solvers_ = false;
-  rm_loader_.reset(new robot_model_loader::RobotModelLoader(rml_options));
+    robot_model_loader::RobotModelLoader::Options rml_options(ROBOT_DESCRIPTION);
+    rml_options.load_kinematics_solvers_ = false;
+    rm_loader_.reset(new robot_model_loader::RobotModelLoader(rml_options));
 
-  std::string monitor_name = "visual_tools_planning_scene_monitor";
+    std::string monitor_name = "visual_tools_planning_scene_monitor";
 
-  planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(
-      planning_scene::PlanningScenePtr(),
-      rm_loader_,
-      boost::shared_ptr<tf::Transformer>(),
-      monitor_name
-      ));
+    planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(
+    planning_scene::PlanningScenePtr(),
+    rm_loader_,
+    boost::shared_ptr<tf::Transformer>(),
+    monitor_name
+    ));
   */
 
   // Regular version b/c the other one causes problems with recognizing end effectors
@@ -717,7 +717,7 @@ bool VisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_c
     return true;
 
   // Check if we have already loaded the EE markers
-  if( ee_marker_array_.markers.empty() ) 
+  if( ee_marker_array_.markers.empty() )
   {
     ROS_ERROR_STREAM_NAMED("visual_tools","Unable to publish EE marker because marker has not been loaded yet");
     return false;
@@ -1006,7 +1006,7 @@ bool VisualTools::publishRectangle(const geometry_msgs::Point &point1, const geo
 }
 
 bool VisualTools::publishLine(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2,
-  const rviz_colors color, const rviz_scales scale)
+                              const rviz_colors color, const rviz_scales scale)
 {
   if(muted_)
     return true;
@@ -1065,7 +1065,7 @@ bool VisualTools::publishPath(const std::vector<geometry_msgs::Point> &path, con
   // Send to Rviz
   loadMarkerPub(); // always check this before publishing
   pub_rviz_marker_.publish( path_marker_ );
-  ros::spinOnce();  
+  ros::spinOnce();
 
   return true;
 }
@@ -1115,8 +1115,9 @@ bool VisualTools::publishSpheres(const std::vector<geometry_msgs::Point> &points
   }
 
   // Send to Rviz
+  loadMarkerPub(); // always check this before publishing
   pub_rviz_marker_.publish( spheres_marker_ );
-  ros::spinOnce();  
+  ros::spinOnce();
 
   return true;
 }
@@ -1133,7 +1134,7 @@ bool VisualTools::publishText(const geometry_msgs::Pose &pose, const std::string
   text_marker_.pose = pose;
   text_marker_.color = getColor( color );
   text_marker_.scale = getScale(scale); // only z is required (size of an "A")
-  //text_marker_.scale.z = 0.01;    
+  //text_marker_.scale.z = 0.01;
 
   loadMarkerPub(); // always check this before publishing
   pub_rviz_marker_.publish( text_marker_ );
@@ -1155,7 +1156,7 @@ bool VisualTools::publishMarker(const visualization_msgs::Marker &marker)
 }
 
 bool VisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
-  const std::string &ee_parent_link)
+                                const std::string &ee_parent_link)
 {
   if(muted_)
   {
@@ -1163,8 +1164,8 @@ bool VisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_
     return false;
   }
 
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing " << possible_grasps.size() << " grasps with parent link " 
-    << ee_parent_link);
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing " << possible_grasps.size() << " grasps with parent link "
+                         << ee_parent_link);
 
   // Loop through all grasps
   for (std::size_t i = 0; i < possible_grasps.size(); ++i)
@@ -1183,7 +1184,7 @@ bool VisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_
 }
 
 bool VisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
-  const std::string &ee_parent_link, double animate_speed)
+                                        const std::string &ee_parent_link, double animate_speed)
 {
   if(muted_)
   {
@@ -1191,8 +1192,8 @@ bool VisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Grasp>& p
     return false;
   }
 
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing " << possible_grasps.size() << " grasps with parent link " 
-    << ee_parent_link << " at speed " << animate_speed);
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing " << possible_grasps.size() << " grasps with parent link "
+                         << ee_parent_link << " at speed " << animate_speed);
 
   // Loop through all grasps
   for (std::size_t i = 0; i < possible_grasps.size(); ++i)
@@ -1244,10 +1245,10 @@ bool VisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, const st
     // The direction of the pre-grasp
     // Calculate the current animation position based on the percent
     Eigen::Vector3d pre_grasp_approach_direction = Eigen::Vector3d(
-      -1 * grasp.pre_grasp_approach.direction.vector.x * grasp.pre_grasp_approach.desired_distance * (1-percent),
-      -1 * grasp.pre_grasp_approach.direction.vector.y * grasp.pre_grasp_approach.desired_distance * (1-percent),
-      -1 * grasp.pre_grasp_approach.direction.vector.z * grasp.pre_grasp_approach.desired_distance * (1-percent)
-    );
+                                                                   -1 * grasp.pre_grasp_approach.direction.vector.x * grasp.pre_grasp_approach.desired_distance * (1-percent),
+                                                                   -1 * grasp.pre_grasp_approach.direction.vector.y * grasp.pre_grasp_approach.desired_distance * (1-percent),
+                                                                   -1 * grasp.pre_grasp_approach.direction.vector.z * grasp.pre_grasp_approach.desired_distance * (1-percent)
+                                                                   );
 
     // Decide if we need to change the approach_direction to the local frame of the end effector orientation
     if( grasp.pre_grasp_approach.direction.header.frame_id == ee_parent_link )
@@ -1274,8 +1275,8 @@ bool VisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, const st
   return true;
 }
 
-bool VisualTools::publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions, 
-  const std::string& planning_group, double display_time)
+bool VisualTools::publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions,
+                                     const std::string& planning_group, double display_time)
 {
   if(muted_)
   {
@@ -1359,6 +1360,23 @@ bool VisualTools::removeAllCollisionObjects()
   ros::spinOnce();
 
   return true;
+}
+
+bool VisualTools::removeAllCollisionObjects(planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
+{
+  // Clean up old collision objects
+  moveit_msgs::CollisionObject remove_object;
+  remove_object.header.frame_id = base_link_;
+  remove_object.operation = moveit_msgs::CollisionObject::REMOVE;
+
+  // Apply removal command directly to avoid a ROS msg call
+  {
+    planning_scene_monitor::LockedPlanningSceneRW scene(planning_scene_monitor);
+    scene->processCollisionObjectMsg(remove_object);
+  }
+
+  // Trigger an update
+  planning_scene_monitor->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
 }
 
 bool VisualTools::cleanupCO(std::string name)
@@ -1568,7 +1586,7 @@ bool VisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph &graph, 
   return true;
 }
 
-void VisualTools::getCollisionWallMsg(double x, double y, double angle, double width, const std::string name, 
+void VisualTools::getCollisionWallMsg(double x, double y, double angle, double width, const std::string name,
                                       moveit_msgs::CollisionObject &collision_obj)
 {
   collision_obj.header.stamp = ros::Time::now();
@@ -1621,7 +1639,7 @@ bool VisualTools::publishCollisionWall(double x, double y, double angle, double 
 }
 
 bool VisualTools::publishCollisionTable(double x, double y, double angle, double width, double height,
-  double depth, const std::string name)
+                                        double depth, const std::string name)
 {
   geometry_msgs::Pose table_pose;
 
@@ -1661,8 +1679,31 @@ bool VisualTools::publishCollisionTable(double x, double y, double angle, double
   return true;
 }
 
+bool VisualTools::publishCollisionSceneFromFile(const std::string &path, planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
+{
+  {
+    planning_scene_monitor::LockedPlanningSceneRW scene(planning_scene_monitor);
+    if (scene)
+    {
+
+      std::ifstream fin(path.c_str());
+      if (fin.good())
+      {
+        scene->loadGeometryFromStream(fin);
+        fin.close();
+        ROS_INFO("Loaded scene geometry from '%s'", path.c_str());
+      }
+      else
+        ROS_WARN("Unable to load scene geometry from '%s'", path.c_str());
+    }
+    else
+      ROS_WARN_STREAM_NAMED("temp","Unable to get locked planning scene RW");
+  }
+  planning_scene_monitor->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
+}
+
 bool VisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
-  const std::string &group_name, double display_time)
+                                         const std::string &group_name, double display_time)
 {
   loadSharedRobotState();
 
@@ -1742,7 +1783,7 @@ bool VisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& traj
   if( blocking )
   {
     ROS_INFO_STREAM_NAMED("visual_tools","Waiting for trajectory animation "
-      << trajectory_msg.joint_trajectory.points.back().time_from_start << " seconds");
+                          << trajectory_msg.joint_trajectory.points.back().time_from_start << " seconds");
 
     // Check if ROS is ok in intervals
     double counter = 0;
@@ -1774,7 +1815,7 @@ bool VisualTools::publishRobotState(const robot_state::RobotState &robot_state)
 }
 
 bool VisualTools::publishRobotState(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
-  const std::string &group_name)
+                                    const std::string &group_name)
 {
   // Always oad the robot state before using
   loadSharedRobotState();
@@ -1895,7 +1936,7 @@ int VisualTools::iRand(int dMin, int dMax)
 
 void VisualTools::print()
 {
-  ROS_WARN_STREAM_NAMED("visual_tools","Debug Visual Tools variable values:");  
+  ROS_WARN_STREAM_NAMED("visual_tools","Debug Visual Tools variable values:");
   std::cout << "marker_topic_: " << marker_topic_ << std::endl;
   std::cout << "base_link_: " << base_link_ << std::endl;
   std::cout << "floor_to_base_height_: " << floor_to_base_height_ << std::endl;
