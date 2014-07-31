@@ -1063,6 +1063,7 @@ bool VisualTools::publishPath(const std::vector<geometry_msgs::Point> &path, con
   }
 
   // Send to Rviz
+  loadMarkerPub(); // always check this before publishing
   pub_rviz_marker_.publish( path_marker_ );
   ros::spinOnce();  
 
@@ -1715,6 +1716,13 @@ bool VisualTools::publishTrajectoryPath(const robot_trajectory::RobotTrajectory&
 bool VisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg, bool blocking)
 {
   loadSharedRobotState();
+
+  // Check if we have enough points
+  if (!trajectory_msg.joint_trajectory.points.size())
+  {
+    ROS_WARN_STREAM_NAMED("temp","Unable to publish trajectory path because trajectory has zero points");
+    return false;
+  }
 
   // Create the message  TODO move to member function to load less often
   moveit_msgs::DisplayTrajectory display_trajectory_msg;
