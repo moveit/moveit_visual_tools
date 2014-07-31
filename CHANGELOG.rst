@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.0 (2014-07-31)
+------------------
 * Bug fixes
 * Fixed convertPoint32ToPose
 * Added scale to publishText
