@@ -2,6 +2,25 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Bug fixes
+* Fixed convertPoint32ToPose
+* Added scale to publishText
+* New publishPolygon, publishMarker, convertPose, convertPointToPose, and convertPoint32 functions
+* New deleteAllMarkers, publishPath, publishSpheres, and convertPoseToPoint functions
+* Added getCollisionWall
+* Made lines darker
+* Added reset marker feature
+* Namespaces for publishSphere
+* New publishTrajectory function
+* Merging features from OMPL viewer
+* Refactored functions, new robot_model intialization
+* Added more rand functions and made them static
+* Added graph_msgs generated messages dependence so it waits for it to be compiled
+* Updated README
+* Contributors: Dave Coleman, Sammy Pfeiffer
+
 1.0.1 (2014-05-30)
 ------------------
 * Updated README
