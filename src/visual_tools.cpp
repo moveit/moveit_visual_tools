@@ -650,7 +650,6 @@ bool VisualTools::loadSharedRobotState()
       planning_scene_monitor::PlanningSceneMonitorPtr psm = getPlanningSceneMonitor();
       robot_model_ = psm->getRobotModel();
     }
-
     shared_robot_state_.reset(new robot_state::RobotState(robot_model_));
   }
 
@@ -1805,7 +1804,6 @@ bool VisualTools::publishRobotState(const robot_state::RobotStatePtr &robot_stat
 bool VisualTools::publishRobotState(const robot_state::RobotState &robot_state)
 {
   robot_state::robotStateToRobotStateMsg(robot_state, display_robot_msg_.state);
-  //  ROS_DEBUG_STREAM_NAMED("temp","state: " << display_robot_msg_);
 
   loadRobotStatePub(); // always call this before publishing
   pub_robot_state_.publish( display_robot_msg_ );
@@ -1835,17 +1833,9 @@ bool VisualTools::hideRobot()
   // Always load the robot state before using
   loadSharedRobotState();
 
-  double x = shared_robot_state_->getVariablePosition("virtual_joint/trans_x");
-  x += 500;
-  shared_robot_state_->setVariablePosition("virtual_joint/trans_x",x);
-
-  double y = shared_robot_state_->getVariablePosition("virtual_joint/trans_y");
-  y += 500;
-  shared_robot_state_->setVariablePosition("virtual_joint/trans_y",y);
-
-  double z = shared_robot_state_->getVariablePosition("virtual_joint/trans_z");
-  z += 500;
-  shared_robot_state_->setVariablePosition("virtual_joint/trans_z",z);
+  shared_robot_state_->setVariablePosition("virtual_joint/trans_x", 10);
+  shared_robot_state_->setVariablePosition("virtual_joint/trans_y", 10);
+  shared_robot_state_->setVariablePosition("virtual_joint/trans_z", 10);
       
   publishRobotState(shared_robot_state_);
 }
