@@ -1817,7 +1817,7 @@ bool VisualTools::publishRobotState(const robot_state::RobotState &robot_state)
 bool VisualTools::publishRobotState(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
                                     const std::string &group_name)
 {
-  // Always oad the robot state before using
+  // Always load the robot state before using
   loadSharedRobotState();
 
   // Set robot state
@@ -1828,6 +1828,26 @@ bool VisualTools::publishRobotState(const trajectory_msgs::JointTrajectoryPoint&
   publishRobotState(*shared_robot_state_);
 
   return true;
+}
+
+bool VisualTools::hideRobot()
+{
+  // Always load the robot state before using
+  loadSharedRobotState();
+
+  double x = shared_robot_state_->getVariablePosition("virtual_joint/trans_x");
+  x += 500;
+  shared_robot_state_->setVariablePosition("virtual_joint/trans_x",x);
+
+  double y = shared_robot_state_->getVariablePosition("virtual_joint/trans_y");
+  y += 500;
+  shared_robot_state_->setVariablePosition("virtual_joint/trans_y",y);
+
+  double z = shared_robot_state_->getVariablePosition("virtual_joint/trans_z");
+  z += 500;
+  shared_robot_state_->setVariablePosition("virtual_joint/trans_z",z);
+      
+  publishRobotState(shared_robot_state_);
 }
 
 bool VisualTools::publishTest()

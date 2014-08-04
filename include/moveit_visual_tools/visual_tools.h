@@ -625,6 +625,12 @@ public:
   bool publishRobotState(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt, const std::string &group_name);
 
   /**
+   * \brief Fake removing a Robot State display in Rviz by simply moving it very far away
+   * \return true on success
+   */
+  bool hideRobot();
+
+  /**
    * \brief Run a simple test of all visual_tool's features
    * \return true on success
    */
