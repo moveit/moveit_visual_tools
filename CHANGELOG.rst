@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.0 (2014-08-08)
+------------------
 * Added XXLarge size
 * Added global_scale feature
 * Added hideRobot() functionality
