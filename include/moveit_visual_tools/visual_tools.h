@@ -76,7 +76,7 @@ static const std::string DISPLAY_PLANNED_PATH_TOPIC = "/move_group/display_plann
 static const std::string DISPLAY_ROBOT_STATE_TOPIC = "/move_group/robot_state";
 
 enum rviz_colors { RED, GREEN, BLUE, GREY, WHITE, ORANGE, BLACK, YELLOW, TRANSLUCENT, RAND };
-enum rviz_scales { XXSMALL, XSMALL, SMALL, REGULAR, LARGE, XLARGE };
+enum rviz_scales { XXSMALL, XSMALL, SMALL, REGULAR, LARGE, XLARGE, XXLARGE };
 
 class VisualTools
 {
@@ -101,6 +101,7 @@ protected:
   std::string marker_topic_; // topic to publish to rviz
   std::string base_link_; // name of base link of robot
 
+  // TODO rename this
   double floor_to_base_height_; // allows an offset between base link and floor where objects are built
 
   // Duration to have Rviz markers persist, 0 for infinity
@@ -115,6 +116,7 @@ protected:
   // Library settings
   bool muted_; // Whether to actually publish to rviz or not
   double alpha_; // opacity of all markers
+  double global_scale_; // allow all markers to be increased by a constanct factor
 
   // Cached Rviz markers
   visualization_msgs::Marker arrow_marker_;
@@ -305,6 +307,22 @@ public:
   const std::string getBaseLink()
   {
     return base_link_;
+  }
+
+  /**
+   * \brief Getter for the global scale used for changing size of all markers
+   */
+  double getGlobalScale()
+  {
+    return global_scale_;
+  }
+
+  /**
+   * \brief Setter for the global scale used for changing size of all markers
+   */
+  void setGlobalScale(double global_scale)
+  {
+    global_scale_ = global_scale;
   }
 
   /**

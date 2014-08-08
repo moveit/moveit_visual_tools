@@ -81,6 +81,7 @@ void VisualTools::initialize()
   marker_lifetime_ = ros::Duration(0.0); // 0 - unlimited
   muted_ = false;
   alpha_ = 0.8;
+  global_scale_ = 1.0;
 
   // Cache the reusable markers
   loadRvizMarkers();
@@ -606,14 +607,18 @@ geometry_msgs::Vector3 VisualTools::getScale(const rviz_scales &scale, bool arro
     case XLARGE:
       val = 0.5;
       break;
+    case XXLARGE:
+      val = 1.0;
+      break;
     default:
       ROS_ERROR_STREAM_NAMED("visualization_tools","Not implemented yet");
       break;
   }
 
-  result.x = val * marker_scale;
-  result.y = val * marker_scale;
-  result.z = val * marker_scale;
+  // Allows an individual marker size factor and a size factor for all markers 
+  result.x = val * marker_scale * global_scale_;
+  result.y = val * marker_scale * global_scale_;
+  result.z = val * marker_scale * global_scale_;
 
   // The y and z scaling is smaller for arrows
   if (arrow_scale)
@@ -817,7 +822,7 @@ bool VisualTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colo
   if(muted_)
     return true; // this function will only work if we have loaded the publishers
 
-  // Set the frame ID and timestamp.  See the TF tutorials for information on these.
+  // Set the frame ID and timestamp
   sphere_marker_.header.stamp = ros::Time::now();
 
   sphere_marker_.id++;
@@ -828,8 +833,6 @@ bool VisualTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colo
   // Update the single point with new pose
   sphere_marker_.points[0] = pose.position;
   sphere_marker_.colors[0] = getColor(color);
-
-  ROS_DEBUG_STREAM_NAMED("publishSphere","Publishing:\n" << sphere_marker_);
 
   // Publish
   loadMarkerPub(); // always check this before publishing
