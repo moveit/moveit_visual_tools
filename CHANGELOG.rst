@@ -2,6 +2,16 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Added XXLarge size
+* Added global_scale feature
+* Added hideRobot() functionality
+* Added removeAllCollisionObjects from planning scene monitor
+* Added publishCollisionSceneFromFile function
+* Formatting
+* Contributors: Dave Coleman
+
 1.1.0 (2014-07-31)
 ------------------
 * Bug fixes
