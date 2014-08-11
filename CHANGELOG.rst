@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.1 (2014-08-11)
+------------------
 * Renamed base_link to base_frame
 * Added new getBaseFrame() function
 * Deprecated getBaseLink() function
