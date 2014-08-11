@@ -54,23 +54,23 @@
 namespace moveit_visual_tools
 {
 
-VisualTools::VisualTools(const std::string& base_link,
+VisualTools::VisualTools(const std::string& base_frame,
                          const std::string& marker_topic,
                          planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
   :  nh_("~"),
      planning_scene_monitor_(planning_scene_monitor),
      marker_topic_(marker_topic),
-     base_link_(base_link)
+     base_frame_(base_frame)
 {
   initialize();
 }
 
-VisualTools::VisualTools(const std::string& base_link,
+VisualTools::VisualTools(const std::string& base_frame,
                          const std::string& marker_topic,
                          robot_model::RobotModelConstPtr robot_model)
   :  robot_model_(robot_model),
      marker_topic_(marker_topic),
-     base_link_(base_link)
+     base_frame_(base_frame)
 {
   initialize();
 }
@@ -110,13 +110,13 @@ void VisualTools::resetMarkerCounts()
 bool VisualTools::loadRvizMarkers()
 {
   // Load reset marker -------------------------------------------------
-  reset_marker_.header.frame_id = base_link_;
+  reset_marker_.header.frame_id = base_frame_;
   reset_marker_.header.stamp = ros::Time();
   reset_marker_.action = 3; // In ROS-J: visualization_msgs::Marker::DELETEALL;
 
   // Load arrow ----------------------------------------------------
 
-  arrow_marker_.header.frame_id = base_link_;
+  arrow_marker_.header.frame_id = base_frame_;
   // Set the namespace and id for this marker.  This serves to create a unique ID
   arrow_marker_.ns = "Arrow";
   // Set the marker type.
@@ -128,7 +128,7 @@ bool VisualTools::loadRvizMarkers()
 
   // Load rectangle ----------------------------------------------------
 
-  rectangle_marker_.header.frame_id = base_link_;
+  rectangle_marker_.header.frame_id = base_frame_;
   // Set the namespace and id for this marker.  This serves to create a unique ID
   rectangle_marker_.ns = "Rectangle";
   // Set the marker type.
@@ -140,7 +140,7 @@ bool VisualTools::loadRvizMarkers()
 
   // Load line ----------------------------------------------------
 
-  line_marker_.header.frame_id = base_link_;
+  line_marker_.header.frame_id = base_frame_;
   // Set the namespace and id for this marker.  This serves to create a unique ID
   line_marker_.ns = "Line";
   // Set the marker type.
@@ -152,7 +152,7 @@ bool VisualTools::loadRvizMarkers()
 
   // Load path ----------------------------------------------------
 
-  path_marker_.header.frame_id = base_link_;
+  path_marker_.header.frame_id = base_frame_;
   // Set the namespace and id for this marker.  This serves to create a unique ID
   path_marker_.ns = "Path";
   // Set the marker type.
@@ -173,7 +173,7 @@ bool VisualTools::loadRvizMarkers()
 
   // Load sphers ----------------------------------------------------
 
-  spheres_marker_.header.frame_id = base_link_;
+  spheres_marker_.header.frame_id = base_frame_;
   // Set the namespace and id for this marker.  This serves to create a unique ID
   spheres_marker_.ns = "Spheres";
   // Set the marker type.
@@ -193,7 +193,7 @@ bool VisualTools::loadRvizMarkers()
   spheres_marker_.pose.orientation.w = 1.0;
 
   // Load Block ----------------------------------------------------
-  block_marker_.header.frame_id = base_link_;
+  block_marker_.header.frame_id = base_frame_;
   // Set the namespace and id for this marker.  This serves to create a unique ID
   block_marker_.ns = "Block";
   // Set the marker action.  Options are ADD and DELETE
@@ -204,7 +204,7 @@ bool VisualTools::loadRvizMarkers()
   block_marker_.lifetime = marker_lifetime_;
 
   // Load Cylinder ----------------------------------------------------
-  cylinder_marker_.header.frame_id = base_link_;
+  cylinder_marker_.header.frame_id = base_frame_;
   // Set the namespace and id for this marker.  This serves to create a unique ID
   cylinder_marker_.ns = "Cylinder";
   // Set the marker action.  Options are ADD and DELETE
@@ -215,7 +215,7 @@ bool VisualTools::loadRvizMarkers()
   cylinder_marker_.lifetime = marker_lifetime_;
 
   // Load Sphere -------------------------------------------------
-  sphere_marker_.header.frame_id = base_link_;
+  sphere_marker_.header.frame_id = base_frame_;
   // Set the namespace and id for this marker.  This serves to create a unique ID
   sphere_marker_.ns = "Sphere";
   // Set the marker type.
@@ -239,7 +239,7 @@ bool VisualTools::loadRvizMarkers()
   sphere_marker_.lifetime = marker_lifetime_;
 
   // Load Text ----------------------------------------------------
-  text_marker_.header.frame_id = base_link_;
+  text_marker_.header.frame_id = base_frame_;
   // Set the namespace and id for this marker.  This serves to create a unique ID
   text_marker_.ns = "Text";
   // Set the marker action.  Options are ADD and DELETE
@@ -323,7 +323,7 @@ bool VisualTools::loadRobotMarkers()
       break;
 
     // Header
-    robot_marker_array.markers[i].header.frame_id = base_link_;
+    robot_marker_array.markers[i].header.frame_id = base_frame_;
     robot_marker_array.markers[i].header.stamp = ros::Time::now();
 
     // Options for meshes
@@ -751,7 +751,7 @@ bool VisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_c
       break;
 
     // Header
-    ee_marker_array_.markers[i].header.frame_id = base_link_;
+    ee_marker_array_.markers[i].header.frame_id = base_frame_;
     ee_marker_array_.markers[i].header.stamp = ros::Time::now();
 
     // Namespace
@@ -1312,7 +1312,7 @@ bool VisualTools::publishIKSolutions(const std::vector<trajectory_msgs::JointTra
 
   // Create a trajectory with one point
   moveit_msgs::RobotTrajectory trajectory_msg;
-  trajectory_msg.joint_trajectory.header.frame_id = base_link_;
+  trajectory_msg.joint_trajectory.header.frame_id = base_frame_;
   trajectory_msg.joint_trajectory.joint_names = joint_model_group->getJointModelNames();
 
   // Overall length of trajectory
@@ -1351,7 +1351,7 @@ bool VisualTools::removeAllCollisionObjects()
 
   // Clean up old collision objects
   moveit_msgs::CollisionObject remove_object;
-  remove_object.header.frame_id = base_link_;
+  remove_object.header.frame_id = base_frame_;
   remove_object.operation = moveit_msgs::CollisionObject::REMOVE;
 
   planning_scene.world.collision_objects.push_back(remove_object);
@@ -1368,7 +1368,7 @@ bool VisualTools::removeAllCollisionObjects(planning_scene_monitor::PlanningScen
 {
   // Clean up old collision objects
   moveit_msgs::CollisionObject remove_object;
-  remove_object.header.frame_id = base_link_;
+  remove_object.header.frame_id = base_frame_;
   remove_object.operation = moveit_msgs::CollisionObject::REMOVE;
 
   // Apply removal command directly to avoid a ROS msg call
@@ -1386,7 +1386,7 @@ bool VisualTools::cleanupCO(std::string name)
   // Clean up old collision objects
   moveit_msgs::CollisionObject co;
   co.header.stamp = ros::Time::now();
-  co.header.frame_id = base_link_;
+  co.header.frame_id = base_frame_;
   co.id = name;
   co.operation = moveit_msgs::CollisionObject::REMOVE;
 
@@ -1401,7 +1401,7 @@ bool VisualTools::cleanupACO(const std::string& name)
   // Clean up old attached collision object
   moveit_msgs::AttachedCollisionObject aco;
   aco.object.header.stamp = ros::Time::now();
-  aco.object.header.frame_id = base_link_;
+  aco.object.header.frame_id = base_frame_;
 
   //aco.object.id = name;
   aco.object.operation = moveit_msgs::CollisionObject::REMOVE;
@@ -1419,7 +1419,7 @@ bool VisualTools::attachCO(const std::string& name, const std::string& ee_parent
   // Clean up old attached collision object
   moveit_msgs::AttachedCollisionObject aco;
   aco.object.header.stamp = ros::Time::now();
-  aco.object.header.frame_id = base_link_;
+  aco.object.header.frame_id = base_frame_;
 
   aco.object.id = name;
   aco.object.operation = moveit_msgs::CollisionObject::ADD;
@@ -1437,7 +1437,7 @@ bool VisualTools::publishCollisionBlock(geometry_msgs::Pose block_pose, std::str
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
-  collision_obj.header.frame_id = base_link_;
+  collision_obj.header.frame_id = base_frame_;
   collision_obj.id = block_name;
   collision_obj.operation = moveit_msgs::CollisionObject::ADD;
   collision_obj.primitives.resize(1);
@@ -1493,7 +1493,7 @@ bool VisualTools::publishCollisionCylinder(geometry_msgs::Pose object_pose, std:
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
-  collision_obj.header.frame_id = base_link_;
+  collision_obj.header.frame_id = base_frame_;
   collision_obj.id = object_name;
   collision_obj.operation = moveit_msgs::CollisionObject::ADD;
   collision_obj.primitives.resize(1);
@@ -1521,7 +1521,7 @@ bool VisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph &graph, 
   // The graph is one collision object with many primitives
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
-  collision_obj.header.frame_id = base_link_;
+  collision_obj.header.frame_id = base_frame_;
   collision_obj.id = object_name;
   collision_obj.operation = moveit_msgs::CollisionObject::ADD;
 
@@ -1592,7 +1592,7 @@ void VisualTools::getCollisionWallMsg(double x, double y, double angle, double w
                                       moveit_msgs::CollisionObject &collision_obj)
 {
   collision_obj.header.stamp = ros::Time::now();
-  collision_obj.header.frame_id = base_link_;
+  collision_obj.header.frame_id = base_frame_;
   collision_obj.operation = moveit_msgs::CollisionObject::ADD;
   collision_obj.primitives.resize(1);
   collision_obj.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
@@ -1659,7 +1659,7 @@ bool VisualTools::publishCollisionTable(double x, double y, double angle, double
 
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
-  collision_obj.header.frame_id = base_link_;
+  collision_obj.header.frame_id = base_frame_;
   collision_obj.id = name;
   collision_obj.operation = moveit_msgs::CollisionObject::ADD;
   collision_obj.primitives.resize(1);
@@ -1726,7 +1726,7 @@ bool VisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryP
 
   // Create a trajectory with one point
   moveit_msgs::RobotTrajectory trajectory_msg;
-  trajectory_msg.joint_trajectory.header.frame_id = base_link_;
+  trajectory_msg.joint_trajectory.header.frame_id = base_frame_;
   trajectory_msg.joint_trajectory.joint_names = joint_model_group->getJointModelNames();
   trajectory_msg.joint_trajectory.points.push_back(trajectory_pt);
   trajectory_msg.joint_trajectory.points.push_back(trajectory_pt_timed);
@@ -1951,7 +1951,7 @@ void VisualTools::print()
 {
   ROS_WARN_STREAM_NAMED("visual_tools","Debug Visual Tools variable values:");
   std::cout << "marker_topic_: " << marker_topic_ << std::endl;
-  std::cout << "base_link_: " << base_link_ << std::endl;
+  std::cout << "base_frame_: " << base_frame_ << std::endl;
   std::cout << "floor_to_base_height_: " << floor_to_base_height_ << std::endl;
   std::cout << "marker_lifetime_: " << marker_lifetime_.toSec() << std::endl;
   std::cout << "muted_: " << muted_ << std::endl;
@@ -2003,7 +2003,7 @@ void VisualTools::print()
 
  visualization_msgs::Marker marker;
  // Set the frame ID and timestamp.  See the TF tutorials for information on these.
- marker.header.frame_id = base_link_;
+ marker.header.frame_id = base_frame_;
  marker.header.stamp = ros::Time::now();
 
  // Set the namespace and id for this marker.  This serves to create a unique ID

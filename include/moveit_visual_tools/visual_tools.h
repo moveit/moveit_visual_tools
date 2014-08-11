@@ -51,7 +51,7 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit_msgs/Grasp.h>
 #include <moveit_msgs/DisplayRobotState.h>
-//#include <moveit/macros/deprecation.h>
+#include <moveit/macros/deprecation.h>
 
 // Boost
 #include <boost/shared_ptr.hpp>
@@ -99,7 +99,7 @@ protected:
 
   // Strings
   std::string marker_topic_; // topic to publish to rviz
-  std::string base_link_; // name of base link of robot
+  std::string base_frame_; // name of base link of robot
 
   // TODO rename this
   double floor_to_base_height_; // allows an offset between base link and floor where objects are built
@@ -147,22 +147,22 @@ public:
 
   /**
    * \brief Constructor
-   * \param base_link - common base for all visualization markers, usually "base_link"
+   * \param base_frame - common base for all visualization markers, usually "/world" or "/odom"
    * \param marker_topic - rostopic to publish markers to - your Rviz display should match
    * \param planning_scene_monitor - optionally pass in a pre-loaded planning scene monitor to avoid having to re-load
    *        the URDF, kinematic solvers, etc
    */
-  VisualTools(const std::string& base_link,
+  VisualTools(const std::string& base_frame,
               const std::string& marker_topic,
               planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor);
 
   /**
    * \brief Constructor
-   * \param base_link - common base for all visualization markers, usually "base_link"
+   * \param base_frame - common base for all visualization markers, usually "/world" or "/odom"
    * \param marker_topic - rostopic to publish markers to - your Rviz display should match
    * \param robot_model - load robot model pointer so that we don't have do re-parse it here
    */
-  VisualTools(const std::string& base_link,
+  VisualTools(const std::string& base_frame,
               const std::string& marker_topic = RVIZ_MARKER_TOPIC,
               robot_model::RobotModelConstPtr robot_model = robot_model::RobotModelConstPtr());
 
@@ -304,9 +304,13 @@ public:
    * \brief Get the base frame
    * \return name of base frame
    */
-  const std::string getBaseLink()
+  const std::string getBaseFrame()
   {
-    return base_link_;
+    return base_frame_;
+  }
+  MOVEIT_DEPRECATED const std::string getBaseLink()    
+  {
+    return base_frame_;
   }
 
   /**
