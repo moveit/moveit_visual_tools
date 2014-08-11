@@ -2,6 +2,13 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Renamed base_link to base_frame
+* Added new getBaseFrame() function
+* Deprecated getBaseLink() function
+* Contributors: Dave Coleman
+
 1.2.0 (2014-08-08)
 ------------------
 * Added XXLarge size
