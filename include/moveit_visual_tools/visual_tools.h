@@ -75,7 +75,7 @@ static const std::string PLANNING_SCENE_TOPIC = "/move_group/monitored_planning_
 static const std::string DISPLAY_PLANNED_PATH_TOPIC = "/move_group/display_planned_path";
 static const std::string DISPLAY_ROBOT_STATE_TOPIC = "/move_group/robot_state";
 
-enum rviz_colors { RED, GREEN, BLUE, GREY, WHITE, ORANGE, BLACK, YELLOW, TRANSLUCENT, RAND };
+enum rviz_colors { RED, GREEN, BLUE, GREY, WHITE, ORANGE, BLACK, YELLOW, PURPLE, TRANSLUCENT, RAND };
 enum rviz_scales { XXSMALL, XSMALL, SMALL, REGULAR, LARGE, XLARGE, XXLARGE };
 
 class VisualTools
@@ -308,9 +308,20 @@ public:
   {
     return base_frame_;
   }
-  MOVEIT_DEPRECATED const std::string getBaseLink()    
+  MOVEIT_DEPRECATED const std::string getBaseLink()
   {
     return base_frame_;
+  }
+
+  /**
+   * \brief Change the global base frame
+   *        Note: this might reset all your current markers
+   * \param name of frame
+   */
+  void setBaseFrame(const std::string& base_frame)
+  {
+    base_frame_ = base_frame;
+    loadRvizMarkers();
   }
 
   /**

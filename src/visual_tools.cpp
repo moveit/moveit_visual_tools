@@ -47,6 +47,7 @@
 
 // Conversions
 #include <tf_conversions/tf_eigen.h>
+
 #include <eigen_conversions/eigen_msg.h>
 
 #include <shape_tools/solid_primitive_dims.h>
@@ -82,7 +83,6 @@ void VisualTools::initialize()
   muted_ = false;
   alpha_ = 0.8;
   global_scale_ = 1.0;
-
   // Cache the reusable markers
   loadRvizMarkers();
 }
@@ -563,6 +563,11 @@ std_msgs::ColorRGBA VisualTools::getColor(const rviz_colors &color)
       result.r = 1.0;
       result.g = 1.0;
       result.b = 0.0;
+      break;
+    case PURPLE:
+      result.r = 0.597;
+      result.g = 0.0;
+      result.b = 0.597;
       break;
     case RAND:
       // Make sure color is not *too* light
