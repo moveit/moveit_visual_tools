@@ -1,7 +1,7 @@
 MoveIt! Visual Tools
 ==========================
 
-Helper functions for displaying and debugging MoveIt! data in Rviz via published markers, trajectories, and MoveIt! collision objects. It is sometimes hard to understand everything that is going on internally with MoveIt!, but using these quick convenience functions allows one to easily visualize their code. 
+Helper functions for displaying and debugging MoveIt! data in Rviz via published markers, trajectories, and MoveIt! collision objects. It is sometimes hard to understand everything that is going on internally with MoveIt!, but using these quick convenience functions allows one to easily visualize their code.
 
 This package includes:
 
@@ -53,10 +53,10 @@ moveit_visual_tools::VisualToolsPtr visual_tools_;
 
 In your class' constructor add:
 ```
-visual_tools_.reset(new moveit_visual_tools::VisualTools("base_link","/moveit_visual_markers"));
+visual_tools_.reset(new moveit_visual_tools::VisualTools("base_frame","/moveit_visual_markers"));
 ```
 
-Change the first parameter to the name of your robot's base link, and the second parameter to whatever name you'd like to use for the corresponding Rviz marker ROS topic.
+Change the first parameter to the name of your robot's base frame, and the second parameter to whatever name you'd like to use for the corresponding Rviz marker ROS topic.
 
 There are several other settings you can adjust, which I might get around to documenting in the future:
 ```
@@ -67,6 +67,8 @@ visual_tools_->setPlanningGroupName(planning_group_name_);
 visual_tools_->setFloorToBaseHeight(floor_to_base_height);
 visual_tools_->setGraspPoseToEEFPose(grasp_pose_to_eef_pose);
 visual_tools_->setAlpha(alpha);
+visual_tools_->setGlobalScale(scale);
+visual_tools_->setBaseFrame(frame_name);
 ```
 
 ### Tools
@@ -93,7 +95,6 @@ In the following snippet we create a pose at xyz (0.1, 0.1, 0.1) and rotate the 
 
 See ``visual_tools.h`` for more details and documentation on the following functions:
 
- - publishEEMarkers
  - publishSphere
  - publishArrow
  - publishRectangle
@@ -102,9 +103,15 @@ See ``visual_tools.h`` for more details and documentation on the following funct
  - publishText
  - publishTest
 
+And more...
+
 ### Collision Object Functions
 
+To
+
 Helpers for adding and removing objects from the MoveIt! planning scene. CO stands for Collision Object and ACO stands for Active Collision Object.
+
+DEVELOPER TODO: make it so that to use these functions, you must first instanciate a planning scene monitor outside of moveit_visual_tools. Remove publish collision message
 
  - cleanupCO
  - cleanupACO
@@ -115,9 +122,11 @@ Helpers for adding and removing objects from the MoveIt! planning scene. CO stan
  - publishCollisionTable
  - publishCollisionWall
 
+And more...
+
 ### Animate Trajectories
 
-Higher level robot ans trajectory functions
+Higher level robot and trajectory functions
 
  - publishTrajectoryPath
  - publishTrajectoryPoint
@@ -125,17 +134,32 @@ Higher level robot ans trajectory functions
  - publishAnimatedGrasps
  - publishIKSolutions
 
+## Show parts of a robot
+
+These functions are a little more complicated TODO document more
+
+ - publishEEMarkers
+
 ### Helper Functions
 
 Reset function
 
  - ``deleteAllMarkers`` - tells Rviz to clear out all current markers from being displayed. Only withs in ROS Indigo and newer.
 
-Convenience functions
- 
+Conversion functions
+
  - convertPose
+ - convertPoint32ToPose
+ - convertPoseToPoint
+ - convertPoint
+ - convertPoint32
+
+Convenience functions
+
  - generateRandomPose
  - dRand
+ - fRand
+ - iRand
  - getCenterPoint
  - getVectorBetweenPoints
 

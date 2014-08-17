@@ -76,7 +76,13 @@ static const std::string DISPLAY_PLANNED_PATH_TOPIC = "/move_group/display_plann
 static const std::string DISPLAY_ROBOT_STATE_TOPIC = "/move_group/robot_state";
 
 enum rviz_colors { RED, GREEN, BLUE, GREY, WHITE, ORANGE, BLACK, YELLOW, PURPLE, TRANSLUCENT, RAND };
-enum rviz_scales { XXSMALL, XSMALL, SMALL, REGULAR, LARGE, XLARGE, XXLARGE };
+enum rviz_scales { XXSMALL, 
+                   XSMALL, 
+                   SMALL, 
+                   REGULAR, 
+                   LARGE, xLARGE, xxLARGE, xxxLARGE, 
+                   XLARGE, 
+                   XXLARGE };
 
 class VisualTools
 {
@@ -195,6 +201,13 @@ public:
   bool loadPlanningSceneMonitor();
 
   /**
+   * \brief Skip a ROS message call by sending directly to planning scene monitor
+   * \param collision object message
+   * \return true on success
+   */
+  bool processCollisionObjectMsg(moveit_msgs::CollisionObject msg);
+
+  /**
    * \brief Load robot state only as needed
    * \return true if successful in loading
    */
@@ -260,6 +273,15 @@ public:
   void setAlpha(double alpha)
   {
     alpha_ = alpha;
+  }
+
+  /**
+   * \brief Allow a pre-configured planning scene monitor to be set for publishing collision objects, etc
+   * \param a pointer to a load planning scen
+   */
+  void setPlanningSceneMonitor(planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
+  {
+    planning_scene_monitor_ = planning_scene_monitor;
   }
 
   /**
@@ -509,7 +531,11 @@ public:
    *        Communicates to a remote move_group node through a ROS message
    * \return true on sucess
    */
-  bool removeAllCollisionObjects();
+  MOVEIT_DEPRECATED bool removeAllCollisionObjects()
+  {
+    publishRemoveAllCollisionObjects();
+  }
+  bool publishRemoveAllCollisionObjects();
 
   /**
    * \brief Remove all collision objects that this class has added to the MoveIt! planning scene
@@ -517,7 +543,7 @@ public:
    * \param  the scene to directly clear the collision objects from
    * \return true on sucess
    */
-  bool removeAllCollisionObjects(planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
+  bool removeAllCollisionObjectsPS();
 
   /**
    * \brief Remove a collision object from the planning scene
@@ -540,6 +566,14 @@ public:
    * \return true on sucess
    */
   bool attachCO(const std::string& name, const std::string& ee_parent_link);
+
+  /**
+   * \brief Make the floor a collision object
+   * \param z location of floor
+   * \param name of floor
+   * \return true on success
+   */
+  bool publishCollisionFloor(double z, std::string plane_name);
 
   /**
    * \brief Create a MoveIt Collision block at the given pose
@@ -617,7 +651,7 @@ public:
    * \param planning scene monitor that is already setup
    * \return true on success
    */
-  bool publishCollisionSceneFromFile(const std::string &path, planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
+  bool loadCollisionSceneFromFile(const std::string &path);
 
   /**
    * \brief Move a joint group in MoveIt for visualization
