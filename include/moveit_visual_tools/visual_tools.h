@@ -76,12 +76,12 @@ static const std::string DISPLAY_PLANNED_PATH_TOPIC = "/move_group/display_plann
 static const std::string DISPLAY_ROBOT_STATE_TOPIC = "/move_group/robot_state";
 
 enum rviz_colors { RED, GREEN, BLUE, GREY, WHITE, ORANGE, BLACK, YELLOW, PURPLE, TRANSLUCENT, RAND };
-enum rviz_scales { XXSMALL, 
-                   XSMALL, 
-                   SMALL, 
-                   REGULAR, 
-                   LARGE, xLARGE, xxLARGE, xxxLARGE, 
-                   XLARGE, 
+enum rviz_scales { XXSMALL,
+                   XSMALL,
+                   SMALL,
+                   REGULAR,
+                   LARGE, xLARGE, xxLARGE, xxxLARGE,
+                   XLARGE,
                    XXLARGE };
 
 class VisualTools
