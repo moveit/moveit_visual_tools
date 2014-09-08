@@ -780,12 +780,6 @@ public:
 private:
 
   /**
-   * \brief Get the end effector parent link as loaded from the SRDF
-   * \return string of name of end effector parent link
-   */
-  const std::string& getEEParentLink();
-
-  /**
    * @brief Get the planning scene monitor that this class is using
    * @return a ptr to a planning scene
    */
