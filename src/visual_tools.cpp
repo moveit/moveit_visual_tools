@@ -1161,21 +1161,38 @@ bool VisualTools::publishSpheres(const std::vector<geometry_msgs::Point> &points
 
 bool VisualTools::publishText(const geometry_msgs::Pose &pose, const std::string &text, const rviz_colors &color, const rviz_scales scale)
 {
+  publishText(pose, text, color, getScale(scale));
+}
+
+bool VisualTools::publishText(const geometry_msgs::Pose &pose, const std::string &text, const rviz_colors &color, const geometry_msgs::Vector3 scale, bool static_id)
+{
   if(muted_)
     return true;
 
-  text_marker_.id = 0;
+  // Save the ID if this is a static ID or keep incrementing ID if not static
+  double temp_id = text_marker_.id;
+  if (static_id)
+  {
+    text_marker_.id = 0;
+  }
+  else
+  {
+    text_marker_.id++;
+  }
 
   text_marker_.header.stamp = ros::Time::now();
   text_marker_.text = text;
   text_marker_.pose = pose;
   text_marker_.color = getColor( color );
-  text_marker_.scale = getScale(scale); // only z is required (size of an "A")
-  //text_marker_.scale.z = 0.01;
+  text_marker_.scale = scale;
 
   loadMarkerPub(); // always check this before publishing
   pub_rviz_marker_.publish( text_marker_ );
   ros::spinOnce();
+
+  // Restore the ID count if needed
+  if (static_id)
+    text_marker_.id = temp_id;
 
   return true;
 }

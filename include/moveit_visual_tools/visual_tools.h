@@ -484,6 +484,9 @@ public:
   bool publishText(const geometry_msgs::Pose &pose, const std::string &text,
                    const rviz_colors &color = WHITE, const rviz_scales scale = REGULAR);
 
+  bool publishText(const geometry_msgs::Pose &pose, const std::string &text,
+                   const rviz_colors &color, const geometry_msgs::Vector3 scale, bool static_id = true);
+
   /**
    * \brief Publish a visualization_msgs Marker of a custom type. Allows reuse of the ros publisher
    * \param marker - a pre-made marker ready to be published
