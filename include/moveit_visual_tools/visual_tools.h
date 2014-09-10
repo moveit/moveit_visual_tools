@@ -731,6 +731,14 @@ public:
   static Eigen::Affine3d convertPoint32ToPose(const geometry_msgs::Point32 &point);
 
   /**
+   * \brief 
+   * \param input - description
+   * \param input - description
+   * \return 
+   */
+  static geometry_msgs::Pose convertPointToPose(const geometry_msgs::Point &point);
+
+  /**
    * \brief Convert an Eigen pose to a geometry_msg point
    *        Note: NOT memory efficient
    * \param pose
