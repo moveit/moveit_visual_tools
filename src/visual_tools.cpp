@@ -285,7 +285,7 @@ bool VisualTools::loadPlanningSceneMonitor()
   planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(ROBOT_DESCRIPTION));
 
   ros::spinOnce();
-  ros::Duration(0.5).sleep();
+  ros::Duration(0.1).sleep();
   ros::spinOnce();
 
   if (planning_scene_monitor_->getPlanningScene())
@@ -440,7 +440,7 @@ void VisualTools::loadMarkerPub()
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing Rviz markers on topic " << pub_rviz_marker_.getTopic());
 
   ros::spinOnce();
-  ros::Duration(0.5).sleep();
+  ros::Duration(0.1).sleep();
   ros::spinOnce();
 }
 
@@ -454,7 +454,7 @@ void VisualTools::loadCollisionPub()
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing collision objects on topic " << pub_collision_obj_.getTopic());
 
   ros::spinOnce();
-  ros::Duration(0.5).sleep();
+  ros::Duration(0.1).sleep();
   ros::spinOnce();
 }
 
@@ -468,7 +468,7 @@ void VisualTools::loadAttachedPub()
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing attached collision objects on topic " << pub_attach_collision_obj_.getTopic());
 
   ros::spinOnce();
-  ros::Duration(0.5).sleep();
+  ros::Duration(0.1).sleep();
   ros::spinOnce();
 }
 
@@ -482,7 +482,7 @@ void VisualTools::loadPlanningPub()
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing planning scene on topic " << pub_planning_scene_diff_.getTopic());
 
   ros::spinOnce();
-  ros::Duration(0.5).sleep();
+  ros::Duration(0.1).sleep();
   ros::spinOnce();
 }
 
@@ -496,7 +496,7 @@ void VisualTools::loadTrajectoryPub()
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing MoveIt trajectory on topic " << pub_display_path_.getTopic());
 
   ros::spinOnce();
-  ros::Duration(0.5).sleep();
+  ros::Duration(0.1).sleep();
   ros::spinOnce();
 }
 
@@ -510,7 +510,7 @@ void VisualTools::loadRobotStatePub(const std::string &marker_topic)
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing MoveIt robot state on topic " << pub_robot_state_.getTopic());
 
   ros::spinOnce();
-  ros::Duration(0.5).sleep();
+  ros::Duration(0.1).sleep();
   ros::spinOnce();
 }
 

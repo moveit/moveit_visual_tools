@@ -206,24 +206,6 @@ Useful notes for anyone wanting to dig in deeper:
  -  All publish() ROS topics should be followed by a ``ros::spinOnce();`` but no sleep
  -  Do not want to load any features/publishers until they are actually needed since this library contains so many components
 
-### Stacktrace Tool
-
-An additional tool, that perhaps should not live in this repo, allows one to see the backtrace of their code without using gdb or compiling in debug mode. To use:
-
-```
-#include <moveit_visual_tools/stacktrace.h>
-```
-
-Then:
-```
-void someFunction()
-{
-  print_stacktrace();
-}
-```
-
-Easy! Only works with g++, however. See [this page](http://panthema.net/2008/0901-stacktrace-demangled/) for more information.
-
 ## Contribute
 
 Feel free to send PRs for new helper functions, fixes, etc. - I'll happily discuss and merge them. I do not, however, want to send much time helping people use this because I am a busy grad student. Use at your own risk.
