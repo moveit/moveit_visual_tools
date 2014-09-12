@@ -575,6 +575,12 @@ std_msgs::ColorRGBA VisualTools::getColor(const rviz_colors &color)
       result.b = 0.8;
       result.a = 0.3;
       break;
+    case TRANSLUCENT2:
+      result.r = 0.1;
+      result.g = 0.1;
+      result.b = 0.1;
+      result.a = 0.1;
+      break;
     case BLACK:
       result.r = 0.0;
       result.g = 0.0;
@@ -854,6 +860,19 @@ bool VisualTools::publishSphere(const geometry_msgs::Point &point, const rviz_co
 
 bool VisualTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color, const rviz_scales scale, const std::string& ns)
 {
+  return publishSphere(pose, color, getScale(scale, false, 0.1), ns);
+}
+
+bool VisualTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color, double scale, const std::string& ns)
+{
+  geometry_msgs::Vector3 scale_msg;
+  scale_msg.x = scale;
+  scale_msg.y = scale;
+  scale_msg.z = scale;
+  return publishSphere(pose, color, scale_msg, ns);
+}
+bool VisualTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color, const geometry_msgs::Vector3 scale, const std::string& ns)
+{
   if(muted_)
     return true; // this function will only work if we have loaded the publishers
 
@@ -862,7 +881,7 @@ bool VisualTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colo
 
   sphere_marker_.id++;
   sphere_marker_.color = getColor(color);
-  sphere_marker_.scale = getScale(scale, false, 0.1);
+  sphere_marker_.scale = scale;
   sphere_marker_.ns = ns;
 
   // Update the single point with new pose

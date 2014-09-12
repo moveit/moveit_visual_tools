@@ -75,7 +75,19 @@ static const std::string PLANNING_SCENE_TOPIC = "/move_group/monitored_planning_
 static const std::string DISPLAY_PLANNED_PATH_TOPIC = "/move_group/display_planned_path";
 static const std::string DISPLAY_ROBOT_STATE_TOPIC = "/move_group/robot_state";
 
-enum rviz_colors { RED, GREEN, BLUE, GREY, WHITE, ORANGE, BLACK, YELLOW, PURPLE, TRANSLUCENT, RAND };
+enum rviz_colors { RED, 
+                   GREEN, 
+                   BLUE, 
+                   GREY, 
+                   WHITE, 
+                   ORANGE, 
+                   BLACK, 
+                   YELLOW, 
+                   PURPLE, 
+                   TRANSLUCENT, 
+                   TRANSLUCENT2,
+                   RAND };
+
 enum rviz_scales { XXSMALL,
                    XSMALL,
                    SMALL,
@@ -380,6 +392,8 @@ public:
   bool publishSphere(const Eigen::Vector3d &point, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, const std::string& ns = "Sphere");
   bool publishSphere(const geometry_msgs::Point &point, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, const std::string& ns = "Sphere");
   bool publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, const std::string& ns = "Sphere");
+  bool publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color, const double scale, const std::string& ns = "Sphere");
+  bool publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color, const geometry_msgs::Vector3 scale, const std::string& ns = "Sphere");
 
   /**
    * \brief Publish a marker of an arrow to rviz
