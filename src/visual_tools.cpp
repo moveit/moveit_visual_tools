@@ -538,6 +538,23 @@ void VisualTools::setLifetime(double lifetime)
   text_marker_.lifetime = marker_lifetime_;
 }
 
+const rviz_colors VisualTools::getRandColor()
+{
+  std::vector<rviz_colors> all_colors;
+  
+  all_colors.push_back(RED);
+  all_colors.push_back(GREEN);
+  all_colors.push_back(BLUE);
+  all_colors.push_back(GREY);
+  all_colors.push_back(WHITE);
+  all_colors.push_back(ORANGE);
+  all_colors.push_back(BLACK);
+  all_colors.push_back(YELLOW);
+  all_colors.push_back(PURPLE);
+  
+  return all_colors[ rand() % all_colors.size() ];
+}
+
 std_msgs::ColorRGBA VisualTools::getColor(const rviz_colors &color)
 {
   std_msgs::ColorRGBA result;

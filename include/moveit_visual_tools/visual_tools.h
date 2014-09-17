@@ -75,6 +75,7 @@ static const std::string PLANNING_SCENE_TOPIC = "/move_group/monitored_planning_
 static const std::string DISPLAY_PLANNED_PATH_TOPIC = "/move_group/display_planned_path";
 static const std::string DISPLAY_ROBOT_STATE_TOPIC = "/move_group/robot_state";
 
+// Note: when adding new colors to rviz_colors, also add them to getRandColor() function
 enum rviz_colors { RED, 
                    GREEN, 
                    BLUE, 
@@ -301,6 +302,12 @@ public:
    * \param lifetime seconds of how long to show markers. 0 for inifinity
    */
   void setLifetime(double lifetime);
+
+  /**
+   * \brief Get a random color from the list of hardcoded enum color types
+   * \return Random color from rviz_colors
+   */
+  const rviz_colors getRandColor();
 
   /**
    * \brief Get the RGB value of standard colors
