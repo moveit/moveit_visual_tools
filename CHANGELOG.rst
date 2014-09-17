@@ -2,6 +2,27 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Added new getRandColor() function
+* Added TRANSLUCENT2 color
+* Added two new publishSphere() functions
+* New convertPointToPose function
+* Reduced sleep timer for starting all publishers from 0.5 seconds to 0.2 seconds
+* Removed stacktrace tool because already exists in moveit_core
+* New publishText function that allows custom scale and id number be passed in
+* Removed deprecated getEEParentLink() function
+* Added new scale sizes
+* Added new processCollisionObvMsg()
+* Added new setPlanningSceneMonitor()
+* Deprecated removeAllColisionObejcts()
+* Created new removeAllCollisionObjectsPS()
+* Added new publishCollisionFloor()
+* Added new loadCollisionSceneFromFile()
+* New color purple
+* Added new setBaseFrame() function
+* Contributors: Dave Coleman
+
 1.2.1 (2014-08-11)
 ------------------
 * Renamed base_link to base_frame
