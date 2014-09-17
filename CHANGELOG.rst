@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.0 (2014-09-17)
+------------------
 * Added new getRandColor() function
 * Added TRANSLUCENT2 color
 * Added two new publishSphere() functions
