@@ -1162,7 +1162,21 @@ bool VisualTools::publishPolygon(const geometry_msgs::Polygon &polygon, const rv
   publishPath(points, color, scale, ns);
 }
 
+bool VisualTools::publishSpheres(const std::vector<geometry_msgs::Point> &points, const rviz_colors color, const double scale, const std::string& ns)
+{
+  geometry_msgs::Vector3 scale_vector;
+  scale_vector.x = scale;
+  scale_vector.y = scale;
+  scale_vector.z = scale;
+  publishSpheres( points, color, scale_vector, ns);
+}
+
 bool VisualTools::publishSpheres(const std::vector<geometry_msgs::Point> &points, const rviz_colors color, const rviz_scales scale, const std::string& ns)
+{
+  publishSpheres( points, color, getScale(scale, false, 0.25), ns);
+}
+
+bool VisualTools::publishSpheres(const std::vector<geometry_msgs::Point> &points, const rviz_colors color, const geometry_msgs::Vector3 &scale, const std::string& ns)
 {
   if(muted_)
     return true;
@@ -1174,7 +1188,7 @@ bool VisualTools::publishSpheres(const std::vector<geometry_msgs::Point> &points
   spheres_marker_.id++;
 
   std_msgs::ColorRGBA this_color = getColor( color );
-  spheres_marker_.scale = getScale(scale, false, 0.25);
+  spheres_marker_.scale = scale;
   spheres_marker_.color = this_color;
   //spheres_marker_.points.clear();
   spheres_marker_.colors.clear();

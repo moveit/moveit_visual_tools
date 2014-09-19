@@ -403,6 +403,20 @@ public:
   bool publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color, const geometry_msgs::Vector3 scale, const std::string& ns = "Sphere");
 
   /**
+   * \brief Publish a marker of a series of spheres to rviz
+   * \param spheres - where to publish them
+   * \param color - an enum pre-defined name of a color
+   * \param scale - an enum pre-defined name of a size
+   * \param ns - namespace of marker
+   * \return true on success
+   */
+  bool publishSpheres(const std::vector<geometry_msgs::Point> &points, const rviz_colors color = BLUE, const double scale = 0.1, const std::string& ns = "Spheres");
+  bool publishSpheres(const std::vector<geometry_msgs::Point> &points, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, const std::string& ns = "Spheres");
+  bool publishSpheres(const std::vector<geometry_msgs::Point> &points, const rviz_colors color, const geometry_msgs::Vector3 &scale, const std::string& ns = "Spheres");
+                      
+
+
+  /**
    * \brief Publish a marker of an arrow to rviz
    * \param pose - the location to publish the marker with respect to the base frame
    * \param color - an enum pre-defined name of a color
@@ -481,18 +495,6 @@ public:
    * \return true on success
    */
   bool publishGraph(const graph_msgs::GeometryGraph &graph, const rviz_colors color, double radius);
-
-
-  /**
-   * \brief Publish a marker of a series of spheres to rviz
-   * \param spheres - where to publish them
-   * \param color - an enum pre-defined name of a color
-   * \param scale - an enum pre-defined name of a size
-   * \param ns - namespace of marker
-   * \return true on success
-   */
-  bool publishSpheres(const std::vector<geometry_msgs::Point> &points, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR,
-                      const std::string& ns = "Spheres");
 
   /**
    * \brief Publish a marker of a text to Rviz
