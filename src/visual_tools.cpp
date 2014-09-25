@@ -1815,7 +1815,7 @@ bool VisualTools::publishCollisionTable(double x, double y, double angle, double
   return true;
 }
 
-bool VisualTools::loadCollisionSceneFromFile(const std::string &path)
+bool VisualTools::loadCollisionSceneFromFile(const std::string &path, double x_offset, double y_offset)
 {
   {
     // Load directly to the planning scene
@@ -1826,7 +1826,7 @@ bool VisualTools::loadCollisionSceneFromFile(const std::string &path)
       std::ifstream fin(path.c_str());
       if (fin.good())
       {
-        scene->loadGeometryFromStream(fin);
+        scene->loadGeometryFromStream(fin, x_offset, y_offset);
         fin.close();
         ROS_INFO("Loaded scene geometry from '%s'", path.c_str());
       }
@@ -2083,10 +2083,17 @@ float VisualTools::fRand(float dMin, float dMax)
   return dMin + d * (dMax - dMin);
 }
 
-int VisualTools::iRand(int dMin, int dMax)
+int VisualTools::iRand(int min, int max)
 {
-  int d = (int)rand() / RAND_MAX;
-  return dMin + d * (dMax - dMin);
+  int n = max - min + 1;
+  int remainder = RAND_MAX % n;
+  int x;
+  do
+  {
+    x = rand();
+  }
+  while (x >= RAND_MAX - remainder);
+  return min + x % n;
 }
 
 void VisualTools::print()

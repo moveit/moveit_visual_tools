@@ -677,7 +677,7 @@ public:
    * \param planning scene monitor that is already setup
    * \return true on success
    */
-  bool loadCollisionSceneFromFile(const std::string &path);
+  bool loadCollisionSceneFromFile(const std::string &path, double x_offset = 0, double y_offset = 0);
 
   /**
    * \brief Move a joint group in MoveIt for visualization
@@ -802,9 +802,9 @@ public:
   /**
    * \brief Get random between min and max
    */
-  static double dRand(double dMin, double dMax);
-  static float fRand(float dMin, float dMax);
-  static int iRand(int dMin, int dMax);
+  static double dRand(double min, double max);
+  static float fRand(float min, float max);
+  static int iRand(int min, int max);
 
   /**
    * \brief Debug variables to console
