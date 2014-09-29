@@ -548,11 +548,12 @@ const rviz_colors VisualTools::getRandColor()
   all_colors.push_back(GREY);
   all_colors.push_back(WHITE);
   all_colors.push_back(ORANGE);
-  all_colors.push_back(BLACK);
+  //all_colors.push_back(BLACK);
   all_colors.push_back(YELLOW);
   all_colors.push_back(PURPLE);
   
-  return all_colors[ rand() % all_colors.size() ];
+  int rand_num = iRand(0, all_colors.size() - 1);
+  return all_colors[ rand_num ];
 }
 
 std_msgs::ColorRGBA VisualTools::getColor(const rviz_colors &color)
