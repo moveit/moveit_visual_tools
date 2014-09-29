@@ -34,6 +34,10 @@ Clone this repository into a catkin workspace, then use the rosdep install tool 
 rosdep install --from-paths src --ignore-src --rosdistro indigo
 ```
 
+## Code API
+
+See [VisualTools Class Reference](http://docs.ros.org/indigo/api/moveit_visual_tools/html/classmoveit__visual__tools_1_1VisualTools.html)
+
 ## Usage
 
 We'll assume you will be using these helper functions within a class.
