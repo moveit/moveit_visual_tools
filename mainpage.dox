@@ -1,0 +1,14 @@
+/**
+\mainpage
+\htmlinclude manifest.html
+
+\section Main class for grasping
+- \link moveit_simple_grasps::SimpleGrasps \endlink
+
+\section Filtering grasps
+- \link moveit_simple_grasps::GraspFilter \endlink
+
+\section Action Server for Generating Grasps
+- \link moveit_simple_grasps::GraspGeneratorServer \endlink
+
+*/
