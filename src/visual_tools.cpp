@@ -240,7 +240,6 @@ bool VisualTools::loadRvizMarkers()
   sphere_marker_.lifetime = marker_lifetime_;
 
   // Load Text ----------------------------------------------------
-  text_marker_.header.frame_id = base_frame_;
   // Set the namespace and id for this marker.  This serves to create a unique ID
   text_marker_.ns = "Text";
   // Set the marker action.  Options are ADD and DELETE
@@ -1210,9 +1209,9 @@ bool VisualTools::publishSpheres(const std::vector<geometry_msgs::Point> &points
   return true;
 }
 
-bool VisualTools::publishText(const geometry_msgs::Pose &pose, const std::string &text, const rviz_colors &color, const rviz_scales scale)
+bool VisualTools::publishText(const geometry_msgs::Pose &pose, const std::string &text, const rviz_colors &color, const rviz_scales scale, bool static_id)
 {
-  publishText(pose, text, color, getScale(scale));
+  publishText(pose, text, color, getScale(scale), static_id);
 }
 
 bool VisualTools::publishText(const geometry_msgs::Pose &pose, const std::string &text, const rviz_colors &color, const geometry_msgs::Vector3 scale, bool static_id)
@@ -1232,6 +1231,7 @@ bool VisualTools::publishText(const geometry_msgs::Pose &pose, const std::string
   }
 
   text_marker_.header.stamp = ros::Time::now();
+  text_marker_.header.frame_id = base_frame_;
   text_marker_.text = text;
   text_marker_.pose = pose;
   text_marker_.color = getColor( color );

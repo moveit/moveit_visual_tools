@@ -505,7 +505,7 @@ public:
    * \return true on success
    */
   bool publishText(const geometry_msgs::Pose &pose, const std::string &text,
-                   const rviz_colors &color = WHITE, const rviz_scales scale = REGULAR);
+                   const rviz_colors &color = WHITE, const rviz_scales scale = REGULAR, bool static_id = true);
 
   bool publishText(const geometry_msgs::Pose &pose, const std::string &text,
                    const rviz_colors &color, const geometry_msgs::Vector3 scale, bool static_id = true);
