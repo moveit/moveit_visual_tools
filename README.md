@@ -14,10 +14,6 @@ Developed by [Dave Coleman](http://dav.ee) at the Correll Robotics Lab, Universi
 
 <img align="right" src="https://raw.github.com/davetcoleman/moveit_visual_tools/indigo-devel/resources/demo.png" />
 
-### Build Status
-
-[![Build Status](https://travis-ci.org/davetcoleman/moveit_visual_tools.png?branch=indigo-devel)](https://travis-ci.org/davetcoleman/moveit_visual_tools)
-
 ## Install
 
 ### Ubuntu Debian
