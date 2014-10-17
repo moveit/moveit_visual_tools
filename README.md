@@ -120,11 +120,9 @@ And more...
 
 ### Collision Object Functions
 
-To
-
 Helpers for adding and removing objects from the MoveIt! planning scene. CO stands for Collision Object and ACO stands for Active Collision Object.
 
-DEVELOPER TODO: make it so that to use these functions, you must first instanciate a planning scene monitor outside of moveit_visual_tools. Remove publish collision message
+*DEVELOPER TODO: make it so that to use these functions, you must first instanciate a planning scene monitor outside of moveit_visual_tools. Remove publish collision message*
 
  - cleanupCO
  - cleanupACO
