@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, University of Colorado, Boulder
+ *  Copyright (c) 2014, University of Colorado, Boulder
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -70,10 +70,13 @@ public:
   {
     visual_tools_.reset(new moveit_visual_tools::VisualTools("base","/moveit_visual_tools"));
 
-    runTest();
-
     // Allow time to publish messages
     ros::Duration(1.0).sleep();
+
+    while (ros::ok())
+    {
+      visual_tools_->publishTest();
+    }
   }
 
   /**
@@ -81,14 +84,6 @@ public:
    */
   ~VisualToolsTest()
   {
-  }
-
-  /**
-   * \brief Test
-   */
-  void runTest()
-  {
-    visual_tools_->publishTest();
   }
 
 }; // end class

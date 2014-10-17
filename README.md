@@ -12,18 +12,17 @@ This package includes:
 
 Developed by [Dave Coleman](http://dav.ee) at the Correll Robotics Lab, University of Colorado Boulder with outside contributors.
 
-<img align="right" src="https://raw.github.com/davetcoleman/moveit_visual_tools/hydro-devel/resources/demo.png" />
+<img align="right" src="https://raw.github.com/davetcoleman/moveit_visual_tools/indigo-devel/resources/demo.png" />
 
 ### Build Status
 
-[![Build Status](https://travis-ci.org/davetcoleman/moveit_visual_tools.png?branch=hydro-devel)](https://travis-ci.org/davetcoleman/moveit_visual_tools)
+[![Build Status](https://travis-ci.org/davetcoleman/moveit_visual_tools.png?branch=indigo-devel)](https://travis-ci.org/davetcoleman/moveit_visual_tools)
 
 ## Install
 
 ### Ubuntu Debian
 
 ```
-sudo apt-get install ros-hydro-moveit-visual-tools
 sudo apt-get install ros-indigo-moveit-visual-tools
 ```
 
@@ -34,6 +33,16 @@ Clone this repository into a catkin workspace, then use the rosdep install tool 
 rosdep install --from-paths src --ignore-src --rosdistro indigo
 ```
 
+## Quick Start
+
+To see random shapes generated in Rviz:
+
+    roslaunch moveit_visual_tools visual_tools_test.launch
+
+You should see something like:
+
+<img align="right" src="https://raw.github.com/davetcoleman/moveit_visual_tools/indigo-devel/resources/screenshot.png" />
+	
 ## Code API
 
 See [VisualTools Class Reference](http://docs.ros.org/indigo/api/moveit_visual_tools/html/classmoveit__visual__tools_1_1VisualTools.html)

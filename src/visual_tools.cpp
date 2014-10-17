@@ -1982,12 +1982,47 @@ bool VisualTools::hideRobot()
 bool VisualTools::publishTest()
 {
   // Create pose
-  geometry_msgs::Pose pose;
-  generateRandomPose(pose);
+  geometry_msgs::Pose pose1;
+  geometry_msgs::Pose pose2;
 
-  // Publish arrow vector of pose
+  // Test all shapes ----------
+
   ROS_INFO_STREAM_NAMED("test","Publishing Arrow");
-  publishArrow(pose, moveit_visual_tools::RED, moveit_visual_tools::LARGE);
+  generateRandomPose(pose1);
+  publishArrow(pose1, moveit_visual_tools::RAND);
+  ros::Duration(1.0).sleep();
+
+  ROS_INFO_STREAM_NAMED("test","Publishing Sphere");
+  generateRandomPose(pose1);
+  publishSphere(pose1, moveit_visual_tools::RAND);
+  ros::Duration(1.0).sleep();
+
+  ROS_INFO_STREAM_NAMED("test","Publishing Rectangle");
+  generateRandomPose(pose1);
+  generateRandomPose(pose2);
+  publishRectangle(pose1.position, pose2.position, moveit_visual_tools::RAND);
+  ros::Duration(1.0).sleep();
+
+  ROS_INFO_STREAM_NAMED("test","Publishing Line");
+  generateRandomPose(pose1);
+  generateRandomPose(pose2);
+  publishLine(pose1.position, pose2.position, moveit_visual_tools::RAND);
+  ros::Duration(1.0).sleep();
+
+  ROS_INFO_STREAM_NAMED("test","Publishing Block");
+  generateRandomPose(pose1);
+  publishBlock(pose1, moveit_visual_tools::RAND);
+  ros::Duration(1.0).sleep();
+
+  ROS_INFO_STREAM_NAMED("test","Publishing Cylinder");
+  generateRandomPose(pose1);
+  publishCylinder(pose1, moveit_visual_tools::RAND);
+  ros::Duration(1.0).sleep();
+
+  ROS_INFO_STREAM_NAMED("test","Publishing Text");
+  generateRandomPose(pose1);
+  publishText(pose1, "Test", moveit_visual_tools::RAND);
+  ros::Duration(1.0).sleep();
 
   return true;
 }
