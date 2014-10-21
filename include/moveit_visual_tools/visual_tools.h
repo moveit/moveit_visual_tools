@@ -397,6 +397,7 @@ public:
    */
   bool publishSphere(const Eigen::Affine3d &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, const std::string& ns = "Sphere");
   bool publishSphere(const Eigen::Vector3d &point, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, const std::string& ns = "Sphere");
+  bool publishSphere(const Eigen::Vector3d &point, const rviz_colors color, const double scale, const std::string& ns = "Sphere");
   bool publishSphere(const geometry_msgs::Point &point, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, const std::string& ns = "Sphere");
   bool publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color = BLUE, const rviz_scales scale = REGULAR, const std::string& ns = "Sphere");
   bool publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color, const double scale, const std::string& ns = "Sphere");

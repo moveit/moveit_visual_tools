@@ -63,6 +63,12 @@ target_link_libraries(visual_tools_test
   ${catkin_LIBRARIES} ${PROJECT_NAME}
 )
 
+# Test executable
+add_executable(publish_sphere src/publish_sphere.cpp)
+target_link_libraries(publish_sphere 
+  ${catkin_LIBRARIES} ${PROJECT_NAME}
+)
+
 # Install
 install(TARGETS ${PROJECT_NAME} 
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})

@@ -868,6 +868,13 @@ bool VisualTools::publishSphere(const Eigen::Vector3d &point, const rviz_colors 
   return publishSphere(pose_msg, color, scale, ns);
 }
 
+bool VisualTools::publishSphere(const Eigen::Vector3d &point, const rviz_colors color, const double scale, const std::string& ns)
+{
+  geometry_msgs::Pose pose_msg;
+  tf::pointEigenToMsg(point, pose_msg.position);
+  return publishSphere(pose_msg, color, scale, ns);
+}
+
 bool VisualTools::publishSphere(const geometry_msgs::Point &point, const rviz_colors color, const rviz_scales scale, const std::string& ns)
 {
   geometry_msgs::Pose pose_msg;
