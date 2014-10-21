@@ -47,7 +47,7 @@ See [VisualTools Class Reference](http://docs.ros.org/indigo/api/moveit_visual_t
 
 ## Upgrade Notes
 
-We recently did a major refactor of moveit_visual_tools that caused some API breaking changes. To upgrade, do the following:
+We recently did a major refactor of moveit_visual_tools that caused some API breaking changes. To upgrade, do the following or use the upgrade script below:
 
 Orignal API                                    | New API
 ---------------------------------------------- | ------------------------------------------------------
@@ -56,6 +56,18 @@ moveit_visual_tools::VisualTools               | moveit_visual_tools::MoveItVisu
 moveit_visual_tools::VisualToolsPtr            | moveit_visual_tools::MoveItVisualToolsPtr
 moveit_visual_tools::rviz_colors               | rviz_visual_tools::colors
 moveit_visual_tools::rviz_scales               | rviz_visual_tools::scales
+
+### Auto Upgrade Script
+
+Run each line in order in the ``/src`` of your catkin workspace:
+
+```
+findreplace() { grep -lr -e "$1" * | xargs sed -i "s/$1/$2/g" ;}
+findreplace '<moveit_visual_tools\/visual_tools.h>' '<moveit_visual_tools\/moveit_visual_tools.h>'
+findreplace moveit_visual_tools::VisualTools moveit_visual_tools::MoveItVisualTools
+findreplace 'moveit_visual_tools::' 'rviz_visual_tools::'
+findreplace 'rviz_visual_tools::MoveItVisualTools' 'moveit_visual_tools::MoveItVisualTools'
+```
 
 ## Usage
 
