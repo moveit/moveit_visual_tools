@@ -41,7 +41,7 @@
 #include <ros/ros.h>
 
 // For visualizing things in rviz
-#include <moveit_visual_tools/visual_tools.h>
+#include <moveit_visual_tools/moveit_visual_tools.h>
 
 namespace moveit_visual_tools
 {
@@ -59,7 +59,7 @@ private:
   ros::NodeHandle nh_;
 
   // For visualizing things in rviz
-  moveit_visual_tools::VisualToolsPtr visual_tools_;
+  moveit_visual_tools::MoveItVisualToolsPtr visual_tools_;
 
 public:
 
@@ -68,7 +68,7 @@ public:
    */
   VisualToolsTest()
   {
-    visual_tools_.reset(new moveit_visual_tools::VisualTools("base","/moveit_visual_tools"));
+    visual_tools_.reset(new moveit_visual_tools::MoveItVisualTools("base","/moveit_visual_tools"));
 
     // Allow time to publish messages
     ros::Duration(1.0).sleep();

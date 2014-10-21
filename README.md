@@ -43,6 +43,18 @@ You should see something like:
 
 See [VisualTools Class Reference](http://docs.ros.org/indigo/api/moveit_visual_tools/html/classmoveit__visual__tools_1_1VisualTools.html)
 
+## Upgrade Notes
+
+We recently did a major refactor of moveit_visual_tools that caused some API breaking changes. To upgrade, do the following:
+
+Orignal API                                    | New API
+---------------------------------------------- | ------------------------------------------------------
+#include <moveit_visual_tools/visual_tools.h>  | #include <moveit_visual_tools/moveit_visual_tools.h>
+moveit_visual_tools::VisualTools               | moveit_visual_tools::MoveItVisualTools
+moveit_visual_tools::VisualToolsPtr            | moveit_visual_tools::MoveItVisualToolsPtr
+moveit_visual_tools::rviz_colors               | rviz_visual_tools::colors
+moveit_visual_tools::rviz_scales               | rviz_visual_tools::scales
+
 ## Usage
 
 We'll assume you will be using these helper functions within a class.

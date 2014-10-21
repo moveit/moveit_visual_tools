@@ -16,6 +16,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>rviz_visual_tools</build_depend>
   <build_depend>eigen_conversions</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>moveit_ros_robot_interaction</build_depend>
@@ -29,6 +30,7 @@
   <build_depend>trajectory_msgs</build_depend>
   <build_depend>cmake_modules</build_depend>
 
+  <run_depend>rviz_visual_tools</run_depend>
   <run_depend>moveit_ros_robot_interaction</run_depend>
   <run_depend>moveit_core</run_depend>
   <run_depend>geometry_msgs</run_depend>

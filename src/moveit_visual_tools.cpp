@@ -35,7 +35,7 @@
 // Author: Dave Coleman
 // Desc:   Simple tools for showing parts of a robot in Rviz, such as the gripper or arm
 
-#include <moveit_visual_tools/visual_tools.h>
+#include <moveit_visual_tools/moveit_visual_tools.h>
 #include <moveit/robot_interaction/robot_interaction.h>
 
 // MoveIt Messages
@@ -55,204 +55,25 @@
 namespace moveit_visual_tools
 {
 
-VisualTools::VisualTools(const std::string& base_frame,
-                         const std::string& marker_topic,
-                         planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
-  :  nh_("~"),
-     planning_scene_monitor_(planning_scene_monitor),
-     marker_topic_(marker_topic),
-     base_frame_(base_frame)
+MoveItVisualTools::MoveItVisualTools(const std::string& base_frame,
+                                     const std::string& marker_topic,
+                                     planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
+  :  VisualTools::VisualTools(base_frame, marker_topic),
+     planning_scene_monitor_(planning_scene_monitor)
 {
-  initialize();
+
 }
 
-VisualTools::VisualTools(const std::string& base_frame,
-                         const std::string& marker_topic,
-                         robot_model::RobotModelConstPtr robot_model)
-  :  nh_("~"),
-     robot_model_(robot_model),
-     marker_topic_(marker_topic),
-     base_frame_(base_frame)
+MoveItVisualTools::MoveItVisualTools(const std::string& base_frame,
+                                     const std::string& marker_topic,
+                                     robot_model::RobotModelConstPtr robot_model)
+  :  VisualTools::VisualTools(base_frame, marker_topic),
+     robot_model_(robot_model)
 {
-  initialize();
+
 }
 
-void VisualTools::initialize()
-{
-  floor_to_base_height_ = 0;
-  marker_lifetime_ = ros::Duration(0.0); // 0 - unlimited
-  muted_ = false;
-  alpha_ = 0.8;
-  global_scale_ = 1.0;
-  // Cache the reusable markers
-  loadRvizMarkers();
-}
-
-void VisualTools::deleteAllMarkers()
-{
-  loadMarkerPub(); // always check this before publishing
-  pub_rviz_marker_.publish( reset_marker_ );
-  ros::spinOnce();
-}
-
-void VisualTools::resetMarkerCounts()
-{
-  arrow_marker_.id++;
-  sphere_marker_.id++;
-  block_marker_.id++;
-  cylinder_marker_.id++;
-  text_marker_.id++;
-  rectangle_marker_.id++;
-  line_marker_.id++;
-  path_marker_.id++;
-  spheres_marker_.id++;
-}
-
-bool VisualTools::loadRvizMarkers()
-{
-  // Load reset marker -------------------------------------------------
-  reset_marker_.header.frame_id = base_frame_;
-  reset_marker_.header.stamp = ros::Time();
-  reset_marker_.action = 3; // In ROS-J: visualization_msgs::Marker::DELETEALL;
-
-  // Load arrow ----------------------------------------------------
-
-  arrow_marker_.header.frame_id = base_frame_;
-  // Set the namespace and id for this marker.  This serves to create a unique ID
-  arrow_marker_.ns = "Arrow";
-  // Set the marker type.
-  arrow_marker_.type = visualization_msgs::Marker::ARROW;
-  // Set the marker action.  Options are ADD and DELETE
-  arrow_marker_.action = visualization_msgs::Marker::ADD;
-  // Lifetime
-  arrow_marker_.lifetime = marker_lifetime_;
-
-  // Load rectangle ----------------------------------------------------
-
-  rectangle_marker_.header.frame_id = base_frame_;
-  // Set the namespace and id for this marker.  This serves to create a unique ID
-  rectangle_marker_.ns = "Rectangle";
-  // Set the marker type.
-  rectangle_marker_.type = visualization_msgs::Marker::CUBE;
-  // Set the marker action.  Options are ADD and DELETE
-  rectangle_marker_.action = visualization_msgs::Marker::ADD;
-  // Lifetime
-  rectangle_marker_.lifetime = marker_lifetime_;
-
-  // Load line ----------------------------------------------------
-
-  line_marker_.header.frame_id = base_frame_;
-  // Set the namespace and id for this marker.  This serves to create a unique ID
-  line_marker_.ns = "Line";
-  // Set the marker type.
-  line_marker_.type = visualization_msgs::Marker::LINE_STRIP;
-  // Set the marker action.  Options are ADD and DELETE
-  line_marker_.action = visualization_msgs::Marker::ADD;
-  // Lifetime
-  line_marker_.lifetime = marker_lifetime_;
-
-  // Load path ----------------------------------------------------
-
-  path_marker_.header.frame_id = base_frame_;
-  // Set the namespace and id for this marker.  This serves to create a unique ID
-  path_marker_.ns = "Path";
-  // Set the marker type.
-  path_marker_.type = visualization_msgs::Marker::LINE_LIST;
-  // Set the marker action.  Options are ADD and DELETE
-  path_marker_.action = visualization_msgs::Marker::ADD;
-  // Lifetime
-  path_marker_.lifetime = marker_lifetime_;
-  // Constants
-  path_marker_.pose.position.x = 0.0;
-  path_marker_.pose.position.y = 0.0;
-  path_marker_.pose.position.z = 0.0;
-
-  path_marker_.pose.orientation.x = 0.0;
-  path_marker_.pose.orientation.y = 0.0;
-  path_marker_.pose.orientation.z = 0.0;
-  path_marker_.pose.orientation.w = 1.0;
-
-  // Load sphers ----------------------------------------------------
-
-  spheres_marker_.header.frame_id = base_frame_;
-  // Set the namespace and id for this marker.  This serves to create a unique ID
-  spheres_marker_.ns = "Spheres";
-  // Set the marker type.
-  spheres_marker_.type = visualization_msgs::Marker::SPHERE_LIST;
-  // Set the marker action.  Options are ADD and DELETE
-  spheres_marker_.action = visualization_msgs::Marker::ADD;
-  // Lifetime
-  spheres_marker_.lifetime = marker_lifetime_;
-  // Constants
-  spheres_marker_.pose.position.x = 0.0;
-  spheres_marker_.pose.position.y = 0.0;
-  spheres_marker_.pose.position.z = 0.0;
-
-  spheres_marker_.pose.orientation.x = 0.0;
-  spheres_marker_.pose.orientation.y = 0.0;
-  spheres_marker_.pose.orientation.z = 0.0;
-  spheres_marker_.pose.orientation.w = 1.0;
-
-  // Load Block ----------------------------------------------------
-  block_marker_.header.frame_id = base_frame_;
-  // Set the namespace and id for this marker.  This serves to create a unique ID
-  block_marker_.ns = "Block";
-  // Set the marker action.  Options are ADD and DELETE
-  block_marker_.action = visualization_msgs::Marker::ADD;
-  // Set the marker type.
-  block_marker_.type = visualization_msgs::Marker::CUBE;
-  // Lifetime
-  block_marker_.lifetime = marker_lifetime_;
-
-  // Load Cylinder ----------------------------------------------------
-  cylinder_marker_.header.frame_id = base_frame_;
-  // Set the namespace and id for this marker.  This serves to create a unique ID
-  cylinder_marker_.ns = "Cylinder";
-  // Set the marker action.  Options are ADD and DELETE
-  cylinder_marker_.action = visualization_msgs::Marker::ADD;
-  // Set the marker type.
-  cylinder_marker_.type = visualization_msgs::Marker::CYLINDER;
-  // Lifetime
-  cylinder_marker_.lifetime = marker_lifetime_;
-
-  // Load Sphere -------------------------------------------------
-  sphere_marker_.header.frame_id = base_frame_;
-  // Set the namespace and id for this marker.  This serves to create a unique ID
-  sphere_marker_.ns = "Sphere";
-  // Set the marker type.
-  sphere_marker_.type = visualization_msgs::Marker::SPHERE_LIST;
-  // Set the marker action.  Options are ADD and DELETE
-  sphere_marker_.action = visualization_msgs::Marker::ADD;
-  // Marker group position and orientation
-  sphere_marker_.pose.position.x = 0;
-  sphere_marker_.pose.position.y = 0;
-  sphere_marker_.pose.position.z = 0;
-  sphere_marker_.pose.orientation.x = 0.0;
-  sphere_marker_.pose.orientation.y = 0.0;
-  sphere_marker_.pose.orientation.z = 0.0;
-  sphere_marker_.pose.orientation.w = 1.0;
-  // Create a sphere point
-  geometry_msgs::Point point_a;
-  // Add the point pair to the line message
-  sphere_marker_.points.push_back( point_a );
-  sphere_marker_.colors.push_back( getColor( BLUE ) );
-  // Lifetime
-  sphere_marker_.lifetime = marker_lifetime_;
-
-  // Load Text ----------------------------------------------------
-  // Set the namespace and id for this marker.  This serves to create a unique ID
-  text_marker_.ns = "Text";
-  // Set the marker action.  Options are ADD and DELETE
-  text_marker_.action = visualization_msgs::Marker::ADD;
-  // Set the marker type.
-  text_marker_.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
-  // Lifetime
-  text_marker_.lifetime = marker_lifetime_;
-
-  return true;
-}
-
-bool VisualTools::loadPlanningSceneMonitor()
+bool MoveItVisualTools::loadPlanningSceneMonitor()
 {
   // Check if we already have one
   if (planning_scene_monitor_)
@@ -304,7 +125,7 @@ bool VisualTools::loadPlanningSceneMonitor()
   return true;
 }
 
-bool VisualTools::processCollisionObjectMsg(moveit_msgs::CollisionObject msg)
+bool MoveItVisualTools::processCollisionObjectMsg(moveit_msgs::CollisionObject msg)
 {
   // Apply removal command directly to avoid a ROS msg call
   {
@@ -318,7 +139,27 @@ bool VisualTools::processCollisionObjectMsg(moveit_msgs::CollisionObject msg)
   return true;
 }
 
-bool VisualTools::loadRobotMarkers()
+bool MoveItVisualTools::loadSharedRobotState()
+{
+  // Get robot state
+  if (!shared_robot_state_)
+  {
+    // Check if a robot model was passed in
+    if (!robot_model_)
+    {
+      // Fall back on using planning scene monitor.
+      // Deprecated?
+      ROS_WARN_STREAM_NAMED("temp","Falling back to using planning scene monitor for loading a robot state");
+      planning_scene_monitor::PlanningSceneMonitorPtr psm = getPlanningSceneMonitor();
+      robot_model_ = psm->getRobotModel();
+    }
+    shared_robot_state_.reset(new robot_state::RobotState(robot_model_));
+  }
+
+  return true;
+}
+
+bool MoveItVisualTools::loadRobotMarkers()
 {
   // Always load the robot state before using
   loadSharedRobotState();
@@ -331,7 +172,7 @@ bool VisualTools::loadRobotMarkers()
 
   // Get EE link markers for Rviz
   visualization_msgs::MarkerArray robot_marker_array;
-  shared_robot_state_->getRobotMarkers(robot_marker_array, link_names, getColor( GREY ), "test", ros::Duration());
+  shared_robot_state_->getRobotMarkers(robot_marker_array, link_names, getColor( rviz_visual_tools::GREY ), "test", ros::Duration());
 
   ROS_DEBUG_STREAM_NAMED("visual_tools","Number of rviz markers: " << robot_marker_array.markers.size());
 
@@ -358,7 +199,7 @@ bool VisualTools::loadRobotMarkers()
   return true;
 }
 
-bool VisualTools::loadEEMarker(const std::string& ee_group_name, const std::string& planning_group)
+bool MoveItVisualTools::loadEEMarker(const std::string& ee_group_name, const std::string& planning_group)
 {
   // Always load the robot state before using
   loadSharedRobotState();
@@ -367,7 +208,7 @@ bool VisualTools::loadEEMarker(const std::string& ee_group_name, const std::stri
   // Get end effector group
 
   // Create color to use for EE markers
-  std_msgs::ColorRGBA marker_color = getColor( GREY );
+  std_msgs::ColorRGBA marker_color = getColor( rviz_visual_tools::GREY );
 
   // Get robot model
   robot_model::RobotModelConstPtr robot_model = shared_robot_state_->getRobotModel();
@@ -429,21 +270,7 @@ bool VisualTools::loadEEMarker(const std::string& ee_group_name, const std::stri
   return true;
 }
 
-void VisualTools::loadMarkerPub()
-{
-  if (pub_rviz_marker_)
-    return;
-
-  // Rviz marker publisher
-  pub_rviz_marker_ = nh_.advertise<visualization_msgs::Marker>(marker_topic_, 10);
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing Rviz markers on topic " << pub_rviz_marker_.getTopic());
-
-  ros::spinOnce();
-  ros::Duration(0.2).sleep();
-  ros::spinOnce();
-}
-
-void VisualTools::loadCollisionPub()
+void MoveItVisualTools::loadCollisionPub()
 {
   if (pub_collision_obj_)
     return;
@@ -457,7 +284,7 @@ void VisualTools::loadCollisionPub()
   ros::spinOnce();
 }
 
-void VisualTools::loadAttachedPub()
+void MoveItVisualTools::loadAttachedPub()
 {
   if (pub_attach_collision_obj_)
     return;
@@ -471,7 +298,7 @@ void VisualTools::loadAttachedPub()
   ros::spinOnce();
 }
 
-void VisualTools::loadPlanningPub()
+void MoveItVisualTools::loadPlanningPub()
 {
   if (pub_planning_scene_diff_)
     return;
@@ -485,7 +312,7 @@ void VisualTools::loadPlanningPub()
   ros::spinOnce();
 }
 
-void VisualTools::loadTrajectoryPub()
+void MoveItVisualTools::loadTrajectoryPub()
 {
   if (pub_display_path_)
     return;
@@ -499,7 +326,7 @@ void VisualTools::loadTrajectoryPub()
   ros::spinOnce();
 }
 
-void VisualTools::loadRobotStatePub(const std::string &marker_topic)
+void MoveItVisualTools::loadRobotStatePub(const std::string &marker_topic)
 {
   if (pub_robot_state_)
     return;
@@ -513,182 +340,7 @@ void VisualTools::loadRobotStatePub(const std::string &marker_topic)
   ros::spinOnce();
 }
 
-void VisualTools::setFloorToBaseHeight(double floor_to_base_height)
-{
-  floor_to_base_height_ = floor_to_base_height;
-}
-
-void VisualTools::setGraspPoseToEEFPose(geometry_msgs::Pose grasp_pose_to_eef_pose)
-{
-  grasp_pose_to_eef_pose_ = grasp_pose_to_eef_pose;
-}
-
-void VisualTools::setLifetime(double lifetime)
-{
-  marker_lifetime_ = ros::Duration(lifetime);
-
-  // Update cached markers
-  arrow_marker_.lifetime = marker_lifetime_;
-  rectangle_marker_.lifetime = marker_lifetime_;
-  line_marker_.lifetime = marker_lifetime_;
-  sphere_marker_.lifetime = marker_lifetime_;
-  block_marker_.lifetime = marker_lifetime_;
-  cylinder_marker_.lifetime = marker_lifetime_;
-  text_marker_.lifetime = marker_lifetime_;
-}
-
-const rviz_colors VisualTools::getRandColor()
-{
-  std::vector<rviz_colors> all_colors;
-  
-  all_colors.push_back(RED);
-  all_colors.push_back(GREEN);
-  all_colors.push_back(BLUE);
-  all_colors.push_back(GREY);
-  all_colors.push_back(WHITE);
-  all_colors.push_back(ORANGE);
-  //all_colors.push_back(BLACK);
-  all_colors.push_back(YELLOW);
-  all_colors.push_back(PURPLE);
-  
-  int rand_num = iRand(0, all_colors.size() - 1);
-  return all_colors[ rand_num ];
-}
-
-std_msgs::ColorRGBA VisualTools::getColor(const rviz_colors &color)
-{
-  std_msgs::ColorRGBA result;
-  result.a = alpha_;
-  switch(color)
-  {
-    case RED:
-      result.r = 0.8;
-      result.g = 0.1;
-      result.b = 0.1;
-      break;
-    case GREEN:
-      result.r = 0.1;
-      result.g = 0.8;
-      result.b = 0.1;
-      break;
-    case GREY:
-      result.r = 0.9;
-      result.g = 0.9;
-      result.b = 0.9;
-      break;
-    case WHITE:
-      result.r = 1.0;
-      result.g = 1.0;
-      result.b = 1.0;
-      break;
-    case ORANGE:
-      result.r = 1.0;
-      result.g = 0.5;
-      result.b = 0.0;
-      break;
-    case TRANSLUCENT:
-      result.r = 0.1;
-      result.g = 0.1;
-      result.b = 0.8;
-      result.a = 0.3;
-      break;
-    case TRANSLUCENT2:
-      result.r = 0.1;
-      result.g = 0.1;
-      result.b = 0.1;
-      result.a = 0.1;
-      break;
-    case BLACK:
-      result.r = 0.0;
-      result.g = 0.0;
-      result.b = 0.0;
-      break;
-    case YELLOW:
-      result.r = 1.0;
-      result.g = 1.0;
-      result.b = 0.0;
-      break;
-    case PURPLE:
-      result.r = 0.597;
-      result.g = 0.0;
-      result.b = 0.597;
-      break;
-    case RAND:
-      // Make sure color is not *too* light
-      do
-      {
-        result.r = fRand(0.0,1.0);
-        result.g = fRand(0.0,1.0);
-        result.b = fRand(0.0,1.0);
-      } while (result.r + result.g + result.b < 1.5); // 3 would be white
-      break;
-    case BLUE:
-    default:
-      result.r = 0.1;
-      result.g = 0.1;
-      result.b = 0.8;
-  }
-
-  return result;
-}
-
-geometry_msgs::Vector3 VisualTools::getScale(const rviz_scales &scale, bool arrow_scale, double marker_scale)
-{
-  geometry_msgs::Vector3 result;
-  double val(0.0);
-  switch(scale)
-  {
-    case XXSMALL:
-      val = 0.005;
-      break;
-    case XSMALL:
-      val = 0.01;
-      break;
-    case SMALL:
-      val = 0.03;
-      break;
-    case REGULAR:
-      val = 0.05;
-      break;
-    case LARGE:
-      val = 0.1;
-      break;
-    case xLARGE:
-      val = 0.2;
-      break;
-    case xxLARGE:
-      val = 0.3;
-      break;
-    case xxxLARGE:
-      val = 0.4;
-      break;
-    case XLARGE:
-      val = 0.5;
-      break;
-    case XXLARGE:
-      val = 1.0;
-      break;
-    default:
-      ROS_ERROR_STREAM_NAMED("visualization_tools","Not implemented yet");
-      break;
-  }
-
-  // Allows an individual marker size factor and a size factor for all markers 
-  result.x = val * marker_scale * global_scale_;
-  result.y = val * marker_scale * global_scale_;
-  result.z = val * marker_scale * global_scale_;
-
-  // The y and z scaling is smaller for arrows
-  if (arrow_scale)
-  {
-    result.y *= 0.1;
-    result.z *= 0.1;
-  }
-
-  return result;
-}
-
-planning_scene_monitor::PlanningSceneMonitorPtr VisualTools::getPlanningSceneMonitor()
+planning_scene_monitor::PlanningSceneMonitorPtr MoveItVisualTools::getPlanningSceneMonitor()
 {
   if( !planning_scene_monitor_ )
   {
@@ -699,81 +351,7 @@ planning_scene_monitor::PlanningSceneMonitorPtr VisualTools::getPlanningSceneMon
   return planning_scene_monitor_;
 }
 
-bool VisualTools::loadSharedRobotState()
-{
-  // Get robot state
-  if (!shared_robot_state_)
-  {
-    // Check if a robot model was passed in
-    if (!robot_model_)
-    {
-      // Fall back on using planning scene monitor.
-      // Deprecated?
-      ROS_WARN_STREAM_NAMED("temp","Falling back to using planning scene monitor for loading a robot state");
-      planning_scene_monitor::PlanningSceneMonitorPtr psm = getPlanningSceneMonitor();
-      robot_model_ = psm->getRobotModel();
-    }
-    shared_robot_state_.reset(new robot_state::RobotState(robot_model_));
-  }
-
-  return true;
-}
-
-Eigen::Vector3d VisualTools::getCenterPoint(Eigen::Vector3d a, Eigen::Vector3d b)
-{
-  Eigen::Vector3d center;
-  center[0] = (a[0] + b[0]) / 2;
-  center[1] = (a[1] + b[1]) / 2;
-  center[2] = (a[2] + b[2]) / 2;
-  return center;
-}
-
-Eigen::Affine3d VisualTools::getVectorBetweenPoints(Eigen::Vector3d a, Eigen::Vector3d b)
-{
-  // from http://answers.ros.org/question/31006/how-can-a-vector3-axis-be-used-to-produce-a-quaternion/
-
-  // Goal pose:
-  Eigen::Quaterniond q;
-
-  Eigen::Vector3d axis_vector = b - a;
-  axis_vector.normalize();
-
-  Eigen::Vector3d up_vector(0.0, 0.0, 1.0);
-  Eigen::Vector3d right_axis_vector = axis_vector.cross(up_vector);
-  right_axis_vector.normalized();
-  double theta = axis_vector.dot(up_vector);
-  double angle_rotation = -1.0*acos(theta);
-
-  //-------------------------------------------
-  // Method 1 - TF - works
-  //Convert to TF
-  tf::Vector3 tf_right_axis_vector;
-  tf::vectorEigenToTF(right_axis_vector, tf_right_axis_vector);
-
-  // Create quaternion
-  tf::Quaternion tf_q(tf_right_axis_vector, angle_rotation);
-
-  // Convert back to Eigen
-  tf::quaternionTFToEigen(tf_q, q);
-  //-------------------------------------------
-  //std::cout << q.toRotationMatrix() << std::endl;
-
-  //-------------------------------------------
-  // Method 2 - Eigen - broken TODO
-  //q = Eigen::AngleAxis<double>(angle_rotation, right_axis_vector);
-  //-------------------------------------------
-  //std::cout << q.toRotationMatrix() << std::endl;
-
-  // Rotate so that vector points along line
-  Eigen::Affine3d pose;
-  q.normalize();
-  pose = q * Eigen::AngleAxisd(-0.5*M_PI, Eigen::Vector3d::UnitY());
-  pose.translation() = a;
-
-  return pose;
-}
-
-bool VisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_colors &color, const std::string &ns)
+bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_visual_tools::colors &color, const std::string &ns)
 {
   if(muted_)
     return true;
@@ -856,411 +434,7 @@ bool VisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_c
   return true;
 }
 
-bool VisualTools::publishSphere(const Eigen::Affine3d &pose, const rviz_colors color, const rviz_scales scale, const std::string& ns)
-{
-  return publishSphere(convertPose(pose), color, scale, ns);
-}
-
-bool VisualTools::publishSphere(const Eigen::Vector3d &point, const rviz_colors color, const rviz_scales scale, const std::string& ns)
-{
-  geometry_msgs::Pose pose_msg;
-  tf::pointEigenToMsg(point, pose_msg.position);
-  return publishSphere(pose_msg, color, scale, ns);
-}
-
-bool VisualTools::publishSphere(const geometry_msgs::Point &point, const rviz_colors color, const rviz_scales scale, const std::string& ns)
-{
-  geometry_msgs::Pose pose_msg;
-  pose_msg.position = point;
-  return publishSphere(pose_msg, color, scale, ns);
-}
-
-bool VisualTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color, const rviz_scales scale, const std::string& ns)
-{
-  return publishSphere(pose, color, getScale(scale, false, 0.1), ns);
-}
-
-bool VisualTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color, double scale, const std::string& ns)
-{
-  geometry_msgs::Vector3 scale_msg;
-  scale_msg.x = scale;
-  scale_msg.y = scale;
-  scale_msg.z = scale;
-  return publishSphere(pose, color, scale_msg, ns);
-}
-bool VisualTools::publishSphere(const geometry_msgs::Pose &pose, const rviz_colors color, const geometry_msgs::Vector3 scale, const std::string& ns)
-{
-  if(muted_)
-    return true; // this function will only work if we have loaded the publishers
-
-  // Set the frame ID and timestamp
-  sphere_marker_.header.stamp = ros::Time::now();
-
-  sphere_marker_.id++;
-  sphere_marker_.color = getColor(color);
-  sphere_marker_.scale = scale;
-  sphere_marker_.ns = ns;
-
-  // Update the single point with new pose
-  sphere_marker_.points[0] = pose.position;
-  sphere_marker_.colors[0] = getColor(color);
-
-  // Publish
-  loadMarkerPub(); // always check this before publishing
-  pub_rviz_marker_.publish( sphere_marker_ );
-  ros::spinOnce();
-
-  return true;
-}
-
-bool VisualTools::publishArrow(const Eigen::Affine3d &pose, const rviz_colors color, const rviz_scales scale)
-{
-  return publishArrow(convertPose(pose), color, scale);
-}
-
-bool VisualTools::publishArrow(const geometry_msgs::Pose &pose, const rviz_colors color, const rviz_scales scale)
-{
-  if(muted_)
-    return true;
-
-  // Set the frame ID and timestamp.  See the TF tutorials for information on these.
-  arrow_marker_.header.stamp = ros::Time::now();
-
-  arrow_marker_.id++;
-  arrow_marker_.pose = pose;
-  arrow_marker_.color = getColor(color);
-  arrow_marker_.scale = getScale(scale, true);
-
-  loadMarkerPub(); // always check this before publishing
-  pub_rviz_marker_.publish( arrow_marker_ );
-  ros::spinOnce();
-
-  return true;
-}
-
-bool VisualTools::publishBlock(const geometry_msgs::Pose &pose, const rviz_colors color, const double &block_size)
-{
-  if(muted_)
-    return true;
-
-  // Set the timestamp
-  block_marker_.header.stamp = ros::Time::now();
-
-  block_marker_.id++;
-
-  // Set the pose
-  block_marker_.pose = pose;
-
-  // Set marker size
-  block_marker_.scale.x = block_size;
-  block_marker_.scale.y = block_size;
-  block_marker_.scale.z = block_size;
-
-  // Set marker color
-  block_marker_.color = getColor( color );
-
-  loadMarkerPub(); // always check this before publishing
-  pub_rviz_marker_.publish( block_marker_ );
-  ros::spinOnce();
-
-  return true;
-}
-
-bool VisualTools::publishCylinder(const geometry_msgs::Pose &pose, const rviz_colors color, double height, double radius)
-{
-  if(muted_)
-    return true;
-
-  // Set the timestamp
-  cylinder_marker_.header.stamp = ros::Time::now();
-
-  cylinder_marker_.id++;
-
-  // Set the pose
-  cylinder_marker_.pose = pose;
-
-  // Set marker size
-  cylinder_marker_.scale.x = radius;
-  cylinder_marker_.scale.y = radius;
-  cylinder_marker_.scale.z = height;
-
-  // Set marker color
-  cylinder_marker_.color = getColor( color );
-
-  loadMarkerPub(); // always check this before publishing
-  pub_rviz_marker_.publish( cylinder_marker_ );
-  ros::spinOnce();
-
-  return true;
-}
-
-bool VisualTools::publishGraph(const graph_msgs::GeometryGraph &graph, const rviz_colors color, double radius)
-{
-  if(muted_)
-    return true;
-
-  // Track which pairs of nodes we've already connected since graph is bi-directional
-  typedef std::pair<std::size_t, std::size_t> node_ids;
-  std::set<node_ids> added_edges;
-  std::pair<std::set<node_ids>::iterator,bool> return_value;
-
-  Eigen::Vector3d a, b;
-  for (std::size_t i = 0; i < graph.nodes.size(); ++i)
-  {
-    for (std::size_t j = 0; j < graph.edges[i].node_ids.size(); ++j)
-    {
-      // Check if we've already added this pair of nodes (edge)
-      return_value = added_edges.insert( node_ids(i,j) );
-      if (return_value.second == false)
-      {
-        // Element already existed in set, so don't add a new collision object
-      }
-      else
-      {
-        // Create a cylinder from two points
-        a = convertPoint(graph.nodes[i]);
-        b = convertPoint(graph.nodes[graph.edges[i].node_ids[j]]);
-
-        // add other direction of edge
-        added_edges.insert( node_ids(j,i) );
-
-        // Distance between two points
-        double height = (a - b).lpNorm<2>();
-
-        // Find center point
-        Eigen::Vector3d pt_center = getCenterPoint(a, b);
-
-        // Create vector
-        Eigen::Affine3d pose;
-        pose = getVectorBetweenPoints(pt_center, b);
-
-        // Convert pose to be normal to cylindar axis
-        Eigen::Affine3d rotation;
-        rotation = Eigen::AngleAxisd(0.5*M_PI, Eigen::Vector3d::UnitY());
-        pose = pose * rotation;
-
-        // Publish individually
-        publishCylinder(convertPose(pose), color, height, radius);
-      }
-    }
-  }
-
-  return true;
-}
-
-bool VisualTools::publishRectangle(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2, const rviz_colors color)
-{
-  if(muted_)
-    return true;
-
-  // Set the timestamp
-  rectangle_marker_.header.stamp = ros::Time::now();
-
-  rectangle_marker_.id++;
-  rectangle_marker_.color = getColor(color);
-
-  // Calculate pose
-  geometry_msgs::Pose pose;
-  pose.position.x = (point1.x - point2.x) / 2.0 + point2.x;
-  pose.position.y = (point1.y - point2.y) / 2.0 + point2.y;
-  pose.position.z = (point1.z - point2.z) / 2.0 + point2.z;
-  rectangle_marker_.pose = pose;
-
-  // Calculate scale
-  rectangle_marker_.scale.x = fabs(point1.x - point2.x);
-  rectangle_marker_.scale.y = fabs(point1.y - point2.y);
-  rectangle_marker_.scale.z = fabs(point1.z - point2.z);
-
-  loadMarkerPub(); // always check this before publishing
-  pub_rviz_marker_.publish( rectangle_marker_ );
-  ros::spinOnce();
-
-  return true;
-}
-
-bool VisualTools::publishLine(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2,
-                              const rviz_colors color, const rviz_scales scale)
-{
-  if(muted_)
-    return true;
-
-  // Set the timestamp
-  line_marker_.header.stamp = ros::Time::now();
-
-  line_marker_.id++;
-  line_marker_.color = getColor(color);
-  line_marker_.scale = getScale( scale, false, 0.1 );
-
-  line_marker_.points.clear();
-  line_marker_.points.push_back(point1);
-  line_marker_.points.push_back(point2);
-
-  loadMarkerPub(); // always check this before publishing
-  pub_rviz_marker_.publish( line_marker_ );
-  ros::spinOnce();
-
-  return true;
-}
-
-bool VisualTools::publishPath(const std::vector<geometry_msgs::Point> &path, const rviz_colors color, const rviz_scales scale, const std::string& ns)
-{
-  if(muted_)
-    return true;
-
-  if (path.size() < 2)
-  {
-    ROS_WARN_STREAM_NAMED("publishPath","Skipping path because " << path.size() << " points passed in.");
-    return true;
-  }
-
-  path_marker_.header.stamp = ros::Time();
-  path_marker_.ns = ns;
-
-  // Provide a new id every call to this function
-  path_marker_.id++;
-
-  std_msgs::ColorRGBA this_color = getColor( color );
-  path_marker_.scale = getScale(scale, false, 0.25);
-  path_marker_.color = this_color;
-  path_marker_.points.clear();
-  path_marker_.colors.clear();
-
-  // Convert path coordinates
-  for( std::size_t i = 1; i < path.size(); ++i )
-  {
-    // Add the point pair to the line message
-    path_marker_.points.push_back( path[i-1] );
-    path_marker_.points.push_back( path[i] );
-    path_marker_.colors.push_back( this_color );
-    path_marker_.colors.push_back( this_color );
-  }
-
-  // Send to Rviz
-  loadMarkerPub(); // always check this before publishing
-  pub_rviz_marker_.publish( path_marker_ );
-  ros::spinOnce();
-
-  return true;
-}
-
-bool VisualTools::publishPolygon(const geometry_msgs::Polygon &polygon, const rviz_colors color, const rviz_scales scale, const std::string& ns)
-{
-  std::vector<geometry_msgs::Point> points;
-  geometry_msgs::Point temp;
-  geometry_msgs::Point first; // remember first point because we will connect first and last points for last line
-  for (std::size_t i = 0; i < polygon.points.size(); ++i)
-  {
-    temp.x = polygon.points[i].x;
-    temp.y = polygon.points[i].y;
-    temp.z = polygon.points[i].z;
-    if (i == 0)
-      first = temp;
-    points.push_back(temp);
-  }
-  points.push_back(first); // connect first and last points for last line
-
-  publishPath(points, color, scale, ns);
-}
-
-bool VisualTools::publishSpheres(const std::vector<geometry_msgs::Point> &points, const rviz_colors color, const double scale, const std::string& ns)
-{
-  geometry_msgs::Vector3 scale_vector;
-  scale_vector.x = scale;
-  scale_vector.y = scale;
-  scale_vector.z = scale;
-  publishSpheres( points, color, scale_vector, ns);
-}
-
-bool VisualTools::publishSpheres(const std::vector<geometry_msgs::Point> &points, const rviz_colors color, const rviz_scales scale, const std::string& ns)
-{
-  publishSpheres( points, color, getScale(scale, false, 0.25), ns);
-}
-
-bool VisualTools::publishSpheres(const std::vector<geometry_msgs::Point> &points, const rviz_colors color, const geometry_msgs::Vector3 &scale, const std::string& ns)
-{
-  if(muted_)
-    return true;
-
-  spheres_marker_.header.stamp = ros::Time();
-  spheres_marker_.ns = ns;
-
-  // Provide a new id every call to this function
-  spheres_marker_.id++;
-
-  std_msgs::ColorRGBA this_color = getColor( color );
-  spheres_marker_.scale = scale;
-  spheres_marker_.color = this_color;
-  //spheres_marker_.points.clear();
-  spheres_marker_.colors.clear();
-
-  spheres_marker_.points = points; // straight copy
-
-  // Convert path coordinates
-  for( std::size_t i = 0; i < points.size(); ++i )
-  {
-    spheres_marker_.colors.push_back( this_color );
-  }
-
-  // Send to Rviz
-  loadMarkerPub(); // always check this before publishing
-  pub_rviz_marker_.publish( spheres_marker_ );
-  ros::spinOnce();
-
-  return true;
-}
-
-bool VisualTools::publishText(const geometry_msgs::Pose &pose, const std::string &text, const rviz_colors &color, const rviz_scales scale, bool static_id)
-{
-  publishText(pose, text, color, getScale(scale), static_id);
-}
-
-bool VisualTools::publishText(const geometry_msgs::Pose &pose, const std::string &text, const rviz_colors &color, const geometry_msgs::Vector3 scale, bool static_id)
-{
-  if(muted_)
-    return true;
-
-  // Save the ID if this is a static ID or keep incrementing ID if not static
-  double temp_id = text_marker_.id;
-  if (static_id)
-  {
-    text_marker_.id = 0;
-  }
-  else
-  {
-    text_marker_.id++;
-  }
-
-  text_marker_.header.stamp = ros::Time::now();
-  text_marker_.header.frame_id = base_frame_;
-  text_marker_.text = text;
-  text_marker_.pose = pose;
-  text_marker_.color = getColor( color );
-  text_marker_.scale = scale;
-
-  loadMarkerPub(); // always check this before publishing
-  pub_rviz_marker_.publish( text_marker_ );
-  ros::spinOnce();
-
-  // Restore the ID count if needed
-  if (static_id)
-    text_marker_.id = temp_id;
-
-  return true;
-}
-
-bool VisualTools::publishMarker(const visualization_msgs::Marker &marker)
-{
-  if(muted_)
-    return true;
-
-  loadMarkerPub(); // always check this before publishing
-  pub_rviz_marker_.publish( marker );
-  ros::spinOnce();
-
-  return true;
-}
-
-bool VisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
+bool MoveItVisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
                                 const std::string &ee_parent_link)
 {
   if(muted_)
@@ -1288,7 +462,7 @@ bool VisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_
   return true;
 }
 
-bool VisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
+bool MoveItVisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
                                         const std::string &ee_parent_link, double animate_speed)
 {
   if(muted_)
@@ -1314,7 +488,7 @@ bool VisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Grasp>& p
   return true;
 }
 
-bool VisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, const std::string &ee_parent_link, double animate_speed)
+bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, const std::string &ee_parent_link, double animate_speed)
 {
   if(muted_)
     return true;
@@ -1380,7 +554,7 @@ bool VisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, const st
   return true;
 }
 
-bool VisualTools::publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions,
+bool MoveItVisualTools::publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions,
                                      const std::string& planning_group, double display_time)
 {
   if(muted_)
@@ -1444,7 +618,7 @@ bool VisualTools::publishIKSolutions(const std::vector<trajectory_msgs::JointTra
   return publishTrajectoryPath(trajectory_msg, true);
 }
 
-bool VisualTools::publishRemoveAllCollisionObjects()
+bool MoveItVisualTools::publishRemoveAllCollisionObjects()
 {
   // Publish an empty REMOVE message so as to remove all of them
 
@@ -1467,7 +641,7 @@ bool VisualTools::publishRemoveAllCollisionObjects()
   return true;
 }
 
-bool VisualTools::removeAllCollisionObjectsPS()
+bool MoveItVisualTools::removeAllCollisionObjectsPS()
 {
   // Clean up old collision objects
   moveit_msgs::CollisionObject remove_object;
@@ -1477,7 +651,7 @@ bool VisualTools::removeAllCollisionObjectsPS()
   processCollisionObjectMsg(remove_object);
 }
 
-bool VisualTools::cleanupCO(std::string name)
+bool MoveItVisualTools::cleanupCO(std::string name)
 {
   // Clean up old collision objects
   moveit_msgs::CollisionObject co;
@@ -1492,7 +666,7 @@ bool VisualTools::cleanupCO(std::string name)
   return true;
 }
 
-bool VisualTools::cleanupACO(const std::string& name)
+bool MoveItVisualTools::cleanupACO(const std::string& name)
 {
   // Clean up old attached collision object
   moveit_msgs::AttachedCollisionObject aco;
@@ -1510,7 +684,7 @@ bool VisualTools::cleanupACO(const std::string& name)
   return true;
 }
 
-bool VisualTools::attachCO(const std::string& name, const std::string& ee_parent_link)
+bool MoveItVisualTools::attachCO(const std::string& name, const std::string& ee_parent_link)
 {
   // Clean up old attached collision object
   moveit_msgs::AttachedCollisionObject aco;
@@ -1529,7 +703,7 @@ bool VisualTools::attachCO(const std::string& name, const std::string& ee_parent
   return true;
 }
 
-bool VisualTools::publishCollisionFloor(double z, std::string plane_name)
+bool MoveItVisualTools::publishCollisionFloor(double z, std::string plane_name)
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
@@ -1568,7 +742,7 @@ bool VisualTools::publishCollisionFloor(double z, std::string plane_name)
   return true;
 }
 
-bool VisualTools::publishCollisionBlock(geometry_msgs::Pose block_pose, std::string block_name, double block_size)
+bool MoveItVisualTools::publishCollisionBlock(geometry_msgs::Pose block_pose, std::string block_name, double block_size)
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
@@ -1594,12 +768,12 @@ bool VisualTools::publishCollisionBlock(geometry_msgs::Pose block_pose, std::str
   return true;
 }
 
-bool VisualTools::publishCollisionCylinder(geometry_msgs::Point a, geometry_msgs::Point b, std::string object_name, double radius)
+bool MoveItVisualTools::publishCollisionCylinder(geometry_msgs::Point a, geometry_msgs::Point b, std::string object_name, double radius)
 {
   return publishCollisionCylinder(convertPoint(a), convertPoint(b), object_name, radius);
 }
 
-bool VisualTools::publishCollisionCylinder(Eigen::Vector3d a, Eigen::Vector3d b, std::string object_name, double radius)
+bool MoveItVisualTools::publishCollisionCylinder(Eigen::Vector3d a, Eigen::Vector3d b, std::string object_name, double radius)
 {
   // Distance between two points
   double height = (a - b).lpNorm<2>();
@@ -1619,12 +793,12 @@ bool VisualTools::publishCollisionCylinder(Eigen::Vector3d a, Eigen::Vector3d b,
   return publishCollisionCylinder(pose, object_name, radius, height);
 }
 
-bool VisualTools::publishCollisionCylinder(Eigen::Affine3d object_pose, std::string object_name, double radius, double height)
+bool MoveItVisualTools::publishCollisionCylinder(Eigen::Affine3d object_pose, std::string object_name, double radius, double height)
 {
   return publishCollisionCylinder(convertPose(object_pose), object_name, radius, height);
 }
 
-bool VisualTools::publishCollisionCylinder(geometry_msgs::Pose object_pose, std::string object_name, double radius, double height)
+bool MoveItVisualTools::publishCollisionCylinder(geometry_msgs::Pose object_pose, std::string object_name, double radius, double height)
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
@@ -1649,7 +823,7 @@ bool VisualTools::publishCollisionCylinder(geometry_msgs::Pose object_pose, std:
   return true;
 }
 
-bool VisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph &graph, const std::string &object_name, double radius)
+bool MoveItVisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph &graph, const std::string &object_name, double radius)
 {
   ROS_INFO_STREAM_NAMED("publishCollisionGraph","Preparing to create collision graph");
 
@@ -1723,7 +897,7 @@ bool VisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph &graph, 
   return true;
 }
 
-void VisualTools::getCollisionWallMsg(double x, double y, double angle, double width, const std::string name,
+void MoveItVisualTools::getCollisionWallMsg(double x, double y, double angle, double width, const std::string name,
                                       moveit_msgs::CollisionObject &collision_obj)
 {
   collision_obj.header.stamp = ros::Time::now();
@@ -1763,7 +937,7 @@ void VisualTools::getCollisionWallMsg(double x, double y, double angle, double w
   collision_obj.primitive_poses[0] = rec_pose;
 }
 
-bool VisualTools::publishCollisionWall(double x, double y, double angle, double width, const std::string name)
+bool MoveItVisualTools::publishCollisionWall(double x, double y, double angle, double width, const std::string name)
 {
   moveit_msgs::CollisionObject collision_obj;
   getCollisionWallMsg(x, y, angle, width, name, collision_obj);
@@ -1775,7 +949,7 @@ bool VisualTools::publishCollisionWall(double x, double y, double angle, double 
   return true;
 }
 
-bool VisualTools::publishCollisionTable(double x, double y, double angle, double width, double height,
+bool MoveItVisualTools::publishCollisionTable(double x, double y, double angle, double width, double height,
                                         double depth, const std::string name)
 {
   geometry_msgs::Pose table_pose;
@@ -1816,7 +990,7 @@ bool VisualTools::publishCollisionTable(double x, double y, double angle, double
   return true;
 }
 
-bool VisualTools::loadCollisionSceneFromFile(const std::string &path, double x_offset, double y_offset)
+bool MoveItVisualTools::loadCollisionSceneFromFile(const std::string &path, double x_offset, double y_offset)
 {
   {
     // Load directly to the planning scene
@@ -1840,7 +1014,7 @@ bool VisualTools::loadCollisionSceneFromFile(const std::string &path, double x_o
   getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
 }
 
-bool VisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
+bool MoveItVisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
                                          const std::string &group_name, double display_time)
 {
   loadSharedRobotState();
@@ -1870,7 +1044,7 @@ bool VisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryP
   return publishTrajectoryPath(trajectory_msg, true);
 }
 
-bool VisualTools::publishTrajectoryPath(const robot_trajectory::RobotTrajectory& trajectory, bool blocking)
+bool MoveItVisualTools::publishTrajectoryPath(const robot_trajectory::RobotTrajectory& trajectory, bool blocking)
 {
   moveit_msgs::RobotTrajectory trajectory_msg;
   trajectory.getRobotTrajectoryMsg(trajectory_msg);
@@ -1892,7 +1066,7 @@ bool VisualTools::publishTrajectoryPath(const robot_trajectory::RobotTrajectory&
   publishTrajectoryPath(trajectory_msg, blocking);
 }
 
-bool VisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg, bool blocking)
+bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg, bool blocking)
 {
   loadSharedRobotState();
 
@@ -1935,12 +1109,12 @@ bool VisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& traj
   return true;
 }
 
-bool VisualTools::publishRobotState(const robot_state::RobotStatePtr &robot_state)
+bool MoveItVisualTools::publishRobotState(const robot_state::RobotStatePtr &robot_state)
 {
   publishRobotState(*robot_state.get());
 }
 
-bool VisualTools::publishRobotState(const robot_state::RobotState &robot_state)
+bool MoveItVisualTools::publishRobotState(const robot_state::RobotState &robot_state)
 {
   robot_state::robotStateToRobotStateMsg(robot_state, display_robot_msg_.state);
 
@@ -1951,7 +1125,7 @@ bool VisualTools::publishRobotState(const robot_state::RobotState &robot_state)
   return true;
 }
 
-bool VisualTools::publishRobotState(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
+bool MoveItVisualTools::publishRobotState(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
                                     const std::string &group_name)
 {
   // Always load the robot state before using
@@ -1967,7 +1141,7 @@ bool VisualTools::publishRobotState(const trajectory_msgs::JointTrajectoryPoint&
   return true;
 }
 
-bool VisualTools::hideRobot()
+bool MoveItVisualTools::hideRobot()
 {
   // Always load the robot state before using
   loadSharedRobotState();
@@ -1979,265 +1153,4 @@ bool VisualTools::hideRobot()
   publishRobotState(shared_robot_state_);
 }
 
-bool VisualTools::publishTest()
-{
-  // Create pose
-  geometry_msgs::Pose pose1;
-  geometry_msgs::Pose pose2;
-
-  // Test all shapes ----------
-
-  ROS_INFO_STREAM_NAMED("test","Publishing Arrow");
-  generateRandomPose(pose1);
-  publishArrow(pose1, moveit_visual_tools::RAND);
-  ros::Duration(1.0).sleep();
-
-  ROS_INFO_STREAM_NAMED("test","Publishing Sphere");
-  generateRandomPose(pose1);
-  publishSphere(pose1, moveit_visual_tools::RAND);
-  ros::Duration(1.0).sleep();
-
-  ROS_INFO_STREAM_NAMED("test","Publishing Rectangle");
-  generateRandomPose(pose1);
-  generateRandomPose(pose2);
-  publishRectangle(pose1.position, pose2.position, moveit_visual_tools::RAND);
-  ros::Duration(1.0).sleep();
-
-  ROS_INFO_STREAM_NAMED("test","Publishing Line");
-  generateRandomPose(pose1);
-  generateRandomPose(pose2);
-  publishLine(pose1.position, pose2.position, moveit_visual_tools::RAND);
-  ros::Duration(1.0).sleep();
-
-  ROS_INFO_STREAM_NAMED("test","Publishing Block");
-  generateRandomPose(pose1);
-  publishBlock(pose1, moveit_visual_tools::RAND);
-  ros::Duration(1.0).sleep();
-
-  ROS_INFO_STREAM_NAMED("test","Publishing Cylinder");
-  generateRandomPose(pose1);
-  publishCylinder(pose1, moveit_visual_tools::RAND);
-  ros::Duration(1.0).sleep();
-
-  ROS_INFO_STREAM_NAMED("test","Publishing Text");
-  generateRandomPose(pose1);
-  publishText(pose1, "Test", moveit_visual_tools::RAND);
-  ros::Duration(1.0).sleep();
-
-  return true;
-}
-
-geometry_msgs::Pose VisualTools::convertPose(const Eigen::Affine3d &pose)
-{
-  geometry_msgs::Pose pose_msg;
-  tf::poseEigenToMsg(pose, pose_msg);
-  return pose_msg;
-}
-
-Eigen::Affine3d VisualTools::convertPose(const geometry_msgs::Pose &pose)
-{
-  Eigen::Affine3d pose_eigen;
-  tf::poseMsgToEigen(pose, pose_eigen);
-  return pose_eigen;
-}
-
-Eigen::Affine3d VisualTools::convertPoint32ToPose(const geometry_msgs::Point32 &point)
-{
-  Eigen::Affine3d pose_eigen = Eigen::Affine3d::Identity();
-  pose_eigen.translation().x() = point.x;
-  pose_eigen.translation().y() = point.y;
-  pose_eigen.translation().z() = point.z;
-  return pose_eigen;
-}
-
-geometry_msgs::Pose VisualTools::convertPointToPose(const geometry_msgs::Point &point)
-{
-  geometry_msgs::Pose pose_msg;
-  pose_msg.position = point;
-  return pose_msg;
-}
-
-geometry_msgs::Point convertPoseToPoint(const Eigen::Affine3d &pose)
-{
-  geometry_msgs::Pose pose_msg;
-  tf::poseEigenToMsg(pose, pose_msg);
-  return pose_msg.position;
-}
-
-Eigen::Vector3d VisualTools::convertPoint(const geometry_msgs::Point &point)
-{
-  Eigen::Vector3d point_eigen;
-  point_eigen[0] = point.x;
-  point_eigen[1] = point.y;
-  point_eigen[2] = point.z;
-  return point_eigen;
-}
-
-Eigen::Vector3d VisualTools::convertPoint32(const geometry_msgs::Point32 &point)
-{
-  Eigen::Vector3d point_eigen;
-  point_eigen[0] = point.x;
-  point_eigen[1] = point.y;
-  point_eigen[2] = point.z;
-  return point_eigen;
-}
-
-geometry_msgs::Point32 VisualTools::convertPoint32(const Eigen::Vector3d &point)
-{
-  geometry_msgs::Point32 point_msg;
-  point_msg.x = point[0];
-  point_msg.y = point[1];
-  point_msg.z = point[2];
-  return point_msg;
-}
-
-void VisualTools::generateRandomPose(geometry_msgs::Pose& pose)
-{
-  // Position
-  pose.position.x = dRand(0, 1);
-  pose.position.y = dRand(0, 1);
-  pose.position.z = dRand(0, 1);
-
-  // Orientation on place
-  double angle = M_PI * dRand(0.1,1.0);
-  Eigen::Quaterniond quat(Eigen::AngleAxis<double>(double(angle), Eigen::Vector3d::UnitZ()));
-  pose.orientation.x = quat.x();
-  pose.orientation.y = quat.y();
-  pose.orientation.z = quat.z();
-  pose.orientation.w = quat.w();
-}
-
-double VisualTools::dRand(double dMin, double dMax)
-{
-  double d = (double)rand() / RAND_MAX;
-  return dMin + d * (dMax - dMin);
-}
-
-float VisualTools::fRand(float dMin, float dMax)
-{
-  float d = (float)rand() / RAND_MAX;
-  return dMin + d * (dMax - dMin);
-}
-
-int VisualTools::iRand(int min, int max)
-{
-  int n = max - min + 1;
-  int remainder = RAND_MAX % n;
-  int x;
-  do
-  {
-    x = rand();
-  }
-  while (x >= RAND_MAX - remainder);
-  return min + x % n;
-}
-
-void VisualTools::print()
-{
-  ROS_WARN_STREAM_NAMED("visual_tools","Debug Visual Tools variable values:");
-  std::cout << "marker_topic_: " << marker_topic_ << std::endl;
-  std::cout << "base_frame_: " << base_frame_ << std::endl;
-  std::cout << "floor_to_base_height_: " << floor_to_base_height_ << std::endl;
-  std::cout << "marker_lifetime_: " << marker_lifetime_.toSec() << std::endl;
-  std::cout << "muted_: " << muted_ << std::endl;
-  std::cout << "alpha_: " << alpha_ << std::endl;
-}
-
 } // namespace
-
-
-/**
- * \brief Move the robot arm to the ik solution in rviz
- * \param joint_values - the in-order list of values to set the robot's joints
- * \return true if it is successful
- *
- */
-/*
-  bool VisualTools::publishPlanningScene(std::vector<double> joint_values)
-  {
-  if(muted_)
-  return true; // this function will only work if we have loaded the publishers
-
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing planning scene");
-
-  // Output debug
-  //ROS_INFO_STREAM_NAMED("visual_tools","Joint values being sent to planning scene:");
-  //std::copy(joint_values.begin(),joint_values.end(), std::ostream_iterator<double>(std::cout, "\n"));
-
-  // Update planning scene
-  robot_state::JointStateGroup* joint_state_group = getPlanningSceneMonitor()->getPlanningScene()->getCurrentStateNonConst()
-  .getJointStateGroup(planning_group_name_);
-  joint_state_group->setVariableValues(joint_values);
-
-  //    getPlanningSceneMonitor()->updateFrameTransforms();
-  getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
-
-  return true;
-  }
-*/
-
-/**
- * \brief Publish an marker of a mesh to rviz
- * \return true if it is successful
- *
- bool publishMesh(const geometry_msgs::Pose &pose, const rviz_colors &color = WHITE,
- const std::string &ns="mesh")
- {
- if(muted_)
- return true; // this function will only work if we have loaded the publishers
-
- visualization_msgs::Marker marker;
- // Set the frame ID and timestamp.  See the TF tutorials for information on these.
- marker.header.frame_id = base_frame_;
- marker.header.stamp = ros::Time::now();
-
- // Set the namespace and id for this marker.  This serves to create a unique ID
- marker.ns = "Mesh";
-
- // Set the marker type.
- marker.type = visualization_msgs::Marker::MESH_RESOURCE;
- marker.mesh_resource = "package://clam_description/stl/gripper_base_link.STL";
-
- // Set the marker action.  Options are ADD and DELETE
- marker.action = visualization_msgs::Marker::ADD;
- marker.id = 0;
-
- marker.pose.position.x = x;
- marker.pose.position.y = y;
- marker.pose.position.z = z;
-
- marker.pose.orientation.x = qx;
- marker.pose.orientation.y = qy;
- marker.pose.orientation.z = qz;
- marker.pose.orientation.w = qw;
-
- marker.scale.x = 0.001;
- marker.scale.y = 0.001;
- marker.scale.z = 0.001;
-
- marker.color = getColor( RED );
-
- // Make line color
- std_msgs::ColorRGBA color = getColor( RED );
-
- // Point
- geometry_msgs::Point point_a;
- point_a.x = x;
- point_a.y = y;
- point_a.z = z;
-
- // Add the point pair to the line message
- marker.points.push_back( point_a );
- marker.colors.push_back( color );
-
- marker.lifetime = marker_lifetime_;
-
- loadMarkerPub(); // always check this before publishing
- pub_rviz_marker_.publish( marker );
- ros::spinOnce();
-
- return true;
- }
-*/
-
-
