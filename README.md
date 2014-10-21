@@ -1,6 +1,8 @@
 MoveIt! Visual Tools
 ==========================
 
+**NOTE: in ROS Indigo API has changed significantly, see 'Upgrade Notes' below
+
 Helper functions for displaying and debugging MoveIt! data in Rviz via published markers, trajectories, and MoveIt! collision objects. It is sometimes hard to understand everything that is going on internally with MoveIt!, but using these quick convenience functions allows one to easily visualize their code.
 
 This package includes:
