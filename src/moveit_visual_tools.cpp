@@ -1834,7 +1834,8 @@ bool VisualTools::loadCollisionSceneFromFile(const std::string &path, double x_o
       std::ifstream fin(path.c_str());
       if (fin.good())
       {
-        scene->loadGeometryFromStream(fin, x_offset, y_offset);
+        //scene->loadGeometryFromStream(fin, x_offset, y_offset);
+        scene->loadGeometryFromStream(fin);
         fin.close();
         ROS_INFO("Loaded scene geometry from '%s'", path.c_str());
       }
