@@ -43,7 +43,7 @@
 #ifndef MOVEIT_VISUAL_TOOLS__MOVEIT_VISUAL_TOOLS_H_
 #define MOVEIT_VISUAL_TOOLS__MOVEIT_VISUAL_TOOLS_H_
 
-// Rviz
+// Rviz Visualization Tool
 #include <rviz_visual_tools/visual_tools.h>
 
 // MoveIt
@@ -130,6 +130,13 @@ public:
   bool loadPlanningSceneMonitor();
 
   /**
+   * \brief Publish any collision object to the planning scene
+   * \param collision object message
+   * \return true on success
+   */
+  bool publishCollisionObjectMsg(moveit_msgs::CollisionObject msg);
+
+  /**
    * \brief Skip a ROS message call by sending directly to planning scene monitor
    * \param collision object message
    * \return true on success
@@ -147,6 +154,12 @@ public:
    * \return true if successful in loading
    */
   bool loadRobotMarkers();
+
+  /**
+   * \brief Allow robot state to be altered.
+   * \return shared pointer to robot state
+   */
+  robot_state::RobotStatePtr& getSharedRobotState();
 
   /**
    * \brief Call this once at begining to load the robot marker
