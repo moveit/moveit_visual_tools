@@ -2,6 +2,20 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Updated README
+* API Upgrade Notes
+* Renamed to have 'MoveIt' prefix in class and file name, moved base functionality to rviz_visual_tools
+* Added new publishSphere function and publish_sphere test script
+* Created better test script
+* Better static_id handling for publishText
+* Added mainpage for API docs
+* Enabled colors
+* Improved integer random num generation
+* New publishSpheres functions
+* Contributors: Dave Coleman
+
 1.3.0 (2014-09-17)
 ------------------
 * Added new getRandColor() function
