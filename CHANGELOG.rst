@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2014-10-27)
+------------------
 * Updated README
 * API Upgrade Notes
 * Renamed to have 'MoveIt' prefix in class and file name, moved base functionality to rviz_visual_tools
