@@ -47,7 +47,9 @@ See [VisualTools Class Reference](http://docs.ros.org/indigo/api/moveit_visual_t
 
 ## Upgrade Notes
 
-We recently did a major refactor of moveit_visual_tools that caused some API breaking changes. To upgrade, do the following or use the upgrade script below:
+We recently did a major refactor of moveit_visual_tools that caused some API breaking changes. If you do not want to bother, you can still build the old version from source using the branch ``indigo-devel-old-api``.
+
+To upgrade, do the following (or use the upgrade script further down):
 
 Orignal API                                    | New API
 ---------------------------------------------- | ------------------------------------------------------
