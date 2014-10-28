@@ -1,6 +1,8 @@
 MoveIt! Visual Tools
 ==========================
 
+**NOTE: in ROS Indigo API has changed significantly, see 'Upgrade Notes' below**
+
 Helper functions for displaying and debugging MoveIt! data in Rviz via published markers, trajectories, and MoveIt! collision objects. It is sometimes hard to understand everything that is going on internally with MoveIt!, but using these quick convenience functions allows one to easily visualize their code.
 
 This package includes:
@@ -42,6 +44,30 @@ You should see something like:
 ## Code API
 
 See [VisualTools Class Reference](http://docs.ros.org/indigo/api/moveit_visual_tools/html/classmoveit__visual__tools_1_1VisualTools.html)
+
+## Upgrade Notes
+
+We recently did a major refactor of moveit_visual_tools that caused some API breaking changes. To upgrade, do the following or use the upgrade script below:
+
+Orignal API                                    | New API
+---------------------------------------------- | ------------------------------------------------------
+#include \<moveit_visual_tools/visual_tools.h\>  | #include \<moveit_visual_tools/moveit_visual_tools.h\>
+moveit_visual_tools::VisualTools               | moveit_visual_tools::MoveItVisualTools
+moveit_visual_tools::VisualToolsPtr            | moveit_visual_tools::MoveItVisualToolsPtr
+moveit_visual_tools::rviz_colors               | rviz_visual_tools::colors
+moveit_visual_tools::rviz_scales               | rviz_visual_tools::scales
+
+### Auto Upgrade Script
+
+Run each line in order in the ``/src`` of your catkin workspace:
+
+```
+findreplace() { grep -lr -e "$1" * | xargs sed -i "s/$1/$2/g" ;}
+findreplace '<moveit_visual_tools\/visual_tools.h>' '<moveit_visual_tools\/moveit_visual_tools.h>'
+findreplace moveit_visual_tools::VisualTools moveit_visual_tools::MoveItVisualTools
+findreplace 'moveit_visual_tools::' 'rviz_visual_tools::'
+findreplace 'rviz_visual_tools::MoveItVisualTools' 'moveit_visual_tools::MoveItVisualTools'
+```
 
 ## Usage
 
