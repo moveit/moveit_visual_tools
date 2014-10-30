@@ -217,6 +217,7 @@ bool MoveItVisualTools::loadEEMarker(const std::string& ee_group_name, const std
 {
   // Always load the robot state before using
   loadSharedRobotState();
+  shared_robot_state_->setToDefaultValues(); // make sure the ee joint values are reasonable
 
   // Clear old EE markers
   marker_poses_.clear();
@@ -448,7 +449,7 @@ bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const 
 }
 
 bool MoveItVisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
-                                const std::string &ee_parent_link)
+                                      const std::string &ee_parent_link, double animate_speed)
 {
   if(muted_)
   {
@@ -465,11 +466,11 @@ bool MoveItVisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& pos
     if( !ros::ok() )  // Check that ROS is still ok and that user isn't trying to quit
       break;
 
-    ROS_DEBUG_STREAM_NAMED("grasp","Visualizing grasp pose " << i);
+    //ROS_DEBUG_STREAM_NAMED("grasp","Visualizing grasp pose " << i);
 
     publishEEMarkers(possible_grasps[i].grasp_pose.pose);
 
-    ros::Duration(0.1).sleep();
+    ros::Duration(animate_speed).sleep();
   }
 
   return true;
@@ -748,11 +749,11 @@ bool MoveItVisualTools::publishCollisionFloor(double z, std::string plane_name)
   collision_obj.plane_poses.resize(1);
   collision_obj.plane_poses[0] = floor_pose;
 
-  ROS_INFO_STREAM_NAMED("pick_place","CollisionObject: \n " << collision_obj);
+  //ROS_INFO_STREAM_NAMED("visual_tools","CollisionObject: \n " << collision_obj);
 
   processCollisionObjectMsg(collision_obj);
 
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Published collision object " << plane_name);
+  //ROS_DEBUG_STREAM_NAMED("visual_tools","Published collision object " << plane_name);
   return true;
 }
 
@@ -772,7 +773,7 @@ bool MoveItVisualTools::publishCollisionBlock(geometry_msgs::Pose block_pose, st
   collision_obj.primitive_poses.resize(1);
   collision_obj.primitive_poses[0] = block_pose;
 
-  ROS_INFO_STREAM_NAMED("pick_place","CollisionObject: \n " << collision_obj);
+  //ROS_INFO_STREAM_NAMED("visual_tools","CollisionObject: \n " << collision_obj);
 
   loadCollisionPub(); // always call this before publishing
   pub_collision_obj_.publish(collision_obj);
@@ -827,7 +828,7 @@ bool MoveItVisualTools::publishCollisionCylinder(geometry_msgs::Pose object_pose
   collision_obj.primitive_poses.resize(1);
   collision_obj.primitive_poses[0] = object_pose;
 
-  //ROS_INFO_STREAM_NAMED("pick_place","CollisionObject: \n " << collision_obj);
+  //ROS_INFO_STREAM_NAMED("visual_tools","CollisionObject: \n " << collision_obj);
 
   loadCollisionPub(); // always call this before publishing
   pub_collision_obj_.publish(collision_obj);

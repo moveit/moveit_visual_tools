@@ -198,9 +198,10 @@ public:
    * \brief Show grasps generated from moveit_simple_grasps or other MoveIt Grasp message sources
    * \param possible_grasps - a set of grasp positions to visualize
    * \param ee_parent_link - end effector's attachment link
+   * \param animate_speed - how fast the gripper approach is animated, optional
    */
   bool publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
-                     const std::string &ee_parent_link);
+                     const std::string &ee_parent_link, double animate_speed = 0.1);
 
   /**
    * \brief Display an animated vector of grasps including its approach movement in Rviz
