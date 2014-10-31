@@ -58,7 +58,7 @@ namespace moveit_visual_tools
 MoveItVisualTools::MoveItVisualTools(const std::string& base_frame,
                                      const std::string& marker_topic,
                                      planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
-  :  VisualTools::VisualTools(base_frame, marker_topic),
+  :  RvizVisualTools::RvizVisualTools(base_frame, marker_topic),
      planning_scene_monitor_(planning_scene_monitor)
 {
 
@@ -67,7 +67,7 @@ MoveItVisualTools::MoveItVisualTools(const std::string& base_frame,
 MoveItVisualTools::MoveItVisualTools(const std::string& base_frame,
                                      const std::string& marker_topic,
                                      robot_model::RobotModelConstPtr robot_model)
-  :  VisualTools::VisualTools(base_frame, marker_topic),
+  :  RvizVisualTools::RvizVisualTools(base_frame, marker_topic),
      robot_model_(robot_model)
 {
 
