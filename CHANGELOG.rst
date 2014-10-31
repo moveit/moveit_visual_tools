@@ -2,6 +2,17 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix for upstream change of RvizVisualTools
+* Set animation speed of grasps
+* Fix publishing end effector
+* New publishCollisionObjectMsg() function
+* New getSharedRobotState() accessor function
+* Consolidated publish marker functions
+* Fixed loadEEMarker() to be called more than once
+* Contributors: Dave Coleman
+
 2.0.0 (2014-10-27)
 ------------------
 * Updated README
