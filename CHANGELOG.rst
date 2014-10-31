@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.1.0 (2014-10-31)
+------------------
 * Fix for upstream change of RvizVisualTools
 * Set animation speed of grasps
 * Fix publishing end effector
