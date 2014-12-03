@@ -1,0 +1,24 @@
+<launch>
+  
+  <arg name="debug" default="false" />
+  <arg unless="$(arg debug)" name="launch_prefix" value="" />
+  <arg     if="$(arg debug)" name="launch_prefix" value="gdb --ex run --args" />
+
+  <!-- Load universal robot description format (URDF) -->
+  <param name="robot_description" textfile="$(find moveit_visual_tools)/resources/rrbot.urdf"/>
+  <param name="robot_description_semantic" textfile="$(find moveit_visual_tools)/resources/rrbot.srdf" />
+
+  <!-- Load Rviz -->
+  <node name="$(anon rviz)" pkg="rviz" type="rviz" respawn="false"
+	args="-d $(find moveit_visual_tools)/launch/visual_tools_test.rviz" output="screen">
+  </node>  
+
+  <!--Broadcast static tf to hide errors -->
+  <node pkg="tf" type="static_transform_publisher" name="virtual_joint_broadcaster_0" args="0 0 0 0 0 0 /world /base 100" />
+
+  <!-- Start test -->
+  <node name="collision_objects_test" launch-prefix="$(arg launch_prefix)" pkg="moveit_visual_tools" 
+	type="collision_objects_test" output="screen">
+  </node>
+
+</launch>

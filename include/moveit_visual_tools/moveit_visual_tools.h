@@ -53,7 +53,6 @@
 #include <moveit/macros/deprecation.h>
 
 // Messages
-//#include <geometry_msgs/Polygon.h>
 #include <trajectory_msgs/JointTrajectory.h>
 
 namespace moveit_visual_tools
@@ -130,18 +129,11 @@ public:
   bool loadPlanningSceneMonitor();
 
   /**
-   * \brief Publish any collision object to the planning scene
-   * \param collision object message
-   * \return true on success
-   */
-  bool publishCollisionObjectMsg(moveit_msgs::CollisionObject msg);
-
-  /**
    * \brief Skip a ROS message call by sending directly to planning scene monitor
    * \param collision object message
    * \return true on success
    */
-  bool processCollisionObjectMsg(moveit_msgs::CollisionObject msg);
+  bool processCollisionObjectMsg(const moveit_msgs::CollisionObject& msg);
 
   /**
    * \brief Load robot state only as needed
@@ -172,7 +164,6 @@ public:
   /**
    * \brief Load publishers as needed
    */
-  void loadCollisionPub();
   void loadAttachedPub();
   void loadPlanningPub();
   void loadTrajectoryPub();
@@ -254,7 +245,7 @@ public:
    * \param Name of object
    * \return true on sucess
    */
-  bool cleanupCO(std::string name);
+  bool cleanupCO(const std::string& name);
 
   /**
    * \brief Remove an active collision object from the planning scene
@@ -277,7 +268,7 @@ public:
    * \param name of floor
    * \return true on success
    */
-  bool publishCollisionFloor(double z, std::string plane_name);
+  bool publishCollisionFloor(double z = 0.0, const std::string& plane_name = "Floor");
 
   /**
    * \brief Create a MoveIt Collision block at the given pose
@@ -286,7 +277,17 @@ public:
    * \param size - height=width=depth=size
    * \return true on sucess
    **/
-  bool publishCollisionBlock(geometry_msgs::Pose block_pose, std::string block_name, double block_size);
+  bool publishCollisionBlock(const geometry_msgs::Pose& block_pose, const std::string& block_name, double block_size);
+
+  /**
+   * \brief Create a MoveIt Collision block at the given pose
+   * \param point1 - top left of rectangle
+   * \param point2 - bottom right of rectangle
+   * \param name - semantic name of MoveIt collision object
+   * \return true on sucess
+   **/
+  bool publishCollisionRectangle(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2, 
+                                 const std::string& block_name);
 
   /**
    * \brief Create a MoveIt Collision cylinder between two points
@@ -296,8 +297,10 @@ public:
    * \param radius - size of cylinder
    * \return true on sucess
    */
-  bool publishCollisionCylinder(geometry_msgs::Point a, geometry_msgs::Point b, std::string object_name, double radius);
-  bool publishCollisionCylinder(Eigen::Vector3d a, Eigen::Vector3d b, std::string object_name, double radius);
+  bool publishCollisionCylinder(const geometry_msgs::Point &a, const geometry_msgs::Point &b, 
+                                const std::string& object_name, double radius);
+  bool publishCollisionCylinder(const Eigen::Vector3d &a, const Eigen::Vector3d &b, 
+                                const std::string& object_name, double radius);
 
   /**
    * \brief Create a MoveIt Collision cylinder with a center point pose
@@ -307,8 +310,8 @@ public:
    * \param height - size of cylinder
    * \return true on sucess
    */
-  bool publishCollisionCylinder(Eigen::Affine3d object_pose, std::string object_name, double radius, double height);
-  bool publishCollisionCylinder(geometry_msgs::Pose object_pose, std::string object_name, double radius, double height);
+  bool publishCollisionCylinder(const Eigen::Affine3d& object_pose, const std::string& object_name, double radius, double height);
+  bool publishCollisionCylinder(const geometry_msgs::Pose& object_pose, const std::string& object_name, double radius, double height);
 
   /**
    * \brief Publish a connected birectional graph
@@ -356,6 +359,12 @@ public:
    * \return true on success
    */
   bool loadCollisionSceneFromFile(const std::string &path, double x_offset = 0, double y_offset = 0);
+
+  /**
+   * \brief Simple tests for collision testing
+   * \return true on success
+   */
+  bool publishCollisionTests();
 
   /**
    * \brief Move a joint group in MoveIt for visualization

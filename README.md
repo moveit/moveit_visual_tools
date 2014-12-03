@@ -40,6 +40,10 @@ To see random shapes generated in Rviz:
 You should see something like:
 
 <img align="right" src="https://raw.github.com/davetcoleman/moveit_visual_tools/indigo-devel/resources/screenshot.png" />
+
+You can also test the collision objects generation:
+
+    roslaunch moveit_visual_tools collision_objects_test.launch
 	
 ## Code API
 

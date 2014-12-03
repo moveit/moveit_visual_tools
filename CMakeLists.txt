@@ -64,6 +64,12 @@ target_link_libraries(moveit_visual_tools_test
   ${catkin_LIBRARIES} ${PROJECT_NAME}
 )
 
+# Test executable
+add_executable(collision_objects_test src/collision_objects_test.cpp)
+target_link_libraries(collision_objects_test 
+  ${catkin_LIBRARIES} ${PROJECT_NAME}
+)
+
 # Install
 install(TARGETS ${PROJECT_NAME} 
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
