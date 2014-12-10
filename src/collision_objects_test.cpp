@@ -43,6 +43,9 @@
 // For visualizing things in rviz
 #include <moveit_visual_tools/moveit_visual_tools.h>
 
+// MoveIt
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+
 namespace moveit_visual_tools
 {
 
@@ -60,6 +63,9 @@ private:
 
   // For visualizing things in rviz
   moveit_visual_tools::MoveItVisualToolsPtr visual_tools_;
+
+  // MoveIt Components
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
 public:
 
@@ -90,8 +96,7 @@ public:
   {
     // Allows us to sycronize to Rviz and also publish collision objects to ourselves
     ROS_DEBUG_STREAM_NAMED("r2_demos","Loading Planning Scene Monitor");
-    planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(planning_scene_, ROBOT_DESCRIPTION,
-                                                                                   boost::shared_ptr<tf::Transformer>(), "r2_demos"));
+    planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(ROBOT_DESCRIPTION, boost::shared_ptr<tf::Transformer>()));
     ros::spinOnce();
     ros::Duration(0.5).sleep();
 
