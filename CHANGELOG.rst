@@ -30,7 +30,7 @@ Changelog for package moveit_visual_tools
 1.3.0 (2014-09-17)
 ------------------
 * Added new getRandColor() function
-* Added TRANSLUCENT2 color
+* Added TRANSLUCENT color
 * Added two new publishSphere() functions
 * New convertPointToPose function
 * Reduced sleep timer for starting all publishers from 0.5 seconds to 0.2 seconds

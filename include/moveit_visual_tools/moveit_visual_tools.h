@@ -48,11 +48,14 @@
 
 // MoveIt
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit_msgs/Grasp.h>
-#include <moveit_msgs/DisplayRobotState.h>
 #include <moveit/macros/deprecation.h>
 
-// Messages
+// MoveIt Messages
+#include <moveit_msgs/Grasp.h>
+#include <moveit_msgs/DisplayRobotState.h>
+#include <moveit_msgs/WorkspaceParameters.h>
+
+// ROS Messages
 #include <trajectory_msgs/JointTrajectory.h>
 
 namespace moveit_visual_tools
@@ -369,6 +372,14 @@ public:
   bool publishCollisionTests();
 
   /**
+   * \brief Display size of workspace used for planning with OMPL, etc. Important for virtual joints
+   * \param input - description
+   * \param input - description
+   * \return true on sucess
+   */
+  bool publishWorkspaceParameters(const moveit_msgs::WorkspaceParameters& params);
+
+  /**
    * \brief Move a joint group in MoveIt for visualization
    *  make sure you have already set the planning group name
    *  this assumes the trajectory_pt position is the size of the number of joints in the planning group
@@ -399,9 +410,9 @@ public:
    *                by default leaves robot in color as specified in URDF
    */
   bool publishRobotState(const robot_state::RobotState &robot_state, 
-                         const rviz_visual_tools::colors &color = rviz_visual_tools::NONE);
+                         const rviz_visual_tools::colors &color = rviz_visual_tools::DEFAULT);
   bool publishRobotState(const robot_state::RobotStatePtr &robot_state, 
-                         const rviz_visual_tools::colors &color = rviz_visual_tools::NONE);
+                         const rviz_visual_tools::colors &color = rviz_visual_tools::DEFAULT);
 
   /**
    * \brief Publish a MoveIt robot state to a topic that the Rviz "RobotState" display can show

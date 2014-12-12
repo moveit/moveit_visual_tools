@@ -1029,6 +1029,31 @@ bool MoveItVisualTools::publishCollisionTable(double x, double y, double angle, 
   return processCollisionObjectMsg(collision_obj);
 }
 
+bool MoveItVisualTools::loadCollisionSceneFromFile(const std::string &path, double x_offset, double y_offset)
+{
+  {
+    // Load directly to the planning scene
+    planning_scene_monitor::LockedPlanningSceneRW scene(getPlanningSceneMonitor());
+    if (scene)
+    {
+
+      std::ifstream fin(path.c_str());
+      if (fin.good())
+      {
+        //scene->loadGeometryFromStream(fin, x_offset, y_offset);
+        scene->loadGeometryFromStream(fin);
+        fin.close();
+        ROS_INFO("Loaded scene geometry from '%s'", path.c_str());
+      }
+      else
+        ROS_WARN("Unable to load scene geometry from '%s'", path.c_str());
+    }
+    else
+      ROS_WARN_STREAM_NAMED("temp","Unable to get locked planning scene RW");
+  }
+  getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
+}
+
 bool MoveItVisualTools::publishCollisionTests()
 {
   // Create pose
@@ -1072,29 +1097,9 @@ bool MoveItVisualTools::publishCollisionTests()
 
 }
 
-bool MoveItVisualTools::loadCollisionSceneFromFile(const std::string &path, double x_offset, double y_offset)
+bool MoveItVisualTools::publishWorkspaceParameters(const moveit_msgs::WorkspaceParameters& params)
 {
-  {
-    // Load directly to the planning scene
-    planning_scene_monitor::LockedPlanningSceneRW scene(getPlanningSceneMonitor());
-    if (scene)
-    {
-
-      std::ifstream fin(path.c_str());
-      if (fin.good())
-      {
-        //scene->loadGeometryFromStream(fin, x_offset, y_offset);
-        scene->loadGeometryFromStream(fin);
-        fin.close();
-        ROS_INFO("Loaded scene geometry from '%s'", path.c_str());
-      }
-      else
-        ROS_WARN("Unable to load scene geometry from '%s'", path.c_str());
-    }
-    else
-      ROS_WARN_STREAM_NAMED("temp","Unable to get locked planning scene RW");
-  }
-  getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
+  return publishRectangle(convertPoint(params.min_corner), convertPoint(params.max_corner), rviz_visual_tools::TRANSLUCENT);
 }
 
 bool MoveItVisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
@@ -1208,18 +1213,21 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState &robot_s
   // Check if a robot state message already exists for this color
   if (display_robot_msg.highlight_links.size() == 0) // has not been colored yet, lets create that
   {
-    // Get links names
-    const std::vector<const moveit::core::LinkModel*>& link_names = robot_state.getRobotModel()->getLinkModelsWithCollisionGeometry();
-    display_robot_msg.highlight_links.resize(link_names.size());
-
-    // Get color
-    const std_msgs::ColorRGBA& color_rgba = getColor(color);
-
-    // Color every link
-    for (std::size_t i = 0; i < link_names.size(); ++i)
+    if (color != rviz_visual_tools::DEFAULT) // ignore color highlights when set to default
     {
-      display_robot_msg.highlight_links[i].id = link_names[i]->getName();
-      display_robot_msg.highlight_links[i].color = color_rgba;
+      // Get links names
+      const std::vector<const moveit::core::LinkModel*>& link_names = robot_state.getRobotModel()->getLinkModelsWithCollisionGeometry();
+      display_robot_msg.highlight_links.resize(link_names.size());
+
+      // Get color
+      const std_msgs::ColorRGBA& color_rgba = getColor(color);
+
+      // Color every link
+      for (std::size_t i = 0; i < link_names.size(); ++i)
+      {
+        display_robot_msg.highlight_links[i].id = link_names[i]->getName();
+        display_robot_msg.highlight_links[i].color = color_rgba;
+      }
     }
   }
 
@@ -1237,6 +1245,8 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState &robot_s
 bool MoveItVisualTools::publishRobotState(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
                                     const std::string &group_name)
 {
+  // TODO allow color
+
   // Always load the robot state before using
   loadSharedRobotState();
 
