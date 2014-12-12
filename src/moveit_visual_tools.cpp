@@ -1192,17 +1192,43 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
   return true;
 }
 
-bool MoveItVisualTools::publishRobotState(const robot_state::RobotStatePtr &robot_state)
+bool MoveItVisualTools::publishRobotState(const robot_state::RobotStatePtr &robot_state,
+                                          const rviz_visual_tools::colors &color)
 {
-  publishRobotState(*robot_state.get());
+  publishRobotState(*robot_state.get(), color);
 }
 
-bool MoveItVisualTools::publishRobotState(const robot_state::RobotState &robot_state)
+bool MoveItVisualTools::publishRobotState(const robot_state::RobotState &robot_state,
+                                          const rviz_visual_tools::colors &color)
 {
-  robot_state::robotStateToRobotStateMsg(robot_state, display_robot_msg_.state);
+  // Reference to the correctly colored version of message (they are cached)
+  // May not exist yet but this will create it
+  moveit_msgs::DisplayRobotState& display_robot_msg = display_robot_msgs_[color]; 
 
+  // Check if a robot state message already exists for this color
+  if (display_robot_msg.highlight_links.size() == 0) // has not been colored yet, lets create that
+  {
+    // Get links names
+    const std::vector<const moveit::core::LinkModel*>& link_names = robot_state.getRobotModel()->getLinkModelsWithCollisionGeometry();
+    display_robot_msg.highlight_links.resize(link_names.size());
+
+    // Get color
+    const std_msgs::ColorRGBA& color_rgba = getColor(color);
+
+    // Color every link
+    for (std::size_t i = 0; i < link_names.size(); ++i)
+    {
+      display_robot_msg.highlight_links[i].id = link_names[i]->getName();
+      display_robot_msg.highlight_links[i].color = color_rgba;
+    }
+  }
+
+  // Convert state to message
+  robot_state::robotStateToRobotStateMsg(robot_state, display_robot_msg.state);
+
+  // Publish
   loadRobotStatePub();
-  pub_robot_state_.publish( display_robot_msg_ );
+  pub_robot_state_.publish( display_robot_msg );
   ros::spinOnce();
 
   return true;

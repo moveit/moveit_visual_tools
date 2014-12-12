@@ -87,10 +87,12 @@ protected:
   geometry_msgs::Pose grasp_pose_to_eef_pose_; // Convert generic grasp pose to this end effector's frame of reference
   std::vector<geometry_msgs::Pose> marker_poses_;
 
-  // MoveIt cached markers
-  moveit_msgs::DisplayRobotState display_robot_msg_;
+  // Cached robot state marker - cache the colored links. 
+  // Note: Only allows colors provided in rviz_visual_tools to prevent too many robot state messages from being loaded
+  // and ensuring efficiency
+  std::map<rviz_visual_tools::colors, moveit_msgs::DisplayRobotState> display_robot_msgs_;
 
-  // MoveIt cached objects
+  // Cached objects
   robot_state::RobotStatePtr shared_robot_state_; // Note: call loadSharedRobotState() before using this
   robot_state::RobotModelConstPtr robot_model_;
 
@@ -392,10 +394,14 @@ public:
   /**
    * \brief Publish a complete robot state to Rviz
    *        To use, add a RobotState marker to Rviz and subscribe to the DISPLAY_ROBOT_STATE_TOPIC, above
-   * \param robot_state
+   * \param robot_state - joint values of robot
+   * \param color - how to highlight the robot (solid-ly) if desired, 
+   *                by default leaves robot in color as specified in URDF
    */
-  bool publishRobotState(const robot_state::RobotState &robot_state);
-  bool publishRobotState(const robot_state::RobotStatePtr &robot_state);
+  bool publishRobotState(const robot_state::RobotState &robot_state, 
+                         const rviz_visual_tools::colors &color = rviz_visual_tools::NONE);
+  bool publishRobotState(const robot_state::RobotStatePtr &robot_state, 
+                         const rviz_visual_tools::colors &color = rviz_visual_tools::NONE);
 
   /**
    * \brief Publish a MoveIt robot state to a topic that the Rviz "RobotState" display can show
