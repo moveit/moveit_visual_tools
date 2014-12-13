@@ -291,6 +291,8 @@ public:
    * \param name - semantic name of MoveIt collision object
    * \return true on sucess
    **/
+  bool publishCollisionRectangle(const Eigen::Vector3d &point1, const Eigen::Vector3d &point2, 
+                                 const std::string& block_name);
   bool publishCollisionRectangle(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2, 
                                  const std::string& block_name);
 
@@ -360,10 +362,10 @@ public:
   /**
    * \brief Load a planning scene to a planning_scene_monitor from file
    * \param path - path to planning scene, e.g. as exported from Rviz Plugin
-   * \param planning scene monitor that is already setup
+   * \param offset for scene to be placed
    * \return true on success
    */
-  bool loadCollisionSceneFromFile(const std::string &path, double x_offset = 0, double y_offset = 0);
+  bool loadCollisionSceneFromFile(const std::string &path, const Eigen::Affine3d &offset);
 
   /**
    * \brief Simple tests for collision testing

@@ -134,6 +134,7 @@ bool MoveItVisualTools::processCollisionObjectMsg(const moveit_msgs::CollisionOb
   // Apply command directly to planning scene to avoid a ROS msg call
   {
     planning_scene_monitor::LockedPlanningSceneRW scene(getPlanningSceneMonitor());
+    scene->getCurrentStateNonConst().update(); // hack to prevent bad transforms
     scene->processCollisionObjectMsg(msg);
   }
 
@@ -737,6 +738,12 @@ bool MoveItVisualTools::publishCollisionBlock(const geometry_msgs::Pose& block_p
   return processCollisionObjectMsg(collision_obj);
 }
 
+bool MoveItVisualTools::publishCollisionRectangle(const Eigen::Vector3d &point1, const Eigen::Vector3d &point2, 
+                                                  const std::string& block_name)
+{
+  return publishCollisionRectangle( convertPoint(point1), convertPoint(point2), block_name );
+}
+
 bool MoveItVisualTools::publishCollisionRectangle(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2, 
                                                   const std::string& rectangle_name)
 {
@@ -1029,7 +1036,7 @@ bool MoveItVisualTools::publishCollisionTable(double x, double y, double angle, 
   return processCollisionObjectMsg(collision_obj);
 }
 
-bool MoveItVisualTools::loadCollisionSceneFromFile(const std::string &path, double x_offset, double y_offset)
+bool MoveItVisualTools::loadCollisionSceneFromFile(const std::string &path, const Eigen::Affine3d &offset)
 {
   {
     // Load directly to the planning scene
@@ -1040,8 +1047,7 @@ bool MoveItVisualTools::loadCollisionSceneFromFile(const std::string &path, doub
       std::ifstream fin(path.c_str());
       if (fin.good())
       {
-        //scene->loadGeometryFromStream(fin, x_offset, y_offset);
-        scene->loadGeometryFromStream(fin);
+        scene->loadGeometryFromStream(fin, offset);
         fin.close();
         ROS_INFO("Loaded scene geometry from '%s'", path.c_str());
       }
