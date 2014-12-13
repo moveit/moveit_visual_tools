@@ -1036,6 +1036,11 @@ bool MoveItVisualTools::publishCollisionTable(double x, double y, double angle, 
   return processCollisionObjectMsg(collision_obj);
 }
 
+bool MoveItVisualTools::loadCollisionSceneFromFile(const std::string &path)
+{
+  return loadCollisionSceneFromFile(path, Eigen::Affine3d::Identity());
+}
+
 bool MoveItVisualTools::loadCollisionSceneFromFile(const std::string &path, const Eigen::Affine3d &offset)
 {
   {

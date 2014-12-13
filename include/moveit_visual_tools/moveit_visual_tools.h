@@ -365,6 +365,7 @@ public:
    * \param offset for scene to be placed
    * \return true on success
    */
+  bool loadCollisionSceneFromFile(const std::string &path);
   bool loadCollisionSceneFromFile(const std::string &path, const Eigen::Affine3d &offset);
 
   /**
