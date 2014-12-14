@@ -77,7 +77,6 @@ protected:
   ros::Publisher pub_collision_obj_; // for MoveIt collision objects
   ros::Publisher pub_attach_collision_obj_; // for MoveIt attached objects
   ros::Publisher pub_display_path_; // for MoveIt trajectories
-  ros::Publisher pub_planning_scene_diff_; // for adding and removing collision objects
   ros::Publisher pub_robot_state_; // publish a RobotState message
 
   // Pointer to a Planning Scene Monitor
@@ -98,6 +97,9 @@ protected:
   // Cached objects
   robot_state::RobotStatePtr shared_robot_state_; // Note: call loadSharedRobotState() before using this
   robot_state::RobotModelConstPtr robot_model_;
+
+  // Prevent the planning scene from always auto-pushing, but rather do it manually
+  bool mannual_trigger_update_;
 
 public:
 
@@ -136,9 +138,17 @@ public:
   /**
    * \brief Skip a ROS message call by sending directly to planning scene monitor
    * \param collision object message
+   * \param color to set the collision object as
    * \return true on success
    */
-  bool processCollisionObjectMsg(const moveit_msgs::CollisionObject& msg);
+  bool processCollisionObjectMsg(const moveit_msgs::CollisionObject& msg, 
+                                 const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
+
+  /**
+   * \brief When mannual_trigger_update_ is true, use this to tell the planning scene to send
+   *        an update out. Do not use otherwise
+   */
+  bool triggerPlanningSceneUpdate();
 
   /**
    * \brief Load robot state only as needed
@@ -170,7 +180,6 @@ public:
    * \brief Load publishers as needed
    */
   void loadAttachedPub();
-  void loadPlanningPub();
   void loadTrajectoryPub();
   void loadRobotStatePub(const std::string &marker_topic = DISPLAY_ROBOT_STATE_TOPIC);
 
@@ -181,6 +190,15 @@ public:
   void setPlanningSceneMonitor(planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
   {
     planning_scene_monitor_ = planning_scene_monitor;
+  }
+
+  /**
+   * \brief Prevent the planning scene from always auto-pushing, but rather do it manually
+   * \param bool true to enable manual mode
+   */
+  void setManualSceneUpdating(bool enable_manual)
+  {
+    mannual_trigger_update_ = enable_manual;
   }
 
   /**
@@ -228,22 +246,11 @@ public:
 
   /**
    * \brief Remove all collision objects that this class has added to the MoveIt! planning scene
-   *        Communicates to a remote move_group node through a ROS message
-   * \return true on sucess
-   */
-  MOVEIT_DEPRECATED bool removeAllCollisionObjects()
-  {
-    publishRemoveAllCollisionObjects();
-  }
-  bool publishRemoveAllCollisionObjects();
-
-  /**
-   * \brief Remove all collision objects that this class has added to the MoveIt! planning scene
    *        Communicates directly to a planning scene monitor e.g. if this is the move_group node
    * \param  the scene to directly clear the collision objects from
    * \return true on sucess
    */
-  bool removeAllCollisionObjectsPS();
+  bool removeAllCollisionObjects();
 
   /**
    * \brief Remove a collision object from the planning scene
@@ -273,7 +280,8 @@ public:
    * \param name of floor
    * \return true on success
    */
-  bool publishCollisionFloor(double z = 0.0, const std::string& plane_name = "Floor");
+  bool publishCollisionFloor(double z = 0.0, const std::string& plane_name = "Floor",
+                             const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Create a MoveIt Collision block at the given pose
@@ -282,7 +290,8 @@ public:
    * \param size - height=width=depth=size
    * \return true on sucess
    **/
-  bool publishCollisionBlock(const geometry_msgs::Pose& block_pose, const std::string& block_name, double block_size);
+  bool publishCollisionBlock(const geometry_msgs::Pose& block_pose, const std::string& block_name, double block_size,
+                             const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Create a MoveIt Collision block at the given pose
@@ -292,9 +301,9 @@ public:
    * \return true on sucess
    **/
   bool publishCollisionRectangle(const Eigen::Vector3d &point1, const Eigen::Vector3d &point2, 
-                                 const std::string& block_name);
+                                 const std::string& block_name, const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
   bool publishCollisionRectangle(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2, 
-                                 const std::string& block_name);
+                                 const std::string& block_name, const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Create a MoveIt Collision cylinder between two points
@@ -305,9 +314,9 @@ public:
    * \return true on sucess
    */
   bool publishCollisionCylinder(const geometry_msgs::Point &a, const geometry_msgs::Point &b, 
-                                const std::string& object_name, double radius);
+                                const std::string& object_name, double radius, const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
   bool publishCollisionCylinder(const Eigen::Vector3d &a, const Eigen::Vector3d &b, 
-                                const std::string& object_name, double radius);
+                                const std::string& object_name, double radius, const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Create a MoveIt Collision cylinder with a center point pose
@@ -317,8 +326,10 @@ public:
    * \param height - size of cylinder
    * \return true on sucess
    */
-  bool publishCollisionCylinder(const Eigen::Affine3d& object_pose, const std::string& object_name, double radius, double height);
-  bool publishCollisionCylinder(const geometry_msgs::Pose& object_pose, const std::string& object_name, double radius, double height);
+  bool publishCollisionCylinder(const Eigen::Affine3d& object_pose, const std::string& object_name, double radius, double height,
+                                const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
+  bool publishCollisionCylinder(const geometry_msgs::Pose& object_pose, const std::string& object_name, double radius, double height,
+                                const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Publish a connected birectional graph
@@ -326,7 +337,8 @@ public:
    * \param name of collision object
    * \return true on sucess
    */
-  bool publishCollisionGraph(const graph_msgs::GeometryGraph &graph, const std::string &object_name, double radius);
+  bool publishCollisionGraph(const graph_msgs::GeometryGraph &graph, const std::string &object_name, double radius,
+                             const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Helper for publishCollisionWall
@@ -343,7 +355,8 @@ public:
    * \param name
    * \return true on sucess
    */
-  bool publishCollisionWall(double x, double y, double angle, double width, const std::string name);
+  bool publishCollisionWall(double x, double y, double angle, double width, const std::string name,
+                            const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Publish a typical room table
@@ -357,7 +370,7 @@ public:
    * \return true on sucess
    */
   bool publishCollisionTable(double x, double y, double angle, double width, double height,
-                             double depth, const std::string name);
+                             double depth, const std::string name, const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Load a planning scene to a planning_scene_monitor from file

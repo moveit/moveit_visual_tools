@@ -59,7 +59,8 @@ MoveItVisualTools::MoveItVisualTools(const std::string& base_frame,
                                      const std::string& marker_topic,
                                      planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
   :  RvizVisualTools::RvizVisualTools(base_frame, marker_topic),
-     planning_scene_monitor_(planning_scene_monitor)
+     planning_scene_monitor_(planning_scene_monitor),
+     mannual_trigger_update_(false)
 {
 
 }
@@ -68,7 +69,8 @@ MoveItVisualTools::MoveItVisualTools(const std::string& base_frame,
                                      const std::string& marker_topic,
                                      robot_model::RobotModelConstPtr robot_model)
   :  RvizVisualTools::RvizVisualTools(base_frame, marker_topic),
-     robot_model_(robot_model)
+     robot_model_(robot_model),
+     mannual_trigger_update_(false)
 {
 
 }
@@ -129,18 +131,26 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
   return true;
 }
 
-bool MoveItVisualTools::processCollisionObjectMsg(const moveit_msgs::CollisionObject& msg)
+bool MoveItVisualTools::processCollisionObjectMsg(const moveit_msgs::CollisionObject& msg, const rviz_visual_tools::colors &color)
 {
   // Apply command directly to planning scene to avoid a ROS msg call
   {
     planning_scene_monitor::LockedPlanningSceneRW scene(getPlanningSceneMonitor());
     scene->getCurrentStateNonConst().update(); // hack to prevent bad transforms
     scene->processCollisionObjectMsg(msg);
+    scene->setObjectColor(msg.id, getColor(color));
   }
 
   // Trigger an update
-  getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
+  if (!mannual_trigger_update_)
+    getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
 
+  return true;
+}
+
+bool MoveItVisualTools::triggerPlanningSceneUpdate()
+{
+  getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
   return true;
 }
 
@@ -312,19 +322,6 @@ void MoveItVisualTools::loadAttachedPub()
 
   // Wait for topic to be ready
   waitForSubscriber(pub_attach_collision_obj_);
-}
-
-void MoveItVisualTools::loadPlanningPub()
-{
-  if (pub_planning_scene_diff_)
-    return;
-
-  // Planning scene diff publisher
-  pub_planning_scene_diff_ = nh_.advertise<moveit_msgs::PlanningScene>(PLANNING_SCENE_TOPIC, 1);
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing planning scene on topic " << pub_planning_scene_diff_.getTopic());
-
-  // Wait for topic to be ready
-  waitForSubscriber(pub_planning_scene_diff_);
 }
 
 void MoveItVisualTools::loadTrajectoryPub()
@@ -632,37 +629,16 @@ bool MoveItVisualTools::publishIKSolutions(const std::vector<trajectory_msgs::Jo
   return publishTrajectoryPath(trajectory_msg, true);
 }
 
-bool MoveItVisualTools::publishRemoveAllCollisionObjects()
+bool MoveItVisualTools::removeAllCollisionObjects()
 {
-  // Publish an empty REMOVE message so as to remove all of them
-
-  moveit_msgs::PlanningScene planning_scene;
-  planning_scene.is_diff = true;
-  planning_scene.world.collision_objects.clear();
-
-  // Clean up old collision objects
-  moveit_msgs::CollisionObject remove_object;
-  remove_object.header.frame_id = base_frame_;
-  remove_object.operation = moveit_msgs::CollisionObject::REMOVE;
-
-  planning_scene.world.collision_objects.push_back(remove_object);
-
-  // Publish
-  loadPlanningPub(); // always call this before publishing
-  pub_planning_scene_diff_.publish(planning_scene);
-  ros::spinOnce();
+  // Apply command directly to planning scene to avoid a ROS msg call
+  {
+    planning_scene_monitor::LockedPlanningSceneRW scene(getPlanningSceneMonitor());
+    //scene->getCurrentStateNonConst().update(); // hack to prevent bad transforms
+    scene->removeAllCollisionObjects();
+  }
 
   return true;
-}
-
-bool MoveItVisualTools::removeAllCollisionObjectsPS()
-{
-  // Clean up old collision objects
-  moveit_msgs::CollisionObject remove_object;
-  remove_object.header.frame_id = base_frame_;
-  remove_object.operation = moveit_msgs::CollisionObject::REMOVE;
-
-  return processCollisionObjectMsg(remove_object);
 }
 
 bool MoveItVisualTools::cleanupCO(const std::string& name)
@@ -716,7 +692,8 @@ bool MoveItVisualTools::attachCO(const std::string& name, const std::string& ee_
   return true;
 }
 
-bool MoveItVisualTools::publishCollisionBlock(const geometry_msgs::Pose& block_pose, const std::string& block_name, double block_size)
+bool MoveItVisualTools::publishCollisionBlock(const geometry_msgs::Pose& block_pose, const std::string& block_name, 
+                                              double block_size, const rviz_visual_tools::colors &color)
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
@@ -735,17 +712,17 @@ bool MoveItVisualTools::publishCollisionBlock(const geometry_msgs::Pose& block_p
 
   //ROS_INFO_STREAM_NAMED("visual_tools","CollisionObject: \n " << collision_obj);
   //ROS_DEBUG_STREAM_NAMED("visual_tools","Published collision object " << block_name);
-  return processCollisionObjectMsg(collision_obj);
+  return processCollisionObjectMsg(collision_obj, color);
 }
 
 bool MoveItVisualTools::publishCollisionRectangle(const Eigen::Vector3d &point1, const Eigen::Vector3d &point2, 
-                                                  const std::string& block_name)
+                                                  const std::string& block_name, const rviz_visual_tools::colors &color)
 {
-  return publishCollisionRectangle( convertPoint(point1), convertPoint(point2), block_name );
+  return publishCollisionRectangle( convertPoint(point1), convertPoint(point2), block_name, color );
 }
 
 bool MoveItVisualTools::publishCollisionRectangle(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2, 
-                                                  const std::string& rectangle_name)
+                                                  const std::string& rectangle_name, const rviz_visual_tools::colors &color)
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
@@ -776,10 +753,10 @@ bool MoveItVisualTools::publishCollisionRectangle(const geometry_msgs::Point &po
     collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = rviz_visual_tools::SMALL_SCALE;
 
   //ROS_INFO_STREAM_NAMED("visual_tools","CollisionObject: \n " << collision_obj);
-  return processCollisionObjectMsg(collision_obj);
+  return processCollisionObjectMsg(collision_obj, color);
 }
 
-bool MoveItVisualTools::publishCollisionFloor(double z, const std::string& plane_name)
+bool MoveItVisualTools::publishCollisionFloor(double z, const std::string& plane_name, const rviz_visual_tools::colors &color)
 {
   /*
   TODO: I don't think collision planes are implemented... could not get this to work
@@ -827,17 +804,17 @@ bool MoveItVisualTools::publishCollisionFloor(double z, const std::string& plane
   point2.y = -rviz_visual_tools::LARGE_SCALE;
   point2.z = z-rviz_visual_tools::SMALL_SCALE;;
   
-  return publishCollisionRectangle(point1, point2, plane_name);
+  return publishCollisionRectangle(point1, point2, plane_name, color);
 }
 
 bool MoveItVisualTools::publishCollisionCylinder(const geometry_msgs::Point &a, const geometry_msgs::Point& b,
-                                                 const std::string& object_name, double radius)
+                                                 const std::string& object_name, double radius, const rviz_visual_tools::colors &color)
 {
-  return publishCollisionCylinder(convertPoint(a), convertPoint(b), object_name, radius);
+  return publishCollisionCylinder(convertPoint(a), convertPoint(b), object_name, radius, color);
 }
 
 bool MoveItVisualTools::publishCollisionCylinder(const Eigen::Vector3d &a, const Eigen::Vector3d &b,
-                                                 const std::string& object_name, double radius)
+                                                 const std::string& object_name, double radius, const rviz_visual_tools::colors &color)
 {
   // Distance between two points
   double height = (a - b).lpNorm<2>();
@@ -854,15 +831,17 @@ bool MoveItVisualTools::publishCollisionCylinder(const Eigen::Vector3d &a, const
   rotation = Eigen::AngleAxisd(0.5*M_PI, Eigen::Vector3d::UnitY());
   pose = pose * rotation;
 
-  return publishCollisionCylinder(pose, object_name, radius, height);
+  return publishCollisionCylinder(pose, object_name, radius, height, color);
 }
 
-bool MoveItVisualTools::publishCollisionCylinder(const Eigen::Affine3d& object_pose, const std::string& object_name, double radius, double height)
+bool MoveItVisualTools::publishCollisionCylinder(const Eigen::Affine3d& object_pose, const std::string& object_name, 
+                                                 double radius, double height, const rviz_visual_tools::colors &color)
 {
-  return publishCollisionCylinder(convertPose(object_pose), object_name, radius, height);
+  return publishCollisionCylinder(convertPose(object_pose), object_name, radius, height, color);
 }
 
-bool MoveItVisualTools::publishCollisionCylinder(const geometry_msgs::Pose& object_pose, const std::string& object_name, double radius, double height)
+bool MoveItVisualTools::publishCollisionCylinder(const geometry_msgs::Pose& object_pose, const std::string& object_name, 
+                                                 double radius, double height, const rviz_visual_tools::colors &color)
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
@@ -878,10 +857,11 @@ bool MoveItVisualTools::publishCollisionCylinder(const geometry_msgs::Pose& obje
   collision_obj.primitive_poses[0] = object_pose;
 
   //ROS_INFO_STREAM_NAMED("visual_tools","CollisionObject: \n " << collision_obj);
-  return processCollisionObjectMsg(collision_obj);
+  return processCollisionObjectMsg(collision_obj, color);
 }
 
-bool MoveItVisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph &graph, const std::string &object_name, double radius)
+bool MoveItVisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph &graph, const std::string &object_name, 
+                                              double radius, const rviz_visual_tools::colors &color)
 {
   ROS_INFO_STREAM_NAMED("publishCollisionGraph","Preparing to create collision graph");
 
@@ -948,7 +928,7 @@ bool MoveItVisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph &g
     }
   }
 
-  return processCollisionObjectMsg(collision_obj);
+  return processCollisionObjectMsg(collision_obj, color);
 }
 
 void MoveItVisualTools::getCollisionWallMsg(double x, double y, double angle, double width, const std::string name,
@@ -991,16 +971,18 @@ void MoveItVisualTools::getCollisionWallMsg(double x, double y, double angle, do
   collision_obj.primitive_poses[0] = rec_pose;
 }
 
-bool MoveItVisualTools::publishCollisionWall(double x, double y, double angle, double width, const std::string name)
+bool MoveItVisualTools::publishCollisionWall(double x, double y, double angle, double width, const std::string name,
+                                             const rviz_visual_tools::colors &color)
 {
   moveit_msgs::CollisionObject collision_obj;
   getCollisionWallMsg(x, y, angle, width, name, collision_obj);
 
-  return processCollisionObjectMsg(collision_obj);
+  return processCollisionObjectMsg(collision_obj, color);
 }
 
 bool MoveItVisualTools::publishCollisionTable(double x, double y, double angle, double width, double height,
-                                        double depth, const std::string name)
+                                              double depth, const std::string name,
+                                              const rviz_visual_tools::colors &color)
 {
   geometry_msgs::Pose table_pose;
 
@@ -1033,7 +1015,7 @@ bool MoveItVisualTools::publishCollisionTable(double x, double y, double angle, 
   collision_obj.primitive_poses.resize(1);
   collision_obj.primitive_poses[0] = table_pose;
 
-  return processCollisionObjectMsg(collision_obj);
+  return processCollisionObjectMsg(collision_obj, color);
 }
 
 bool MoveItVisualTools::loadCollisionSceneFromFile(const std::string &path)
@@ -1075,35 +1057,35 @@ bool MoveItVisualTools::publishCollisionTests()
 
   ROS_INFO_STREAM_NAMED("test","Publishing Collision Block");
   generateRandomPose(pose1);
-  publishCollisionBlock(pose1, "Block", 0.1);
+  publishCollisionBlock(pose1, "Block", 0.1, rviz_visual_tools::RAND);
   ros::Duration(1.0).sleep();
 
   ROS_INFO_STREAM_NAMED("test","Publishing Collision Rectangle");
   generateRandomPose(pose1);
   generateRandomPose(pose2);
-  publishCollisionRectangle(pose1.position, pose2.position, "Rectangle");
+  publishCollisionRectangle(pose1.position, pose2.position, "Rectangle", rviz_visual_tools::RAND);
   ros::Duration(1.0).sleep();
 
   ROS_INFO_STREAM_NAMED("test","Publishing Collision Floor");
-  publishCollisionFloor(0, "Floor");
+  publishCollisionFloor(0, "Floor", rviz_visual_tools::RAND);
   ros::Duration(1.0).sleep();
 
   ROS_INFO_STREAM_NAMED("test","Publishing Collision Cylinder");
   generateRandomPose(pose1);
   generateRandomPose(pose2);
-  publishCollisionCylinder(pose1.position, pose2.position, "Cylinder", 0.1);
+  publishCollisionCylinder(pose1.position, pose2.position, "Cylinder", 0.1, rviz_visual_tools::RAND);
   ros::Duration(1.0).sleep();
 
   // TODO: test publishCollisionGraph
 
   ROS_INFO_STREAM_NAMED("test","Publishing Collision Wall");
   generateRandomPose(pose1);
-  publishCollisionWall(pose1.position.x, pose1.position.y, 0, 1, "Wall");
+  publishCollisionWall(pose1.position.x, pose1.position.y, 0, 1, "Wall", rviz_visual_tools::RAND);
   ros::Duration(1.0).sleep();
 
   ROS_INFO_STREAM_NAMED("test","Publishing Collision Table");
   generateRandomPose(pose1);
-  publishCollisionTable(pose1.position.x, pose1.position.y, 0, 0.5, 0.5, 0.5, "Table");
+  publishCollisionTable(pose1.position.x, pose1.position.y, 0, 0.5, 0.5, 0.5, "Table", rviz_visual_tools::RAND);
   ros::Duration(1.0).sleep();
 
 }
