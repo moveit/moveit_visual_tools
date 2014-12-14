@@ -566,7 +566,7 @@ bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, co
 }
 
 bool MoveItVisualTools::publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions,
-                                     const std::string& planning_group, double display_time)
+                                           const std::string& planning_group, double display_time)
 {
   if(muted_)
   {
@@ -584,10 +584,8 @@ bool MoveItVisualTools::publishIKSolutions(const std::vector<trajectory_msgs::Jo
 
   ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing " << ik_solutions.size() << " inverse kinematic solutions");
 
-  // Get robot model
-  robot_model::RobotModelConstPtr robot_model = shared_robot_state_->getRobotModel();
   // Get joint state group
-  const robot_model::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(planning_group);
+  const robot_model::JointModelGroup* joint_model_group = robot_model_->getJointModelGroup(planning_group);
 
   if (joint_model_group == NULL) // not found
   {
@@ -601,7 +599,7 @@ bool MoveItVisualTools::publishIKSolutions(const std::vector<trajectory_msgs::Jo
   // Create a trajectory with one point
   moveit_msgs::RobotTrajectory trajectory_msg;
   trajectory_msg.joint_trajectory.header.frame_id = base_frame_;
-  trajectory_msg.joint_trajectory.joint_names = joint_model_group->getJointModelNames();
+  trajectory_msg.joint_trajectory.joint_names = joint_model_group->getActiveJointModelNames();
 
   // Overall length of trajectory
   double running_time = 0;
@@ -618,14 +616,14 @@ bool MoveItVisualTools::publishIKSolutions(const std::vector<trajectory_msgs::Jo
 
     running_time += display_time;
 
-    //ROS_DEBUG_STREAM_NAMED("grasp","Visualizing ik solution " << i);
+    ROS_DEBUG_STREAM_NAMED("grasp","Visualizing ik solution " << i);
   }
 
   // Re-add final position so the last point is displayed fully
   trajectory_pt_timed = trajectory_msg.joint_trajectory.points.back();
   trajectory_pt_timed.time_from_start = ros::Duration(running_time);
   trajectory_msg.joint_trajectory.points.push_back(trajectory_pt_timed);
-
+  
   return publishTrajectoryPath(trajectory_msg, true);
 }
 
