@@ -163,8 +163,6 @@ bool MoveItVisualTools::loadSharedRobotState()
     if (!robot_model_)
     {
       // Fall back on using planning scene monitor.
-      // \todo Deprecated?
-      ROS_WARN_STREAM_NAMED("temp","Falling back to using planning scene monitor for loading a robot state");
       planning_scene_monitor::PlanningSceneMonitorPtr psm = getPlanningSceneMonitor();
       robot_model_ = psm->getRobotModel();
     }
@@ -354,6 +352,7 @@ planning_scene_monitor::PlanningSceneMonitorPtr MoveItVisualTools::getPlanningSc
 {
   if( !planning_scene_monitor_ )
   {
+    ROS_INFO_STREAM_NAMED("getPlanningSceneMonitor","No planning scene passed into moveit_visual_tools, creating one.");
     loadPlanningSceneMonitor();
     ros::spinOnce();
     ros::Duration(1).sleep();
@@ -672,7 +671,7 @@ bool MoveItVisualTools::cleanupACO(const std::string& name)
 
 bool MoveItVisualTools::attachCO(const std::string& name, const std::string& ee_parent_link)
 {
-  // Clean up old attached collision object
+  // Attach a collision object
   moveit_msgs::AttachedCollisionObject aco;
   aco.object.header.stamp = ros::Time::now();
   aco.object.header.frame_id = base_frame_;
@@ -1094,18 +1093,18 @@ bool MoveItVisualTools::publishWorkspaceParameters(const moveit_msgs::WorkspaceP
 }
 
 bool MoveItVisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
-                                         const std::string &group_name, double display_time)
+                                         const std::string &planning_group, double display_time)
 {
   loadSharedRobotState();
 
   // Get robot model
   robot_model::RobotModelConstPtr robot_model = shared_robot_state_->getRobotModel();
   // Get joint state group
-  const robot_model::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(group_name);
+  const robot_model::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(planning_group);
 
   if (joint_model_group == NULL) // not found
   {
-    ROS_ERROR_STREAM_NAMED("publishTrajectoryPoint","Could not find joint model group " << group_name);
+    ROS_ERROR_STREAM_NAMED("publishTrajectoryPoint","Could not find joint model group " << planning_group);
     return false;
   }
 
@@ -1234,7 +1233,7 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState &robot_s
 }
 
 bool MoveItVisualTools::publishRobotState(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
-                                    const std::string &group_name)
+                                    const std::string &planning_group)
 {
   // TODO allow color
 
@@ -1243,7 +1242,7 @@ bool MoveItVisualTools::publishRobotState(const trajectory_msgs::JointTrajectory
 
   // Set robot state
   shared_robot_state_->setToDefaultValues(); // reset the state just in case
-  shared_robot_state_->setJointGroupPositions(group_name, trajectory_pt.positions);
+  shared_robot_state_->setJointGroupPositions(planning_group, trajectory_pt.positions);
 
   // Publish robot state
   publishRobotState(*shared_robot_state_);

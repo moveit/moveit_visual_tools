@@ -402,11 +402,11 @@ public:
    *  This will be displayed in the Planned Path section of the MoveIt Rviz plugin
    *
    * \param trajectory_pts - a single joint configuration
-   * \param group_name - the MoveIt planning group the trajectory applies to
+   * \param planning_group - the MoveIt planning group the trajectory applies to
    * \param display_time - amount of time for the trajectory to "execute"
    * \return true on success
    */
-  bool publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt, const std::string &group_name,
+  bool publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt, const std::string &planning_group,
                               double display_time = 0.1);
 
   /**
@@ -432,10 +432,11 @@ public:
 
   /**
    * \brief Publish a MoveIt robot state to a topic that the Rviz "RobotState" display can show
-   * \param robot_state
+   * \param trajectory_pt
+   * \param planning_group - group corresponding to trajectory pt
    * \return true on success
    */
-  bool publishRobotState(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt, const std::string &group_name);
+  bool publishRobotState(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt, const std::string &planning_group);
 
   /**
    * \brief Fake removing a Robot State display in Rviz by simply moving it very far away
