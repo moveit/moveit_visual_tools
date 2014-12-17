@@ -352,7 +352,7 @@ planning_scene_monitor::PlanningSceneMonitorPtr MoveItVisualTools::getPlanningSc
 {
   if( !planning_scene_monitor_ )
   {
-    ROS_INFO_STREAM_NAMED("getPlanningSceneMonitor","No planning scene passed into moveit_visual_tools, creating one.");
+    ROS_INFO_STREAM_NAMED("visual_tools","No planning scene passed into moveit_visual_tools, creating one.");
     loadPlanningSceneMonitor();
     ros::spinOnce();
     ros::Duration(1).sleep();
@@ -434,7 +434,6 @@ bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const 
     tf::poseTFToMsg(tf_root_to_mesh_new, ee_marker_array_.markers[i].pose);
     // -----------------------------------------------------------------------------------------------
 
-    //ROS_INFO_STREAM("Marker " << i << " ------------- \n" << ee_marker_array_.markers[i]);
 
     // Helper for publishing rviz markers
     publishMarker( ee_marker_array_.markers[i] );
@@ -460,8 +459,6 @@ bool MoveItVisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& pos
   {
     if( !ros::ok() )  // Check that ROS is still ok and that user isn't trying to quit
       break;
-
-    //ROS_DEBUG_STREAM_NAMED("grasp","Visualizing grasp pose " << i);
 
     publishEEMarkers(possible_grasps[i].grasp_pose.pose);
 
@@ -588,7 +585,7 @@ bool MoveItVisualTools::publishIKSolutions(const std::vector<trajectory_msgs::Jo
 
   if (joint_model_group == NULL) // not found
   {
-    ROS_ERROR_STREAM_NAMED("publishIKSolutions","Could not find joint model group " << planning_group);
+    ROS_ERROR_STREAM_NAMED("visual_tools","Could not find joint model group " << planning_group);
     return false;
   }
 
@@ -615,7 +612,7 @@ bool MoveItVisualTools::publishIKSolutions(const std::vector<trajectory_msgs::Jo
 
     running_time += display_time;
 
-    ROS_DEBUG_STREAM_NAMED("grasp","Visualizing ik solution " << i);
+    ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing ik solution " << i);
   }
 
   // Re-add final position so the last point is displayed fully
@@ -1022,25 +1019,30 @@ bool MoveItVisualTools::loadCollisionSceneFromFile(const std::string &path)
 
 bool MoveItVisualTools::loadCollisionSceneFromFile(const std::string &path, const Eigen::Affine3d &offset)
 {
+  // Open file
+  std::ifstream fin(path.c_str());
+  if (fin.good())
   {
     // Load directly to the planning scene
     planning_scene_monitor::LockedPlanningSceneRW scene(getPlanningSceneMonitor());
-    if (scene)
     {
-
-      std::ifstream fin(path.c_str());
-      if (fin.good())
+      if (scene)
       {
         scene->loadGeometryFromStream(fin, offset);
-        fin.close();
-        ROS_INFO("Loaded scene geometry from '%s'", path.c_str());
       }
       else
-        ROS_WARN("Unable to load scene geometry from '%s'", path.c_str());
+      {
+        ROS_WARN_STREAM_NAMED("visual_tools","Unable to get locked planning scene RW");
+        return false;
+      }
     }
-    else
-      ROS_WARN_STREAM_NAMED("temp","Unable to get locked planning scene RW");
+    ROS_INFO_NAMED("visual_tools","Loaded scene geometry from '%s'", path.c_str());
   }
+  else
+    ROS_WARN_NAMED("visual_tools","Unable to load scene geometry from '%s'", path.c_str());
+
+  fin.close();
+
   getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
 }
 
@@ -1052,22 +1054,22 @@ bool MoveItVisualTools::publishCollisionTests()
 
   // Test all shapes ----------
 
-  ROS_INFO_STREAM_NAMED("test","Publishing Collision Block");
+  ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Block");
   generateRandomPose(pose1);
   publishCollisionBlock(pose1, "Block", 0.1, rviz_visual_tools::RAND);
   ros::Duration(1.0).sleep();
 
-  ROS_INFO_STREAM_NAMED("test","Publishing Collision Rectangle");
+  ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Rectangle");
   generateRandomPose(pose1);
   generateRandomPose(pose2);
   publishCollisionRectangle(pose1.position, pose2.position, "Rectangle", rviz_visual_tools::RAND);
   ros::Duration(1.0).sleep();
 
-  ROS_INFO_STREAM_NAMED("test","Publishing Collision Floor");
+  ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Floor");
   publishCollisionFloor(0, "Floor", rviz_visual_tools::RAND);
   ros::Duration(1.0).sleep();
 
-  ROS_INFO_STREAM_NAMED("test","Publishing Collision Cylinder");
+  ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Cylinder");
   generateRandomPose(pose1);
   generateRandomPose(pose2);
   publishCollisionCylinder(pose1.position, pose2.position, "Cylinder", 0.1, rviz_visual_tools::RAND);
@@ -1075,12 +1077,12 @@ bool MoveItVisualTools::publishCollisionTests()
 
   // TODO: test publishCollisionGraph
 
-  ROS_INFO_STREAM_NAMED("test","Publishing Collision Wall");
+  ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Wall");
   generateRandomPose(pose1);
   publishCollisionWall(pose1.position.x, pose1.position.y, 0, 1, "Wall", rviz_visual_tools::RAND);
   ros::Duration(1.0).sleep();
 
-  ROS_INFO_STREAM_NAMED("test","Publishing Collision Table");
+  ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Table");
   generateRandomPose(pose1);
   publishCollisionTable(pose1.position.x, pose1.position.y, 0, 0.5, 0.5, 0.5, "Table", rviz_visual_tools::RAND);
   ros::Duration(1.0).sleep();
@@ -1151,7 +1153,7 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
   // Check if we have enough points
   if (!trajectory_msg.joint_trajectory.points.size())
   {
-    ROS_WARN_STREAM_NAMED("temp","Unable to publish trajectory path because trajectory has zero points");
+    ROS_WARN_STREAM_NAMED("visual_tools","Unable to publish trajectory path because trajectory has zero points");
     return false;
   }
 
