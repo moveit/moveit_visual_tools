@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, University of Colorado, Boulder
+ *  Copyright (c) 2015, University of Colorado, Boulder
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -294,20 +294,6 @@ bool MoveItVisualTools::loadEEMarker(const std::string& ee_group_name, const std
 
   return true;
 }
-
-/*void MoveItVisualTools::loadCollisionPub()
-{
-  if (pub_collision_obj_)
-    return;
-
-  // Collision object creator
-  pub_collision_obj_ = nh_.advertise<moveit_msgs::CollisionObject>(COLLISION_TOPIC, 10);
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing collision objects on topic " << pub_collision_obj_.getTopic());
-
-  // Wait for topic to be ready
-  waitForSubscriber(pub_collision_obj_);
-}
-*/
 
 void MoveItVisualTools::loadAttachedPub()
 {
@@ -1263,7 +1249,5 @@ bool MoveItVisualTools::hideRobot()
       
   publishRobotState(shared_robot_state_);
 }
-
-
 
 } // namespace

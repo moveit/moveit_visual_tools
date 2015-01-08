@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, University of Colorado, Boulder
+ *  Copyright (c) 2015, University of Colorado, Boulder
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,6 @@
  *          and MoveIt! collision objects. Very useful for debugging complex software
  *
  *          See README.md for developers notes.
- *
  */
 
 #ifndef MOVEIT_VISUAL_TOOLS__MOVEIT_VISUAL_TOOLS_H_
@@ -74,7 +73,6 @@ class MoveItVisualTools : public rviz_visual_tools::RvizVisualTools
 protected:
 
   // ROS publishers
-  ros::Publisher pub_collision_obj_; // for MoveIt collision objects
   ros::Publisher pub_attach_collision_obj_; // for MoveIt attached objects
   ros::Publisher pub_display_path_; // for MoveIt trajectories
   ros::Publisher pub_robot_state_; // publish a RobotState message
@@ -107,8 +105,8 @@ public:
    * \brief Constructor
    * \param base_frame - common base for all visualization markers, usually "/world" or "/odom"
    * \param marker_topic - rostopic to publish markers to - your Rviz display should match
-   * \param planning_scene_monitor - optionally pass in a pre-loaded planning scene monitor to avoid having to re-load
-   *        the URDF, kinematic solvers, etc
+   * \param planning_scene_monitor - optionally pass in a pre-loaded planning scene monitor to 
+   *        avoid having to re-load the URDF, kinematic solvers, etc
    */
   MoveItVisualTools(const std::string& base_frame,
               const std::string& marker_topic,
@@ -206,7 +204,8 @@ public:
    * \param pose - the location to publish the marker with respect to the base frame
    * \return true on success
    */
-  bool publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_visual_tools::colors &color = rviz_visual_tools::WHITE, const std::string &ns="end_effector");
+  bool publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_visual_tools::colors &color = 
+                        rviz_visual_tools::WHITE, const std::string &ns="end_effector");
 
   /**
    * \brief Show grasps generated from moveit_simple_grasps or other MoveIt Grasp message sources
@@ -314,9 +313,11 @@ public:
    * \return true on sucess
    */
   bool publishCollisionCylinder(const geometry_msgs::Point &a, const geometry_msgs::Point &b, 
-                                const std::string& object_name, double radius, const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
+                                const std::string& object_name, double radius, const rviz_visual_tools::colors &color = 
+                                rviz_visual_tools::GREEN);
   bool publishCollisionCylinder(const Eigen::Vector3d &a, const Eigen::Vector3d &b, 
-                                const std::string& object_name, double radius, const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
+                                const std::string& object_name, double radius, const rviz_visual_tools::colors &color = 
+                                rviz_visual_tools::GREEN);
 
   /**
    * \brief Create a MoveIt Collision cylinder with a center point pose
