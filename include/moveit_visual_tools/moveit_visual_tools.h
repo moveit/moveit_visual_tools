@@ -98,7 +98,9 @@ protected:
 
   // Prevent the planning scene from always auto-pushing, but rather do it manually
   bool mannual_trigger_update_;
-
+  
+  // ROS topic names to use when starting publishers
+  std::string robot_state_topic_;
 public:
 
   /**
@@ -126,6 +128,15 @@ public:
    * \brief Deconstructor
    */
   ~MoveItVisualTools() {};
+
+  /**
+   * \brief Set the ROS topic for publishing a robot state
+   * \param topic 
+   */
+  void setRobotStateTopic(const std::string &robot_state_topic)
+  {
+    robot_state_topic_ = robot_state_topic;
+  }
 
   /**
    * \brief Load a planning scene monitor if one was not passed into the constructor
@@ -179,7 +190,7 @@ public:
    */
   void loadAttachedPub();
   void loadTrajectoryPub();
-  void loadRobotStatePub(const std::string &marker_topic = DISPLAY_ROBOT_STATE_TOPIC);
+  void loadRobotStatePub(const std::string &robot_state_topic = "");
 
   /**
    * \brief Allow a pre-configured planning scene monitor to be set for publishing collision objects, etc

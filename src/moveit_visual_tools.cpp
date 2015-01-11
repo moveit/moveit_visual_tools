@@ -60,7 +60,8 @@ MoveItVisualTools::MoveItVisualTools(const std::string& base_frame,
                                      planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
   :  RvizVisualTools::RvizVisualTools(base_frame, marker_topic),
      planning_scene_monitor_(planning_scene_monitor),
-     mannual_trigger_update_(false)
+     mannual_trigger_update_(false),
+     robot_state_topic_(DISPLAY_ROBOT_STATE_TOPIC)
 {
 
 }
@@ -321,13 +322,17 @@ void MoveItVisualTools::loadTrajectoryPub()
   waitForSubscriber(pub_display_path_);  
 }
 
-void MoveItVisualTools::loadRobotStatePub(const std::string &marker_topic)
+void MoveItVisualTools::loadRobotStatePub(const std::string &robot_state_topic)
 {
   if (pub_robot_state_)
     return;
 
+  // Update global var if new topic was passed in
+  if (!robot_state_topic.empty())
+    robot_state_topic_ = robot_state_topic;
+
   // RobotState Message
-  pub_robot_state_ = nh_.advertise<moveit_msgs::DisplayRobotState>(marker_topic, 1 );
+  pub_robot_state_ = nh_.advertise<moveit_msgs::DisplayRobotState>(robot_state_topic_, 1 );
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing MoveIt robot state on topic " << pub_robot_state_.getTopic());
 
   // Wait for topic to be ready
