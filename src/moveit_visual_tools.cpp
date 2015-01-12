@@ -1222,6 +1222,19 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState &robot_s
   pub_robot_state_.publish( display_robot_msg );
   ros::spinOnce();
 
+  // Publish foot locations if they are fixed
+  // TODO: this not compatibile with mainstream MoveIt! debians, remove before releasing
+  if (robot_state.dynamicRootEnabled())
+  {
+    for (std::size_t i = 0; i < robot_state.getFixedLinks().size(); ++i)
+    {
+      // BLUE IS PRIMARY, RED IS SECONDARIES
+      const rviz_visual_tools::colors &color = (i==0) ? rviz_visual_tools::BLUE : rviz_visual_tools::RED;
+      publishArrow( robot_state.getGlobalLinkTransform( robot_state.getFixedLinks()[i].link_ ),
+                    color, rviz_visual_tools::LARGE);     
+    }
+  }
+
   return true;
 }
 
