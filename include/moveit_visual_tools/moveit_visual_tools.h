@@ -175,7 +175,7 @@ public:
    * \brief Allow robot state to be altered.
    * \return shared pointer to robot state
    */
-  robot_state::RobotStatePtr& getSharedRobotState();
+  moveit::core::RobotStatePtr& getSharedRobotState();
 
   /**
    * \brief Call this once at begining to load the robot marker
