@@ -1230,8 +1230,7 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState &robot_s
     {
       // BLUE IS PRIMARY, RED IS SECONDARIES
       const rviz_visual_tools::colors &color = (i==0) ? rviz_visual_tools::BLUE : rviz_visual_tools::RED;
-      publishArrow( robot_state.getGlobalLinkTransform( robot_state.getFixedLinks()[i].link_ ),
-                    color, rviz_visual_tools::LARGE);     
+      publishArrow( robot_state.getFixedLinks()[i].transform_, color, rviz_visual_tools::LARGE);
     }
   }
 
