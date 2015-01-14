@@ -1260,11 +1260,12 @@ bool MoveItVisualTools::hideRobot()
   // Always load the robot state before using
   loadSharedRobotState();
 
-  // TODO: this assumes your robot has a virtual joint named "virtual_joint"
-  // TODO check for existence
-  shared_robot_state_->setVariablePosition("virtual_joint/trans_x", rviz_visual_tools::LARGE_SCALE);
-  shared_robot_state_->setVariablePosition("virtual_joint/trans_y", rviz_visual_tools::LARGE_SCALE);
-  shared_robot_state_->setVariablePosition("virtual_joint/trans_z", rviz_visual_tools::LARGE_SCALE);
+  if (shared_robot_state_->getRobotModel()->hasJointModel("virtual_joint"))
+  {
+    shared_robot_state_->setVariablePosition("virtual_joint/trans_x", rviz_visual_tools::LARGE_SCALE);
+    shared_robot_state_->setVariablePosition("virtual_joint/trans_y", rviz_visual_tools::LARGE_SCALE);
+    shared_robot_state_->setVariablePosition("virtual_joint/trans_z", rviz_visual_tools::LARGE_SCALE);
+  }
       
   publishRobotState(shared_robot_state_);
 }
