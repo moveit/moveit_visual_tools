@@ -1214,6 +1214,29 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState &robot_s
     }
   }
 
+  // Modify colors to also indicate which are fixed
+  // TODO not compatibile with mainstream
+  if (robot_state.hasFixedLinks())
+  {
+    // Get links names
+    const std::vector<const moveit::core::LinkModel*>& link_names = robot_state.getRobotModel()->getLinkModelsWithCollisionGeometry();
+
+    for (std::size_t i = 0; i < robot_model_->getFixableLinks().size(); ++i)
+    {
+      if (robot_state.fixedLinkEnabled(i))
+      {
+        for (std::size_t j = 0; j < link_names.size(); ++j)
+        {
+          if (link_names[j] == robot_model_->getFixableLinks()[i])
+            if ( robot_state.getPrimaryFixedLinkID() == i ) // is primary
+              display_robot_msg.highlight_links[j].color = getColor(rviz_visual_tools::BLUE);
+            else
+              display_robot_msg.highlight_links[j].color = getColor(rviz_visual_tools::RED);
+        }
+      }
+    }
+  }  
+
   // Convert state to message
   robot_state::robotStateToRobotStateMsg(robot_state, display_robot_msg.state);
 
@@ -1221,18 +1244,6 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState &robot_s
   loadRobotStatePub();
   pub_robot_state_.publish( display_robot_msg );
   ros::spinOnce();
-
-  // Publish foot locations if they are fixed
-  // TODO: this not compatibile with mainstream MoveIt! debians, remove before releasing
-  if (robot_state.dynamicRootEnabled())
-  {
-    for (std::size_t i = 0; i < robot_state.getFixedLinks().size(); ++i)
-    {
-      // BLUE IS PRIMARY, RED IS SECONDARIES
-      const rviz_visual_tools::colors &color = (i==0) ? rviz_visual_tools::BLUE : rviz_visual_tools::RED;
-      publishArrow( robot_state.getFixedLinks()[i].transform_, color, rviz_visual_tools::LARGE);
-    }
-  }
 
   return true;
 }
