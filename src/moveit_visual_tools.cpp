@@ -127,13 +127,17 @@ bool MoveItVisualTools::processCollisionObjectMsg(const moveit_msgs::CollisionOb
 
   // Trigger an update
   if (!mannual_trigger_update_)
+  {
+    ROS_WARN_STREAM_NAMED("visual_tools","Auto triggering planning scene update");
     triggerPlanningSceneUpdate();
+  }
 
   return true;
 }
 
 bool MoveItVisualTools::triggerPlanningSceneUpdate()
 {
+  ROS_INFO_STREAM_NAMED("visual_tools","Triggering planning scene update");
   getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
   return true;
 }
