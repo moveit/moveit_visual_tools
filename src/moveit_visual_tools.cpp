@@ -47,10 +47,11 @@
 
 // Conversions
 #include <tf_conversions/tf_eigen.h>
-
 #include <eigen_conversions/eigen_msg.h>
 
+// Shape tools
 #include <shape_tools/solid_primitive_dims.h>
+#include <geometric_shapes/shape_operations.h>
 
 namespace moveit_visual_tools
 {
@@ -58,10 +59,11 @@ namespace moveit_visual_tools
 MoveItVisualTools::MoveItVisualTools(const std::string& base_frame,
                                      const std::string& marker_topic,
                                      planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
-  :  RvizVisualTools::RvizVisualTools(base_frame, marker_topic),
-     planning_scene_monitor_(planning_scene_monitor),
-     mannual_trigger_update_(false),
-     robot_state_topic_(DISPLAY_ROBOT_STATE_TOPIC)
+  : RvizVisualTools::RvizVisualTools(base_frame, marker_topic)
+  , planning_scene_monitor_(planning_scene_monitor)
+  , mannual_trigger_update_(false)
+  , robot_state_topic_(DISPLAY_ROBOT_STATE_TOPIC)
+  , planning_scene_topic_(PLANNING_SCENE_TOPIC)
 {
 
 }
@@ -86,24 +88,6 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
   }
   ROS_DEBUG_STREAM_NAMED("visual_tools","Loading planning scene monitor");
 
-  // Create planning scene monitor
-  // We create it the harder, more manual way so that we can tell MoveIt! to skip loading IK solvers, since we will
-  // never use them within the context of moveit_visual_tools. This saves loading time
-  /*
-    robot_model_loader::RobotModelLoader::Options rml_options(ROBOT_DESCRIPTION);
-    rml_options.load_kinematics_solvers_ = false;
-    rm_loader_.reset(new robot_model_loader::RobotModelLoader(rml_options));
-
-    std::string monitor_name = "visual_tools_planning_scene_monitor";
-
-    planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(
-    planning_scene::PlanningScenePtr(),
-    rm_loader_,
-    boost::shared_ptr<tf::Transformer>(),
-    monitor_name
-    ));
-  */
-
   // Regular version b/c the other one causes problems with recognizing end effectors
   planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(ROBOT_DESCRIPTION));
 
@@ -118,10 +102,9 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
     //planning_scene_monitor_->startSceneMonitor("/move_group/monitored_planning_scene");
     //planning_scene_monitor_->startStateMonitor("/joint_states", "/attached_collision_object");
 
-    static const std::string PLANNING_SCENE_TOPIC = "/planning_scene";
     planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE, 
-                                                          PLANNING_SCENE_TOPIC);
-    ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing planning scene on " << PLANNING_SCENE_TOPIC);
+                                                          planning_scene_topic_);
+    ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing planning scene on " << planning_scene_topic_);
   }
   else
   {
@@ -144,7 +127,7 @@ bool MoveItVisualTools::processCollisionObjectMsg(const moveit_msgs::CollisionOb
 
   // Trigger an update
   if (!mannual_trigger_update_)
-    getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
+    triggerPlanningSceneUpdate();
 
   return true;
 }
@@ -619,7 +602,6 @@ bool MoveItVisualTools::removeAllCollisionObjects()
   // Apply command directly to planning scene to avoid a ROS msg call
   {
     planning_scene_monitor::LockedPlanningSceneRW scene(getPlanningSceneMonitor());
-    //scene->getCurrentStateNonConst().update(); // hack to prevent bad transforms
     scene->removeAllCollisionObjects();
   }
 
@@ -845,6 +827,39 @@ bool MoveItVisualTools::publishCollisionCylinder(const geometry_msgs::Pose& obje
   return processCollisionObjectMsg(collision_obj, color);
 }
 
+bool MoveItVisualTools::publishCollisionMesh(const Eigen::Affine3d& object_pose, const std::string& object_name, 
+                                             const std::string &mesh_path, const rviz_visual_tools::colors &color)
+{
+  return publishCollisionMesh(convertPose(object_pose), object_name, mesh_path, color);
+}
+
+bool MoveItVisualTools::publishCollisionMesh(const geometry_msgs::Pose& object_pose, const std::string& object_name, 
+                                             const std::string &mesh_path, const rviz_visual_tools::colors &color)
+{
+  shapes::Shape *mesh = shapes::createMeshFromResource(mesh_path); // make sure its prepended by file://
+  shapes::ShapeMsg shape_msg; // this is a boost::variant type from shape_messages.h
+  if (!mesh || !shapes::constructMsgFromShape(mesh, shape_msg))
+  {
+    ROS_ERROR_STREAM_NAMED("visual_tools","Unable to create mesh shape message from resource " << mesh_path);
+    return false;
+  }
+
+  // Create collision message
+  moveit_msgs::CollisionObject collision_obj;
+  collision_obj.header.stamp = ros::Time::now();
+  collision_obj.header.frame_id = base_frame_;
+  collision_obj.id = object_name;
+  collision_obj.operation = moveit_msgs::CollisionObject::ADD;
+  collision_obj.mesh_poses.resize(1);
+  collision_obj.mesh_poses[0] = object_pose;
+  collision_obj.meshes.resize(1);
+  collision_obj.meshes[0] = boost::get<shape_msgs::Mesh>(shape_msg);
+
+  ROS_INFO_NAMED("visual_tools","Loaded mesh from '%s'", mesh_path.c_str());
+
+  return processCollisionObjectMsg(collision_obj, color);
+}
+
 bool MoveItVisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph &graph, const std::string &object_name, 
                                               double radius, const rviz_visual_tools::colors &color)
 {
@@ -1034,50 +1049,12 @@ bool MoveItVisualTools::loadCollisionSceneFromFile(const std::string &path, cons
 
   fin.close();
 
-  getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
+  return triggerPlanningSceneUpdate();
 }
 
 bool MoveItVisualTools::publishCollisionTests()
 {
-  // Create pose
-  geometry_msgs::Pose pose1;
-  geometry_msgs::Pose pose2;
-
-  // Test all shapes ----------
-
-  ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Block");
-  generateRandomPose(pose1);
-  publishCollisionBlock(pose1, "Block", 0.1, rviz_visual_tools::RAND);
-  ros::Duration(1.0).sleep();
-
-  ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Rectangle");
-  generateRandomPose(pose1);
-  generateRandomPose(pose2);
-  publishCollisionRectangle(pose1.position, pose2.position, "Rectangle", rviz_visual_tools::RAND);
-  ros::Duration(1.0).sleep();
-
-  ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Floor");
-  publishCollisionFloor(0, "Floor", rviz_visual_tools::RAND);
-  ros::Duration(1.0).sleep();
-
-  ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Cylinder");
-  generateRandomPose(pose1);
-  generateRandomPose(pose2);
-  publishCollisionCylinder(pose1.position, pose2.position, "Cylinder", 0.1, rviz_visual_tools::RAND);
-  ros::Duration(1.0).sleep();
-
-  // TODO: test publishCollisionGraph
-
-  ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Wall");
-  generateRandomPose(pose1);
-  publishCollisionWall(pose1.position.x, pose1.position.y, 0, 1, "Wall", rviz_visual_tools::RAND);
-  ros::Duration(1.0).sleep();
-
-  ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Table");
-  generateRandomPose(pose1);
-  publishCollisionTable(pose1.position.x, pose1.position.y, 0, 0.5, 0.5, 0.5, "Table", rviz_visual_tools::RAND);
-  ros::Duration(1.0).sleep();
-
+  ROS_ERROR_STREAM_NAMED("temp","Depricated");
 }
 
 bool MoveItVisualTools::publishWorkspaceParameters(const moveit_msgs::WorkspaceParameters& params)

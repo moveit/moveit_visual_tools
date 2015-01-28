@@ -75,6 +75,7 @@ public:
 
     while (ros::ok())
     {
+      // Run through test
       visual_tools_->publishTests();
     }
   }

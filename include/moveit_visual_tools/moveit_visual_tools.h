@@ -64,9 +64,9 @@ namespace moveit_visual_tools
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 static const std::string COLLISION_TOPIC = "/collision_object";
 static const std::string ATTACHED_COLLISION_TOPIC = "/attached_collision_object";
-static const std::string PLANNING_SCENE_TOPIC = "/move_group/monitored_planning_scene";
 static const std::string DISPLAY_PLANNED_PATH_TOPIC = "/move_group/display_planned_path";
 static const std::string DISPLAY_ROBOT_STATE_TOPIC = "/move_group/robot_state";
+static const std::string PLANNING_SCENE_TOPIC = "/move_group/monitored_planning_scene";
 
 class MoveItVisualTools : public rviz_visual_tools::RvizVisualTools
 {
@@ -101,6 +101,8 @@ protected:
   
   // ROS topic names to use when starting publishers
   std::string robot_state_topic_;
+  std::string planning_scene_topic_;
+
 public:
 
   /**
@@ -139,6 +141,15 @@ public:
   }
 
   /**
+   * \brief Set the planning scene topic
+   * \param topic 
+   */
+  void setPlanningSceneTopic(const std::string &planning_scene_topic)
+  {
+    planning_scene_topic_ = planning_scene_topic;
+  }
+
+  /**
    * \brief Load a planning scene monitor if one was not passed into the constructor
    * \return true if successful in loading
    */
@@ -147,7 +158,7 @@ public:
   /**
    * \brief Skip a ROS message call by sending directly to planning scene monitor
    * \param collision object message
-   * \param color to set the collision object as
+   * \param color to display the collision object with
    * \return true on success
    */
   bool processCollisionObjectMsg(const moveit_msgs::CollisionObject& msg, 
@@ -213,6 +224,7 @@ public:
   /**
    * \brief Publish an end effector to rviz
    * \param pose - the location to publish the marker with respect to the base frame
+   * \param color to display the collision object with
    * \return true on success
    */
   bool publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_visual_tools::colors &color = 
@@ -288,6 +300,7 @@ public:
    * \brief Make the floor a collision object
    * \param z location of floor
    * \param name of floor
+   * \param color to display the collision object with
    * \return true on success
    */
   bool publishCollisionFloor(double z = 0.0, const std::string& plane_name = "Floor",
@@ -298,6 +311,7 @@ public:
    * \param pose - location of center of block
    * \param name - semantic name of MoveIt collision object
    * \param size - height=width=depth=size
+   * \param color to display the collision object with
    * \return true on sucess
    **/
   bool publishCollisionBlock(const geometry_msgs::Pose& block_pose, const std::string& block_name, double block_size,
@@ -308,6 +322,7 @@ public:
    * \param point1 - top left of rectangle
    * \param point2 - bottom right of rectangle
    * \param name - semantic name of MoveIt collision object
+   * \param color to display the collision object with
    * \return true on sucess
    **/
   bool publishCollisionRectangle(const Eigen::Vector3d &point1, const Eigen::Vector3d &point2, 
@@ -321,6 +336,7 @@ public:
    * \param point b - x,y,z in space of a point
    * \param name - semantic name of MoveIt collision object
    * \param radius - size of cylinder
+   * \param color to display the collision object with
    * \return true on sucess
    */
   bool publishCollisionCylinder(const geometry_msgs::Point &a, const geometry_msgs::Point &b, 
@@ -336,6 +352,7 @@ public:
    * \param name - semantic name of MoveIt collision object
    * \param radius - size of cylinder
    * \param height - size of cylinder
+   * \param color to display the collision object with
    * \return true on sucess
    */
   bool publishCollisionCylinder(const Eigen::Affine3d& object_pose, const std::string& object_name, double radius, double height,
@@ -344,9 +361,23 @@ public:
                                 const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
 
   /**
+   * \brief Create a collision object using a mesh
+   * \param pose - location of center of mesh
+   * \param name - semantic name of MoveIt collision object
+   * \param peth - file location to an .stl file
+   * \param color to display the collision object with
+   * \return true on success
+   */
+  bool publishCollisionMesh(const geometry_msgs::Pose& object_pose, const std::string& object_name, const std::string &mesh_path,
+                            const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
+  bool publishCollisionMesh(const Eigen::Affine3d& object_pose, const std::string& object_name, const std::string &mesh_path,
+                            const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
+  
+  /**
    * \brief Publish a connected birectional graph
    * \param graph of nodes and edges
    * \param name of collision object
+   * \param color to display the collision object with
    * \return true on sucess
    */
   bool publishCollisionGraph(const graph_msgs::GeometryGraph &graph, const std::string &object_name, double radius,
@@ -365,6 +396,7 @@ public:
    * \param angle
    * \param width
    * \param name
+   * \param color to display the collision object with
    * \return true on sucess
    */
   bool publishCollisionWall(double x, double y, double angle, double width, const std::string name,
@@ -379,6 +411,7 @@ public:
    * \param height
    * \param depth
    * \param name
+   * \param color to display the collision object with
    * \return true on sucess
    */
   bool publishCollisionTable(double x, double y, double angle, double width, double height,
@@ -397,6 +430,7 @@ public:
    * \brief Simple tests for collision testing
    * \return true on success
    */
+  MOVEIT_DEPRECATED
   bool publishCollisionTests();
 
   /**

@@ -79,10 +79,56 @@ public:
 
     // Allow time to publish messages
     ros::spinOnce();
+    ros::Duration(5.0).sleep();
+
+    // Create pose
+    geometry_msgs::Pose pose1;
+    geometry_msgs::Pose pose2;
+
+    // Test all collision shapes ----------
+
+    ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Mesh");
+    visual_tools_->generateRandomPose(pose1);
+    static const std::string package = "moveit_visual_tools";
+    std::string path = "file://" + ros::package::getPath(package);
+    if( path == "file://" )
+      ROS_FATAL_STREAM_NAMED("visual_tools", "Unable to get " << package << " package path " );
+    path.append("/resources/demo_mesh.stl");
+    visual_tools_->publishCollisionMesh(pose1, "Mesh", path, rviz_visual_tools::RAND);
     ros::Duration(1.0).sleep();
 
-    // Run through test
-    visual_tools_->publishCollisionTests();
+    ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Block");
+    visual_tools_->generateRandomPose(pose1);
+    visual_tools_->publishCollisionBlock(pose1, "Block", 0.1, rviz_visual_tools::RAND);
+    ros::Duration(1.0).sleep();
+
+    ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Rectangle");
+    visual_tools_->generateRandomPose(pose1);
+    visual_tools_->generateRandomPose(pose2);
+    visual_tools_->publishCollisionRectangle(pose1.position, pose2.position, "Rectangle", rviz_visual_tools::RAND);
+    ros::Duration(1.0).sleep();
+
+    ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Floor");
+    visual_tools_->publishCollisionFloor(0, "Floor", rviz_visual_tools::RAND);
+    ros::Duration(1.0).sleep();
+
+    ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Cylinder");
+    visual_tools_->generateRandomPose(pose1);
+    visual_tools_->generateRandomPose(pose2);
+    visual_tools_->publishCollisionCylinder(pose1.position, pose2.position, "Cylinder", 0.1, rviz_visual_tools::RAND);
+    ros::Duration(1.0).sleep();
+
+    // TODO: test publishCollisionGraph
+
+    ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Wall");
+    visual_tools_->generateRandomPose(pose1);
+    visual_tools_->publishCollisionWall(pose1.position.x, pose1.position.y, 0, 1, "Wall", rviz_visual_tools::RAND);
+    ros::Duration(1.0).sleep();
+
+    ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Table");
+    visual_tools_->generateRandomPose(pose1);
+    visual_tools_->publishCollisionTable(pose1.position.x, pose1.position.y, 0, 0.5, 0.5, 0.5, "Table", rviz_visual_tools::RAND);
+    ros::Duration(1.0).sleep();
   }
 
   /**
@@ -95,7 +141,7 @@ public:
   bool loadPlanningSceneMonitor()
   {
     // Allows us to sycronize to Rviz and also publish collision objects to ourselves
-    ROS_DEBUG_STREAM_NAMED("r2_demos","Loading Planning Scene Monitor");
+    ROS_DEBUG_STREAM_NAMED("visual_tools","Loading Planning Scene Monitor");
     planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(ROBOT_DESCRIPTION, boost::shared_ptr<tf::Transformer>()));
     ros::spinOnce();
     ros::Duration(0.5).sleep();
