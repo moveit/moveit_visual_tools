@@ -162,6 +162,7 @@ bool MoveItVisualTools::loadSharedRobotState()
 
 bool MoveItVisualTools::loadRobotMarkers()
 {
+  ROS_ERROR_STREAM_NAMED("temp","This function is going to be removed soon because it is incorrect");
   // Always load the robot state before using
   loadSharedRobotState();
 
@@ -277,7 +278,7 @@ bool MoveItVisualTools::loadEEMarker(const std::string& ee_group_name, const std
   // Copy original marker poses to a vector
   for (std::size_t i = 0 ; i < ee_marker_array_.markers.size() ; ++i)
   {
-    marker_poses_.push_back( ee_marker_array_.markers[i].pose );
+    ee_marker_poses_.push_back( ee_marker_array_.markers[i].pose );
   }
 
   return true;
@@ -404,7 +405,7 @@ bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const 
 
     // Simple conversion from geometry_msgs::Pose to tf::Pose
     tf::poseMsgToTF(pose, tf_root_to_marker);
-    tf::poseMsgToTF(marker_poses_[i], tf_root_to_mesh);
+    tf::poseMsgToTF(ee_marker_poses_[i], tf_root_to_mesh);
 
     // Conversions
     tf::Pose tf_eef_to_mesh = tf_root_to_link_.inverse() * tf_root_to_mesh;

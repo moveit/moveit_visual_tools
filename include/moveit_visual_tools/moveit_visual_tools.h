@@ -85,7 +85,7 @@ protected:
   visualization_msgs::MarkerArray ee_marker_array_;
   tf::Pose tf_root_to_link_;
   geometry_msgs::Pose grasp_pose_to_eef_pose_; // Convert generic grasp pose to this end effector's frame of reference
-  std::vector<geometry_msgs::Pose> marker_poses_;
+  std::vector<geometry_msgs::Pose> ee_marker_poses_;
 
   // Cached robot state marker - cache the colored links. 
   // Note: Only allows colors provided in rviz_visual_tools to prevent too many robot state messages from being loaded
@@ -180,6 +180,7 @@ public:
    * \brief Caches the meshes and geometry of a robot. NOTE: perhaps not maintained...
    * \return true if successful in loading
    */
+  MOVEIT_DEPRECATED
   bool loadRobotMarkers();
 
   /**
