@@ -36,7 +36,6 @@
 // Desc:   Simple tools for showing parts of a robot in Rviz, such as the gripper or arm
 
 #include <moveit_visual_tools/moveit_visual_tools.h>
-#include <moveit/robot_interaction/robot_interaction.h>
 
 // MoveIt Messages
 #include <moveit_msgs/DisplayTrajectory.h>
@@ -102,7 +101,7 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
     //planning_scene_monitor_->startSceneMonitor("/move_group/monitored_planning_scene");
     //planning_scene_monitor_->startStateMonitor("/joint_states", "/attached_collision_object");
 
-    planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE, 
+    planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
                                                           planning_scene_topic_);
     ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing planning scene on " << planning_scene_topic_);
   }
@@ -207,16 +206,27 @@ robot_state::RobotStatePtr& MoveItVisualTools::getSharedRobotState()
   return shared_robot_state_;
 }
 
-// \todo handle different types of end effectors better
-bool MoveItVisualTools::loadEEMarker(const std::string& ee_group_name, const std::string& planning_group)
+bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg)
 {
+  // Get joint state group
+  if( ee_jmg == NULL ) // make sure EE_GROUP exists
+  {
+    ROS_ERROR_STREAM_NAMED("visual_tools","Unable to find joint model group with address" << ee_jmg);
+    return false;
+  }
+
   // Always load the robot state before using
   loadSharedRobotState();
-  shared_robot_state_->setToDefaultValues(); // make sure the ee joint values are reasonable
+  shared_robot_state_->setToDefaultValues();
+  shared_robot_state_->update();
+  publishRobotState(shared_robot_state_);
 
-  // Clear old EE markers
-  marker_poses_.clear();
-  ee_marker_array_.markers.clear();
+  // Clear old EE markers and EE poses
+  ee_markers_map_[ee_jmg].markers.clear();
+  ee_poses_map_[ee_jmg].clear();
+
+  // Keep track of how many unique markers we have between different EEs
+  static std::size_t marker_id_offset = 0;
 
   // -----------------------------------------------------------------------------------------------
   // Get end effector group
@@ -224,62 +234,44 @@ bool MoveItVisualTools::loadEEMarker(const std::string& ee_group_name, const std
   // Create color to use for EE markers
   std_msgs::ColorRGBA marker_color = getColor( rviz_visual_tools::GREY );
 
-  // Get robot model
-  robot_model::RobotModelConstPtr robot_model = shared_robot_state_->getRobotModel();
-  // Get joint state group
-  const robot_model::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(ee_group_name);
-  if( joint_model_group == NULL ) // make sure EE_GROUP exists
-  {
-    ROS_ERROR_STREAM_NAMED("visual_tools","Unable to find joint model group '" << ee_group_name << "'");
-    return false;
-  }
   // Get link names that are in end effector
-  const std::vector<std::string> &ee_link_names = joint_model_group->getLinkModelNames();
-  //ROS_DEBUG_STREAM_NAMED("visual_tools","Number of links in group " << ee_group_name << ": " << ee_link_names.size());
-  //std::copy(ee_link_names.begin(), ee_link_names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
-
-  // Robot Interaction - finds the end effector associated with a planning group
-  robot_interaction::RobotInteraction robot_interaction( robot_model );
-
-  // Decide active end effectors
-  robot_interaction.decideActiveComponents(planning_group);
-
-  // Get active EE
-  std::vector<robot_interaction::RobotInteraction::EndEffector> active_eef =
-    robot_interaction.getActiveEndEffectors();
-
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Number of active end effectors: " << active_eef.size());
-  if( !active_eef.size() )
-  {
-    ROS_ERROR_STREAM_NAMED("visual_tools","No active end effectors found! Make sure kinematics.yaml is loaded in this node's namespace!");
-    return false;
-  }
-
-  // Just choose the first end effector \todo better logic?
-  robot_interaction::RobotInteraction::EndEffector eef = active_eef[0];
+  const std::vector<std::string> &ee_link_names = ee_jmg->getLinkModelNames();
 
   // -----------------------------------------------------------------------------------------------
   // Get EE link markers for Rviz
 
-  shared_robot_state_->getRobotMarkers(ee_marker_array_, ee_link_names, marker_color, eef.eef_group, ros::Duration());
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Number of rviz markers in end effector: " << ee_marker_array_.markers.size());
+  shared_robot_state_->getRobotMarkers(ee_markers_map_[ee_jmg], ee_link_names, marker_color, ee_jmg->getName(), ros::Duration());
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Number of rviz markers in end effector: " << ee_markers_map_[ee_jmg].markers.size());
 
-  // Change pose from Eigen to TF
-  try
+  const std::string &ee_parent_link_name = ee_jmg->getEndEffectorParentGroup().second;
+  ROS_DEBUG_STREAM_NAMED("visual_tools","EE Parent link: " << ee_parent_link_name);
+  const moveit::core::LinkModel* ee_parent_link = robot_model_->getLinkModel(ee_parent_link_name);
+  //const moveit::core::JointModel* ee_parent_joint = ee_parent_link->getParentJointModel();
+
+  Eigen::Affine3d ee_marker_global_transform = shared_robot_state_->getGlobalLinkTransform(ee_parent_link);
+  Eigen::Affine3d ee_marker_pose;
+
+  // Process each link of the end effector
+  for (std::size_t i = 0 ; i < ee_markers_map_[ee_jmg].markers.size() ; ++i)
   {
-    //ee_parent_link_ = eef.parent_link; // save the name of the link for later use
-    tf::poseEigenToTF(shared_robot_state_->getGlobalLinkTransform(eef.parent_link), tf_root_to_link_);
-  }
-  catch(...)
-  {
-    ROS_ERROR_STREAM_NAMED("visual_tools","Didn't find link state for " << eef.parent_link);
+    // Header
+    ee_markers_map_[ee_jmg].markers[i].header.frame_id = base_frame_;
+
+    // Options for meshes
+    if( ee_markers_map_[ee_jmg].markers[i].type == visualization_msgs::Marker::MESH_RESOURCE )
+    {
+      ee_markers_map_[ee_jmg].markers[i].mesh_use_embedded_materials = true;
+    }
+
+    // Unique id
+    ee_markers_map_[ee_jmg].markers[i].id += marker_id_offset;
+
+    // Copy original marker poses to a vector
+    ee_marker_pose = ee_marker_global_transform.inverse() * convertPose(ee_markers_map_[ee_jmg].markers[i].pose);
+    ee_poses_map_[ee_jmg].push_back(ee_marker_pose);
   }
 
-  // Copy original marker poses to a vector
-  for (std::size_t i = 0 ; i < ee_marker_array_.markers.size() ; ++i)
-  {
-    ee_marker_poses_.push_back( ee_marker_array_.markers[i].pose );
-  }
+  marker_id_offset += ee_markers_map_[ee_jmg].markers.size();
 
   return true;
 }
@@ -307,7 +299,7 @@ void MoveItVisualTools::loadTrajectoryPub()
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing MoveIt trajectory on topic " << pub_display_path_.getTopic());
 
   // Wait for topic to be ready
-  waitForSubscriber(pub_display_path_);  
+  waitForSubscriber(pub_display_path_);
 }
 
 void MoveItVisualTools::loadRobotStatePub(const std::string &robot_state_topic)
@@ -339,90 +331,61 @@ planning_scene_monitor::PlanningSceneMonitorPtr MoveItVisualTools::getPlanningSc
   return planning_scene_monitor_;
 }
 
-bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const rviz_visual_tools::colors &color, 
-                                         const std::string &ns)
+bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const robot_model::JointModelGroup* ee_jmg,
+                                         const rviz_visual_tools::colors &color, const std::string &ns)
 {
   if(muted_)
     return true;
 
-  // Check if we have already loaded the EE markers
-  if( ee_marker_array_.markers.empty() )
+  // Check if we have not loaded the EE markers
+  if( ee_markers_map_[ee_jmg].markers.empty() || ee_poses_map_[ee_jmg].empty())
   {
-    ROS_ERROR_STREAM_NAMED("visual_tools","Unable to publish EE marker because marker has not been loaded yet");
-    return false;
+    if (!loadEEMarker(ee_jmg))
+    {
+      ROS_ERROR_STREAM_NAMED("visual_tools","Unable to publish EE marker, unable to load EE markers");
+      return false;
+    }
   }
 
-  // -----------------------------------------------------------------------------------------------
-  // Change the end effector pose to frame of reference of this custom end effector
+  Eigen::Affine3d eigen_goal_ee_pose = convertPose(pose);
+  Eigen::Affine3d eigen_this_marker;
 
-  // Convert to Eigen
-  Eigen::Affine3d ee_pose_eigen;
-  Eigen::Affine3d eef_conversion_pose;
-  tf::poseMsgToEigen(pose, ee_pose_eigen);
-  tf::poseMsgToEigen(grasp_pose_to_eef_pose_, eef_conversion_pose);
-
-  // Transform the grasp pose
-  ee_pose_eigen = ee_pose_eigen * eef_conversion_pose;
-
-  // Convert back to message
-  geometry_msgs::Pose ee_pose = convertPose(ee_pose_eigen);
+  //publishArrow( pose, rviz_visual_tools::RED, rviz_visual_tools::LARGE );
 
   // -----------------------------------------------------------------------------------------------
   // Process each link of the end effector
-  for (std::size_t i = 0 ; i < ee_marker_array_.markers.size() ; ++i)
+  for (std::size_t i = 0 ; i < ee_markers_map_[ee_jmg].markers.size(); ++i)
   {
     // Make sure ROS is still spinning
     if( !ros::ok() )
       break;
 
     // Header
-    ee_marker_array_.markers[i].header.frame_id = base_frame_;
-    ee_marker_array_.markers[i].header.stamp = ros::Time::now();
+    ee_markers_map_[ee_jmg].markers[i].header.stamp = ros::Time::now();
 
     // Namespace
-    ee_marker_array_.markers[i].ns = ns;
+    ee_markers_map_[ee_jmg].markers[i].ns = ns;
 
     // Lifetime
-    ee_marker_array_.markers[i].lifetime = marker_lifetime_;
+    ee_markers_map_[ee_jmg].markers[i].lifetime = marker_lifetime_;
 
     // Color
-    ee_marker_array_.markers[i].color = getColor( color );
+    ee_markers_map_[ee_jmg].markers[i].color = getColor( color );
 
-    // Options for meshes
-    if( ee_marker_array_.markers[i].type == visualization_msgs::Marker::MESH_RESOURCE )
-    {
-      ee_marker_array_.markers[i].mesh_use_embedded_materials = true;
-    }
-
-    // -----------------------------------------------------------------------------------------------
-    // Do some math for the offset
-    // pose             - our generated grasp
-    // markers[i].pose        - an ee link's pose relative to the whole end effector
-    // REMOVED grasp_pose_to_eef_pose_ - the offset from the grasp pose to eef_pose - probably nothing
-    tf::Pose tf_root_to_marker;
-    tf::Pose tf_root_to_mesh;
-    tf::Pose tf_pose_to_eef;
-
-    // Simple conversion from geometry_msgs::Pose to tf::Pose
-    tf::poseMsgToTF(pose, tf_root_to_marker);
-    tf::poseMsgToTF(ee_marker_poses_[i], tf_root_to_mesh);
-
-    // Conversions
-    tf::Pose tf_eef_to_mesh = tf_root_to_link_.inverse() * tf_root_to_mesh;
-    tf::Pose tf_root_to_mesh_new = tf_root_to_marker * tf_eef_to_mesh;
-    tf::poseTFToMsg(tf_root_to_mesh_new, ee_marker_array_.markers[i].pose);
-    // -----------------------------------------------------------------------------------------------
-
+    // Convert pose
+    eigen_this_marker = eigen_goal_ee_pose * ee_poses_map_[ee_jmg][i];
+    ee_markers_map_[ee_jmg].markers[i].pose = convertPose(eigen_this_marker);
 
     // Helper for publishing rviz markers
-    publishMarker( ee_marker_array_.markers[i] );
+    if (!publishMarker( ee_markers_map_[ee_jmg].markers[i] ))
+      return false;
   }
 
   return true;
 }
 
 bool MoveItVisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
-                                      const std::string &ee_parent_link, double animate_speed)
+                                      const robot_model::JointModelGroup* ee_jmg, double animate_speed)
 {
   if(muted_)
   {
@@ -430,8 +393,8 @@ bool MoveItVisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& pos
     return false;
   }
 
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing " << possible_grasps.size() << " grasps with parent link "
-                         << ee_parent_link);
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing " << possible_grasps.size() << " grasps with EE joint model group "
+                         << ee_jmg->getName());
 
   // Loop through all grasps
   for (std::size_t i = 0; i < possible_grasps.size(); ++i)
@@ -439,7 +402,7 @@ bool MoveItVisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& pos
     if( !ros::ok() )  // Check that ROS is still ok and that user isn't trying to quit
       break;
 
-    publishEEMarkers(possible_grasps[i].grasp_pose.pose);
+    publishEEMarkers(possible_grasps[i].grasp_pose.pose, ee_jmg);
 
     ros::Duration(animate_speed).sleep();
   }
@@ -448,7 +411,7 @@ bool MoveItVisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& pos
 }
 
 bool MoveItVisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
-                                              const std::string &ee_parent_link, double animate_speed)
+                                              const robot_model::JointModelGroup* ee_jmg, double animate_speed)
 {
   if(muted_)
   {
@@ -456,8 +419,8 @@ bool MoveItVisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Gra
     return false;
   }
 
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing " << possible_grasps.size() << " grasps with parent link "
-                         << ee_parent_link << " at speed " << animate_speed);
+  ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing " << possible_grasps.size() << " grasps with joint model group "
+                         << ee_jmg->getName() << " at speed " << animate_speed);
 
   // Loop through all grasps
   for (std::size_t i = 0; i < possible_grasps.size(); ++i)
@@ -465,7 +428,7 @@ bool MoveItVisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Gra
     if( !ros::ok() )  // Check that ROS is still ok and that user isn't trying to quit
       break;
 
-    publishAnimatedGrasp(possible_grasps[i], ee_parent_link, animate_speed);
+    publishAnimatedGrasp(possible_grasps[i], ee_jmg, animate_speed);
 
     ros::Duration(0.1).sleep();
   }
@@ -473,7 +436,7 @@ bool MoveItVisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Gra
   return true;
 }
 
-bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, const std::string &ee_parent_link, 
+bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, const robot_model::JointModelGroup* ee_jmg, 
                                              double animate_speed)
 {
   if(muted_)
@@ -481,6 +444,15 @@ bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, co
 
   // Grasp Pose Variables
   geometry_msgs::Pose grasp_pose = grasp.grasp_pose.pose;
+
+  // Debug
+  if (false)
+  {
+    publishArrow(grasp_pose, rviz_visual_tools::GREEN);
+    publishEEMarkers(grasp_pose, ee_jmg);
+    ros::Duration(0.5).sleep();
+  }
+
   Eigen::Affine3d grasp_pose_eigen;
   tf::poseMsgToEigen(grasp_pose, grasp_pose_eigen);
 
@@ -514,9 +486,12 @@ bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, co
                                                                    -1 * grasp.pre_grasp_approach.direction.vector.y * grasp.pre_grasp_approach.desired_distance * (1-percent),
                                                                    -1 * grasp.pre_grasp_approach.direction.vector.z * grasp.pre_grasp_approach.desired_distance * (1-percent)
                                                                    );
+    std::cout << "pre_grasp_approach_direction: " << pre_grasp_approach_direction << std::endl;
 
     // Decide if we need to change the approach_direction to the local frame of the end effector orientation
-    if( grasp.pre_grasp_approach.direction.header.frame_id == ee_parent_link )
+    const std::string &ee_parent_link_name = ee_jmg->getEndEffectorParentGroup().second;
+
+    if( grasp.pre_grasp_approach.direction.header.frame_id == ee_parent_link_name )
     {
       // Apply/compute the approach_direction vector in the local frame of the grasp_pose orientation
       pre_grasp_approach_direction_local = grasp_pose_eigen.rotation() * pre_grasp_approach_direction;
@@ -526,14 +501,14 @@ bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, co
       pre_grasp_approach_direction_local = pre_grasp_approach_direction; //grasp_pose_eigen.rotation() * pre_grasp_approach_direction;
     }
 
-    // Update the grasp matrix usign the new locally-framed approach_direction
+    // Update the grasp pose usign the new locally-framed approach_direction
     pre_grasp_pose_eigen.translation() += pre_grasp_approach_direction_local;
 
     // Convert eigen pre-grasp position back to regular message
     tf::poseEigenToMsg(pre_grasp_pose_eigen, pre_grasp_pose);
 
     //publishArrow(pre_grasp_pose, moveit_visual_tools::BLUE);
-    publishEEMarkers(pre_grasp_pose);
+    publishEEMarkers(pre_grasp_pose, ee_jmg);
 
     ros::Duration(animate_speed).sleep();
   }
@@ -598,7 +573,7 @@ bool MoveItVisualTools::publishIKSolutions(const std::vector<trajectory_msgs::Jo
   trajectory_pt_timed = trajectory_msg.joint_trajectory.points.back();
   trajectory_pt_timed.time_from_start = ros::Duration(running_time);
   trajectory_msg.joint_trajectory.points.push_back(trajectory_pt_timed);
-  
+
   return publishTrajectoryPath(trajectory_msg, true);
 }
 
@@ -635,8 +610,6 @@ bool MoveItVisualTools::cleanupACO(const std::string& name)
   //aco.object.id = name;
   aco.object.operation = moveit_msgs::CollisionObject::REMOVE;
 
-  //aco.link_name = ee_parent_link_;
-
   loadAttachedPub(); // always call this before publishing
   pub_attach_collision_obj_.publish(aco);
   ros::spinOnce();
@@ -664,7 +637,7 @@ bool MoveItVisualTools::attachCO(const std::string& name, const std::string& ee_
   return true;
 }
 
-bool MoveItVisualTools::publishCollisionBlock(const geometry_msgs::Pose& block_pose, const std::string& block_name, 
+bool MoveItVisualTools::publishCollisionBlock(const geometry_msgs::Pose& block_pose, const std::string& block_name,
                                               double block_size, const rviz_visual_tools::colors &color)
 {
   moveit_msgs::CollisionObject collision_obj;
@@ -687,13 +660,13 @@ bool MoveItVisualTools::publishCollisionBlock(const geometry_msgs::Pose& block_p
   return processCollisionObjectMsg(collision_obj, color);
 }
 
-bool MoveItVisualTools::publishCollisionRectangle(const Eigen::Vector3d &point1, const Eigen::Vector3d &point2, 
+bool MoveItVisualTools::publishCollisionRectangle(const Eigen::Vector3d &point1, const Eigen::Vector3d &point2,
                                                   const std::string& block_name, const rviz_visual_tools::colors &color)
 {
   return publishCollisionRectangle( convertPoint(point1), convertPoint(point2), block_name, color );
 }
 
-bool MoveItVisualTools::publishCollisionRectangle(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2, 
+bool MoveItVisualTools::publishCollisionRectangle(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2,
                                                   const std::string& rectangle_name, const rviz_visual_tools::colors &color)
 {
   moveit_msgs::CollisionObject collision_obj;
@@ -717,11 +690,11 @@ bool MoveItVisualTools::publishCollisionRectangle(const geometry_msgs::Point &po
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = fabs(point1.z - point2.z);
 
   // Prevent scale from being zero
-  if (!collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X]) 
+  if (!collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X])
     collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = rviz_visual_tools::SMALL_SCALE;
-  if (!collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y]) 
+  if (!collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y])
     collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = rviz_visual_tools::SMALL_SCALE;
-  if (!collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z]) 
+  if (!collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z])
     collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = rviz_visual_tools::SMALL_SCALE;
 
   //ROS_INFO_STREAM_NAMED("visual_tools","CollisionObject: \n " << collision_obj);
@@ -736,7 +709,7 @@ bool MoveItVisualTools::publishCollisionFloor(double z, const std::string& plane
   collision_obj.header.stamp = ros::Time::now();
   collision_obj.header.frame_id = base_frame_;
   collision_obj.id = plane_name;
-  collision_obj.operation = moveit_msgs::CollisionObject::ADD;  
+  collision_obj.operation = moveit_msgs::CollisionObject::ADD;
 
   // Representation of a plane, using the plane equation ax + by + cz + d = 0
   collision_obj.planes.resize(1);
@@ -767,7 +740,7 @@ bool MoveItVisualTools::publishCollisionFloor(double z, const std::string& plane
   // Instead just generate a rectangle
   geometry_msgs::Point point1;
   geometry_msgs::Point point2;
-  
+
   point1.x = rviz_visual_tools::LARGE_SCALE;
   point1.y = rviz_visual_tools::LARGE_SCALE;
   point1.z = z;
@@ -775,7 +748,7 @@ bool MoveItVisualTools::publishCollisionFloor(double z, const std::string& plane
   point2.x = -rviz_visual_tools::LARGE_SCALE;
   point2.y = -rviz_visual_tools::LARGE_SCALE;
   point2.z = z-rviz_visual_tools::SMALL_SCALE;;
-  
+
   return publishCollisionRectangle(point1, point2, plane_name, color);
 }
 
@@ -806,13 +779,13 @@ bool MoveItVisualTools::publishCollisionCylinder(const Eigen::Vector3d &a, const
   return publishCollisionCylinder(pose, object_name, radius, height, color);
 }
 
-bool MoveItVisualTools::publishCollisionCylinder(const Eigen::Affine3d& object_pose, const std::string& object_name, 
+bool MoveItVisualTools::publishCollisionCylinder(const Eigen::Affine3d& object_pose, const std::string& object_name,
                                                  double radius, double height, const rviz_visual_tools::colors &color)
 {
   return publishCollisionCylinder(convertPose(object_pose), object_name, radius, height, color);
 }
 
-bool MoveItVisualTools::publishCollisionCylinder(const geometry_msgs::Pose& object_pose, const std::string& object_name, 
+bool MoveItVisualTools::publishCollisionCylinder(const geometry_msgs::Pose& object_pose, const std::string& object_name,
                                                  double radius, double height, const rviz_visual_tools::colors &color)
 {
   moveit_msgs::CollisionObject collision_obj;
@@ -832,13 +805,13 @@ bool MoveItVisualTools::publishCollisionCylinder(const geometry_msgs::Pose& obje
   return processCollisionObjectMsg(collision_obj, color);
 }
 
-bool MoveItVisualTools::publishCollisionMesh(const Eigen::Affine3d& object_pose, const std::string& object_name, 
+bool MoveItVisualTools::publishCollisionMesh(const Eigen::Affine3d& object_pose, const std::string& object_name,
                                              const std::string &mesh_path, const rviz_visual_tools::colors &color)
 {
   return publishCollisionMesh(convertPose(object_pose), object_name, mesh_path, color);
 }
 
-bool MoveItVisualTools::publishCollisionMesh(const geometry_msgs::Pose& object_pose, const std::string& object_name, 
+bool MoveItVisualTools::publishCollisionMesh(const geometry_msgs::Pose& object_pose, const std::string& object_name,
                                              const std::string &mesh_path, const rviz_visual_tools::colors &color)
 {
   shapes::Shape *mesh = shapes::createMeshFromResource(mesh_path); // make sure its prepended by file://
@@ -865,7 +838,7 @@ bool MoveItVisualTools::publishCollisionMesh(const geometry_msgs::Pose& object_p
   return processCollisionObjectMsg(collision_obj, color);
 }
 
-bool MoveItVisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph &graph, const std::string &object_name, 
+bool MoveItVisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph &graph, const std::string &object_name,
                                               double radius, const rviz_visual_tools::colors &color)
 {
   ROS_INFO_STREAM_NAMED("publishCollisionGraph","Preparing to create collision graph");
@@ -1173,7 +1146,7 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState &robot_s
 {
   // Reference to the correctly colored version of message (they are cached)
   // May not exist yet but this will create it
-  moveit_msgs::DisplayRobotState& display_robot_msg = display_robot_msgs_[color]; 
+  moveit_msgs::DisplayRobotState& display_robot_msg = display_robot_msgs_[color];
 
   // Check if a robot state message already exists for this color
   if (display_robot_msg.highlight_links.size() == 0) // has not been colored yet, lets create that
@@ -1217,7 +1190,7 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState &robot_s
         }
       }
     }
-  }  
+  }
 
   // Convert state to message
   robot_state::robotStateToRobotStateMsg(robot_state, display_robot_msg.state);
@@ -1259,7 +1232,7 @@ bool MoveItVisualTools::hideRobot()
     shared_robot_state_->setVariablePosition("virtual_joint/trans_y", rviz_visual_tools::LARGE_SCALE);
     shared_robot_state_->setVariablePosition("virtual_joint/trans_z", rviz_visual_tools::LARGE_SCALE);
   }
-      
+
   publishRobotState(shared_robot_state_);
 }
 
