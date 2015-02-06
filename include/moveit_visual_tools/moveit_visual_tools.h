@@ -157,6 +157,12 @@ public:
   moveit::core::RobotStatePtr& getSharedRobotState();
 
   /**
+   * \brief Get a pointer to the robot model
+   * \return const RobotModel
+   */
+  moveit::core::RobotModelConstPtr getRobotModel();
+
+  /**
    * \brief Call this once at begining to load the robot marker
    * \param ee_group_name - name of planning_group for the end effector
    * \return true if it is successful

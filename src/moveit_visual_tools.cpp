@@ -198,12 +198,19 @@ bool MoveItVisualTools::loadRobotMarkers()
 
   return true;
 }
-
-robot_state::RobotStatePtr& MoveItVisualTools::getSharedRobotState()
+ 
+moveit::core::RobotStatePtr& MoveItVisualTools::getSharedRobotState()
 {
   // Always load the robot state before using
   loadSharedRobotState();
   return shared_robot_state_;
+}
+
+moveit::core::RobotModelConstPtr MoveItVisualTools::getRobotModel()
+{
+  // Always load the robot state before using
+  loadSharedRobotState();
+  return shared_robot_state_->getRobotModel();
 }
 
 bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg)
@@ -481,17 +488,19 @@ bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, co
     // The direction of the pre-grasp
     // Calculate the current animation position based on the percent
     Eigen::Vector3d pre_grasp_approach_direction = Eigen::Vector3d(
-                                                                   -1 * grasp.pre_grasp_approach.direction.vector.x * grasp.pre_grasp_approach.desired_distance * (1-percent),
-                                                                   -1 * grasp.pre_grasp_approach.direction.vector.y * grasp.pre_grasp_approach.desired_distance * (1-percent),
-                                                                   -1 * grasp.pre_grasp_approach.direction.vector.z * grasp.pre_grasp_approach.desired_distance * (1-percent)
+                                                                   -1 * grasp.pre_grasp_approach.direction.vector.x * grasp.pre_grasp_approach.min_distance * (1-percent),
+                                                                   -1 * grasp.pre_grasp_approach.direction.vector.y * grasp.pre_grasp_approach.min_distance * (1-percent),
+                                                                   -1 * grasp.pre_grasp_approach.direction.vector.z * grasp.pre_grasp_approach.min_distance * (1-percent)
                                                                    );
-    std::cout << "pre_grasp_approach_direction: " << pre_grasp_approach_direction << std::endl;
+    std::cout << "pre_grasp_approach_direction: \n" << pre_grasp_approach_direction << std::endl;
 
     // Decide if we need to change the approach_direction to the local frame of the end effector orientation
     const std::string &ee_parent_link_name = ee_jmg->getEndEffectorParentGroup().second;
+    std::cout << "Parent link name: " << ee_parent_link_name << std::endl;
 
     if( grasp.pre_grasp_approach.direction.header.frame_id == ee_parent_link_name )
     {
+      std::cout << "inside here: " << ee_parent_link_name << std::endl;
       // Apply/compute the approach_direction vector in the local frame of the grasp_pose orientation
       pre_grasp_approach_direction_local = grasp_pose_eigen.rotation() * pre_grasp_approach_direction;
     }
@@ -510,6 +519,10 @@ bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, co
     publishEEMarkers(pre_grasp_pose, ee_jmg);
 
     ros::Duration(animate_speed).sleep();
+
+    // Pause more at initial pose for debugging purposes
+    if (percent == 0)
+      ros::Duration(animate_speed*2).sleep();
   }
   return true;
 }
