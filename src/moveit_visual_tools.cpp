@@ -169,7 +169,6 @@ bool MoveItVisualTools::loadRobotMarkers()
   const std::vector<std::string> &link_names = shared_robot_state_->getRobotModel()->getLinkModelNames();;
 
   ROS_DEBUG_STREAM_NAMED("visual_tools","Number of links in robot: " << link_names.size());
-  //    std::copy(link_names.begin(), link_names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
 
   // Get EE link markers for Rviz
   visualization_msgs::MarkerArray robot_marker_array;
@@ -492,15 +491,12 @@ bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, co
                                                                    -1 * grasp.pre_grasp_approach.direction.vector.y * grasp.pre_grasp_approach.min_distance * (1-percent),
                                                                    -1 * grasp.pre_grasp_approach.direction.vector.z * grasp.pre_grasp_approach.min_distance * (1-percent)
                                                                    );
-    std::cout << "pre_grasp_approach_direction: \n" << pre_grasp_approach_direction << std::endl;
 
     // Decide if we need to change the approach_direction to the local frame of the end effector orientation
     const std::string &ee_parent_link_name = ee_jmg->getEndEffectorParentGroup().second;
-    std::cout << "Parent link name: " << ee_parent_link_name << std::endl;
 
     if( grasp.pre_grasp_approach.direction.header.frame_id == ee_parent_link_name )
     {
-      std::cout << "inside here: " << ee_parent_link_name << std::endl;
       // Apply/compute the approach_direction vector in the local frame of the grasp_pose orientation
       pre_grasp_approach_direction_local = grasp_pose_eigen.rotation() * pre_grasp_approach_direction;
     }
@@ -1094,8 +1090,6 @@ bool MoveItVisualTools::publishTrajectoryPath(const robot_trajectory::RobotTraje
     }
   }
 
-  //std::cout << "trajectory_msg:\n " << trajectory_msg << std::endl;
-
   publishTrajectoryPath(trajectory_msg, blocking);
 }
 
@@ -1121,7 +1115,6 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
 
   // Publish message
   loadTrajectoryPub(); // always call this before publishing
-  //std::cout << "visual_tools: " << display_trajectory_msg << std::endl;
   pub_display_path_.publish(display_trajectory_msg);
   ros::spinOnce();
 
