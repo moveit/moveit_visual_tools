@@ -219,7 +219,6 @@ bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg)
   loadSharedRobotState();
   shared_robot_state_->setToDefaultValues();
   shared_robot_state_->update();
-  publishRobotState(shared_robot_state_);
 
   // Clear old EE markers and EE poses
   ee_markers_map_[ee_jmg].markers.clear();
@@ -557,16 +556,11 @@ bool MoveItVisualTools::publishIKSolutions(const std::vector<trajectory_msgs::Jo
   // Loop through all inverse kinematic solutions
   for (std::size_t i = 0; i < ik_solutions.size(); ++i)
   {
-    if( !ros::ok() )  // Check that ROS is still ok and that user isn't trying to quit
-      break;
-
     trajectory_pt_timed = ik_solutions[i];
     trajectory_pt_timed.time_from_start = ros::Duration(running_time);
     trajectory_msg.joint_trajectory.points.push_back(trajectory_pt_timed);
 
     running_time += display_time;
-
-    ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing ik solution " << i);
   }
 
   // Re-add final position so the last point is displayed fully
@@ -1106,10 +1100,11 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
   // Create the message  TODO move to member function to load less often
   moveit_msgs::DisplayTrajectory display_trajectory_msg;
   display_trajectory_msg.model_id = robot_model_->getName();
-
-  //    display_trajectory_msg.trajectory_start = start_state;
   display_trajectory_msg.trajectory.resize(1);
   display_trajectory_msg.trajectory[0] = trajectory_msg;
+
+  // Convert the current shared robot state to the trajectory start, so that we can e.g. provide vjoint positions
+  robot_state::robotStateToRobotStateMsg(*shared_robot_state_, display_trajectory_msg.trajectory_start);
 
   // Publish message
   loadTrajectoryPub(); // always call this before publishing

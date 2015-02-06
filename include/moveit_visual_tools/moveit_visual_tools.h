@@ -442,6 +442,7 @@ public:
    * \brief Animate trajectory in rviz
    * \param trajectory_msg the actual plan
    * \param blocking whether we need to wait for the animation to complete
+   * \note: if you need to specify other joints for the robot, e.g. vjoints, first set the shared_robot_state_ as desired
    * \return true on success
    */
   bool publishTrajectoryPath(const robot_trajectory::RobotTrajectory& trajectory, bool blocking = false);
