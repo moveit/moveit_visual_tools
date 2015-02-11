@@ -451,6 +451,8 @@ public:
    * \note: if you need to specify other joints for the robot, e.g. vjoints, first set the shared_robot_state_ as desired
    * \return true on success
    */
+  bool publishTrajectoryPath(const std::vector<robot_state::RobotStatePtr>& trajectory, const moveit::core::JointModelGroup* jmg, 
+                             double speed = 0.01, bool blocking = false);
   bool publishTrajectoryPath(const robot_trajectory::RobotTrajectory& trajectory, bool blocking = false);
   bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg, bool blocking = false);
 

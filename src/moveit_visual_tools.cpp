@@ -249,9 +249,8 @@ bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg)
   ROS_DEBUG_STREAM_NAMED("visual_tools","Number of rviz markers in end effector: " << ee_markers_map_[ee_jmg].markers.size());
 
   const std::string &ee_parent_link_name = ee_jmg->getEndEffectorParentGroup().second;
-  ROS_DEBUG_STREAM_NAMED("visual_tools","EE Parent link: " << ee_parent_link_name);
+  //ROS_DEBUG_STREAM_NAMED("visual_tools","EE Parent link: " << ee_parent_link_name);
   const moveit::core::LinkModel* ee_parent_link = robot_model_->getLinkModel(ee_parent_link_name);
-  //const moveit::core::JointModel* ee_parent_joint = ee_parent_link->getParentJointModel();
 
   Eigen::Affine3d ee_marker_global_transform = shared_robot_state_->getGlobalLinkTransform(ee_parent_link);
   Eigen::Affine3d ee_marker_pose;
@@ -380,11 +379,11 @@ bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const 
     // Convert pose
     eigen_this_marker = eigen_goal_ee_pose * ee_poses_map_[ee_jmg][i];
     ee_markers_map_[ee_jmg].markers[i].pose = convertPose(eigen_this_marker);
-
-    // Helper for publishing rviz markers
-    if (!publishMarker( ee_markers_map_[ee_jmg].markers[i] ))
-      return false;
   }
+
+  // Helper for publishing rviz markers
+  if (!publishMarkers(ee_markers_map_[ee_jmg]))
+    return false;
 
   return true;
 }
@@ -469,8 +468,8 @@ bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, co
   Eigen::Vector3d pre_grasp_approach_direction_local;
 
   // Display Grasp Score
-  std::string text = "Grasp Quality: " + boost::lexical_cast<std::string>(int(grasp.grasp_quality*100)) + "%";
-  publishText(grasp_pose, text);
+  //std::string text = "Grasp Quality: " + boost::lexical_cast<std::string>(int(grasp.grasp_quality*100)) + "%";
+  //publishText(grasp_pose, text);
 
   // Convert the grasp pose into the frame of reference of the approach/retreat frame_id
 
@@ -1073,6 +1072,27 @@ bool MoveItVisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTraje
   return publishTrajectoryPath(trajectory_msg, true);
 }
 
+bool MoveItVisualTools::publishTrajectoryPath(const std::vector<robot_state::RobotStatePtr>& trajectory, 
+                                              const moveit::core::JointModelGroup* jmg, double speed, bool blocking)
+{
+  // Copy the vector of RobotStates to a RobotTrajectory
+  robot_trajectory::RobotTrajectoryPtr
+    robot_trajectory(new robot_trajectory::RobotTrajectory(robot_model_, jmg->getName()));;
+
+  double duration_from_previous = 0;
+  for (std::size_t k = 0 ; k < trajectory.size() ; ++k)
+  {
+    duration_from_previous += speed;
+    robot_trajectory->addSuffixWayPoint(trajectory[k], duration_from_previous);
+  }
+
+  // Convert trajectory to a message
+  moveit_msgs::RobotTrajectory trajectory_msg;
+  robot_trajectory->getRobotTrajectoryMsg(trajectory_msg);
+
+  return publishTrajectoryPath(trajectory_msg, blocking);
+}
+
 bool MoveItVisualTools::publishTrajectoryPath(const robot_trajectory::RobotTrajectory& trajectory, bool blocking)
 {
   moveit_msgs::RobotTrajectory trajectory_msg;
@@ -1090,7 +1110,7 @@ bool MoveItVisualTools::publishTrajectoryPath(const robot_trajectory::RobotTraje
     }
   }
 
-  publishTrajectoryPath(trajectory_msg, blocking);
+  return publishTrajectoryPath(trajectory_msg, blocking);
 }
 
 bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg, bool blocking)
