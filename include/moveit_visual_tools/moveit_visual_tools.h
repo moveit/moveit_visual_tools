@@ -429,7 +429,15 @@ public:
    * \return true on sucess
    */
   bool publishWorkspaceParameters(const moveit_msgs::WorkspaceParameters& params);
-
+  
+  /**
+   * \brief Given a planning scene and robot state, publish any collisions
+   * \param robot_state
+   * \param planning_scene
+   * \return true on success
+   */
+  bool publishContactPoints(const moveit::core::RobotState &robot_state, planning_scene::PlanningScenePtr planning_scene);
+                                             
   /**
    * \brief Move a joint group in MoveIt for visualization
    *  make sure you have already set the planning group name

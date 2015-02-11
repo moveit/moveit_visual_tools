@@ -43,6 +43,7 @@
 
 // MoveIt
 #include <moveit/robot_state/conversions.h>
+#include <moveit/collision_detection/collision_tools.h>
 
 // Conversions
 #include <tf_conversions/tf_eigen.h>
@@ -55,8 +56,7 @@
 namespace moveit_visual_tools
 {
 
-MoveItVisualTools::MoveItVisualTools(const std::string& base_frame,
-                                     const std::string& marker_topic,
+MoveItVisualTools::MoveItVisualTools(const std::string& base_frame, const std::string& marker_topic,
                                      planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
   : RvizVisualTools::RvizVisualTools(base_frame, marker_topic)
   , planning_scene_monitor_(planning_scene_monitor)
@@ -67,8 +67,7 @@ MoveItVisualTools::MoveItVisualTools(const std::string& base_frame,
 
 }
 
-MoveItVisualTools::MoveItVisualTools(const std::string& base_frame,
-                                     const std::string& marker_topic,
+MoveItVisualTools::MoveItVisualTools(const std::string& base_frame, const std::string& marker_topic,
                                      robot_model::RobotModelConstPtr robot_model)
   :  RvizVisualTools::RvizVisualTools(base_frame, marker_topic),
      robot_model_(robot_model),
@@ -197,7 +196,7 @@ bool MoveItVisualTools::loadRobotMarkers()
 
   return true;
 }
- 
+
 moveit::core::RobotStatePtr& MoveItVisualTools::getSharedRobotState()
 {
   // Always load the robot state before using
@@ -440,7 +439,7 @@ bool MoveItVisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Gra
   return true;
 }
 
-bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, const robot_model::JointModelGroup* ee_jmg, 
+bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, const robot_model::JointModelGroup* ee_jmg,
                                              double animate_speed)
 {
   if(muted_)
@@ -835,7 +834,7 @@ bool MoveItVisualTools::publishCollisionMesh(const geometry_msgs::Pose& object_p
   collision_obj.meshes.resize(1);
   collision_obj.meshes[0] = boost::get<shape_msgs::Mesh>(shape_msg);
 
-  ROS_INFO_NAMED("visual_tools","Loaded mesh from '%s'", mesh_path.c_str());
+  ROS_DEBUG_NAMED("visual_tools","Loaded mesh from '%s'", mesh_path.c_str());
 
   return processCollisionObjectMsg(collision_obj, color);
 }
@@ -1042,6 +1041,45 @@ bool MoveItVisualTools::publishWorkspaceParameters(const moveit_msgs::WorkspaceP
   return publishRectangle(convertPoint(params.min_corner), convertPoint(params.max_corner), rviz_visual_tools::TRANSLUCENT);
 }
 
+bool MoveItVisualTools::publishContactPoints(const moveit::core::RobotState &robot_state, 
+                                             planning_scene::PlanningScenePtr planning_scene)
+{
+  // Compute the contacts if any
+  collision_detection::CollisionRequest c_req;
+  collision_detection::CollisionResult c_res;
+  c_req.contacts = true;
+  c_req.max_contacts = 10;
+  c_req.max_contacts_per_pair = 3;
+  c_req.verbose = true;
+
+  // Check for collisions
+  planning_scene->checkCollision(c_req, c_res, robot_state);
+
+  // Display
+  if (c_res.contact_count > 0)
+  {
+    visualization_msgs::MarkerArray arr;
+    collision_detection::getCollisionMarkersFromContacts(arr, planning_scene->getPlanningFrame(), c_res.contacts);
+    ROS_INFO_STREAM_NAMED("visual_tools","Completed listing of explanations for invalid states.");
+
+    // Check for markers
+    if (arr.markers.empty())
+      return true;
+
+    // Convert markers to same namespace and other custom stuff
+    for (std::size_t i = 0; i < arr.markers.size(); ++i)
+    {
+      arr.markers[i].ns = "Collision";
+      arr.markers[i].scale.x = 0.04;
+      arr.markers[i].scale.y = 0.04;
+      arr.markers[i].scale.z = 0.04;
+    }
+
+    return publishMarkers(arr);
+  }
+  return true;
+}
+
 bool MoveItVisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
                                          const std::string &planning_group, double display_time)
 {
@@ -1072,7 +1110,7 @@ bool MoveItVisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTraje
   return publishTrajectoryPath(trajectory_msg, true);
 }
 
-bool MoveItVisualTools::publishTrajectoryPath(const std::vector<robot_state::RobotStatePtr>& trajectory, 
+bool MoveItVisualTools::publishTrajectoryPath(const std::vector<robot_state::RobotStatePtr>& trajectory,
                                               const moveit::core::JointModelGroup* jmg, double speed, bool blocking)
 {
   // Copy the vector of RobotStates to a RobotTrajectory
