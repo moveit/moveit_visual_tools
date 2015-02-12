@@ -1042,7 +1042,7 @@ bool MoveItVisualTools::publishWorkspaceParameters(const moveit_msgs::WorkspaceP
 }
 
 bool MoveItVisualTools::publishContactPoints(const moveit::core::RobotState &robot_state, 
-                                             planning_scene::PlanningScenePtr planning_scene)
+                                             const planning_scene::PlanningScene* planning_scene)
 {
   // Compute the contacts if any
   collision_detection::CollisionRequest c_req;

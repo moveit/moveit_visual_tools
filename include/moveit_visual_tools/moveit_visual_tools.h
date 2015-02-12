@@ -436,7 +436,7 @@ public:
    * \param planning_scene
    * \return true on success
    */
-  bool publishContactPoints(const moveit::core::RobotState &robot_state, planning_scene::PlanningScenePtr planning_scene);
+  bool publishContactPoints(const moveit::core::RobotState &robot_state, const planning_scene::PlanningScene* planning_scene);
                                              
   /**
    * \brief Move a joint group in MoveIt for visualization
