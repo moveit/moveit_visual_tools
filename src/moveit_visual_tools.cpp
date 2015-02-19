@@ -292,13 +292,13 @@ void MoveItVisualTools::loadAttachedPub()
   waitForSubscriber(pub_attach_collision_obj_);
 }
 
-void MoveItVisualTools::loadTrajectoryPub()
+void MoveItVisualTools::loadTrajectoryPub(const std::string& display_planned_path_topic)
 {
   if (pub_display_path_)
     return;
 
   // Trajectory paths
-  pub_display_path_ = nh_.advertise<moveit_msgs::DisplayTrajectory>(DISPLAY_PLANNED_PATH_TOPIC, 10, false);
+  pub_display_path_ = nh_.advertise<moveit_msgs::DisplayTrajectory>(display_planned_path_topic, 10, false);
   ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing MoveIt trajectory on topic " << pub_display_path_.getTopic());
 
   // Wait for topic to be ready
@@ -1191,6 +1191,22 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
     }
   }
 
+  return true;
+}
+
+
+bool MoveItVisualTools::publishTrajectoryPoints(const std::vector<robot_state::RobotStatePtr>& robot_state_trajectory, 
+                                                const moveit::core::LinkModel* ee_parent_link,
+                                                const rviz_visual_tools::colors &color)
+{
+  // Visualize end effector position of cartesian path
+  for (std::size_t i = 0; i < robot_state_trajectory.size(); ++i)
+  {
+    const Eigen::Affine3d& tip_pose =
+      robot_state_trajectory[i]->getGlobalLinkTransform(ee_parent_link);
+
+    publishSphere(tip_pose, color);
+  }
   return true;
 }
 

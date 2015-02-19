@@ -182,7 +182,7 @@ public:
    * \brief Load publishers as needed
    */
   void loadAttachedPub();
-  void loadTrajectoryPub();
+  void loadTrajectoryPub(const std::string& display_planned_path_topic = DISPLAY_PLANNED_PATH_TOPIC);
   void loadRobotStatePub(const std::string &robot_state_topic = "");
 
   /**
@@ -454,7 +454,7 @@ public:
 
   /**
    * \brief Animate trajectory in rviz
-   * \param trajectory_msg the actual plan
+   * \param trajectory the actual plan
    * \param blocking whether we need to wait for the animation to complete
    * \note: if you need to specify other joints for the robot, e.g. vjoints, first set the shared_robot_state_ as desired
    * \return true on success
@@ -462,7 +462,16 @@ public:
   bool publishTrajectoryPath(const std::vector<robot_state::RobotStatePtr>& trajectory, const moveit::core::JointModelGroup* jmg, 
                              double speed = 0.01, bool blocking = false);
   bool publishTrajectoryPath(const robot_trajectory::RobotTrajectory& trajectory, bool blocking = false);
-  bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg, bool blocking = false);
+  bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory, bool blocking = false);
+
+  /**
+   * \brief Display trajectory as series of end effector position points
+   * \param trajectory the actual plan
+   * \return true on success
+   */
+  bool publishTrajectoryPoints(const std::vector<robot_state::RobotStatePtr>& robot_state_trajectory, 
+                               const moveit::core::LinkModel* ee_parent_link,
+                               const rviz_visual_tools::colors &color = rviz_visual_tools::YELLOW);
 
   /**
    * \brief Publish a complete robot state to Rviz
