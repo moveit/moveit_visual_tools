@@ -1301,14 +1301,18 @@ bool MoveItVisualTools::hideRobot()
   // Always load the robot state before using
   loadSharedRobotState();
 
-  if (shared_robot_state_->getRobotModel()->hasJointModel("virtual_joint"))
+  // Check if joint and variable exist
+  if (shared_robot_state_->getRobotModel()->hasJointModel("virtual_joint") &
+      shared_robot_state_->getRobotModel()->getJointModel("virtual_joint")->hasVariable("virtual_joint/trans_x"))
   {
     shared_robot_state_->setVariablePosition("virtual_joint/trans_x", rviz_visual_tools::LARGE_SCALE);
     shared_robot_state_->setVariablePosition("virtual_joint/trans_y", rviz_visual_tools::LARGE_SCALE);
     shared_robot_state_->setVariablePosition("virtual_joint/trans_z", rviz_visual_tools::LARGE_SCALE);
+    return publishRobotState(shared_robot_state_);
   }
 
-  publishRobotState(shared_robot_state_);
+  ROS_WARN_STREAM_NAMED("temp","Unable to hide robot because a variable does not exist (or joint model)");
+  return false;
 }
 
 } // namespace
