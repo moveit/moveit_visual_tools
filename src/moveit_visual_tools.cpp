@@ -87,8 +87,9 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
   ROS_DEBUG_STREAM_NAMED("visual_tools","Loading planning scene monitor");
 
   // Regular version b/c the other one causes problems with recognizing end effectors
-  planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(ROBOT_DESCRIPTION));
-
+  planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(ROBOT_DESCRIPTION,
+                                                                                 boost::shared_ptr<tf::Transformer>(),
+                                                                                 "visual_tools_scene"));
   ros::spinOnce();
   ros::Duration(0.1).sleep();
   ros::spinOnce();
@@ -103,6 +104,8 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
     planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
                                                           planning_scene_topic_);
     ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing planning scene on " << planning_scene_topic_);
+
+    planning_scene_monitor_->getPlanningScene()->setName("visual_tools_scene");
   }
   else
   {
@@ -126,7 +129,6 @@ bool MoveItVisualTools::processCollisionObjectMsg(const moveit_msgs::CollisionOb
   // Trigger an update
   if (!mannual_trigger_update_)
   {
-    ROS_WARN_STREAM_NAMED("visual_tools","Auto triggering planning scene update");
     triggerPlanningSceneUpdate();
   }
 
@@ -135,7 +137,6 @@ bool MoveItVisualTools::processCollisionObjectMsg(const moveit_msgs::CollisionOb
 
 bool MoveItVisualTools::triggerPlanningSceneUpdate()
 {
-  ROS_INFO_STREAM_NAMED("visual_tools","Triggering planning scene update");
   getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
   return true;
 }
@@ -1041,7 +1042,7 @@ bool MoveItVisualTools::publishWorkspaceParameters(const moveit_msgs::WorkspaceP
   return publishRectangle(convertPoint(params.min_corner), convertPoint(params.max_corner), rviz_visual_tools::TRANSLUCENT);
 }
 
-bool MoveItVisualTools::publishContactPoints(const moveit::core::RobotState &robot_state, 
+bool MoveItVisualTools::publishContactPoints(const moveit::core::RobotState &robot_state,
                                              const planning_scene::PlanningScene* planning_scene)
 {
   // Compute the contacts if any
@@ -1195,7 +1196,7 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
 }
 
 
-bool MoveItVisualTools::publishTrajectoryPoints(const std::vector<robot_state::RobotStatePtr>& robot_state_trajectory, 
+bool MoveItVisualTools::publishTrajectoryPoints(const std::vector<robot_state::RobotStatePtr>& robot_state_trajectory,
                                                 const moveit::core::LinkModel* ee_parent_link,
                                                 const rviz_visual_tools::colors &color)
 {
