@@ -135,9 +135,30 @@ bool MoveItVisualTools::processCollisionObjectMsg(const moveit_msgs::CollisionOb
   return true;
 }
 
+bool MoveItVisualTools::processAttachedCollisionObjectMsg(const moveit_msgs::AttachedCollisionObject& msg)
+{
+  // Apply command directly to planning scene to avoid a ROS msg call
+  {
+    planning_scene_monitor::LockedPlanningSceneRW scene(getPlanningSceneMonitor());
+    ROS_WARN_STREAM_NAMED("temp","remove the next line");
+    scene->getCurrentStateNonConst().update(); // hack to prevent bad transforms
+    scene->processAttachedCollisionObjectMsg(msg);
+    //scene->setObjectColor(msg.id, getColor(color));
+  }
+
+  // Trigger an update
+  if (!mannual_trigger_update_)
+  {
+    triggerPlanningSceneUpdate();
+  }
+
+  return true;
+}
+
 bool MoveItVisualTools::triggerPlanningSceneUpdate()
 {
   getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
+  ros::spin();
   return true;
 }
 
@@ -278,19 +299,6 @@ bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg)
   marker_id_offset += ee_markers_map_[ee_jmg].markers.size();
 
   return true;
-}
-
-void MoveItVisualTools::loadAttachedPub()
-{
-  if (pub_attach_collision_obj_)
-    return;
-
-  // Collision object attacher
-  pub_attach_collision_obj_ = nh_.advertise<moveit_msgs::AttachedCollisionObject>(ATTACHED_COLLISION_TOPIC, 10);
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Publishing attached collision objects on topic " << pub_attach_collision_obj_.getTopic());
-
-  // Wait for topic to be ready
-  waitForSubscriber(pub_attach_collision_obj_);
 }
 
 void MoveItVisualTools::loadTrajectoryPub(const std::string& display_planned_path_topic)
@@ -612,11 +620,7 @@ bool MoveItVisualTools::cleanupACO(const std::string& name)
   //aco.object.id = name;
   aco.object.operation = moveit_msgs::CollisionObject::REMOVE;
 
-  loadAttachedPub(); // always call this before publishing
-  pub_attach_collision_obj_.publish(aco);
-  ros::spinOnce();
-
-  return true;
+  return processAttachedCollisionObjectMsg(aco);
 }
 
 bool MoveItVisualTools::attachCO(const std::string& name, const std::string& ee_parent_link)
@@ -632,11 +636,7 @@ bool MoveItVisualTools::attachCO(const std::string& name, const std::string& ee_
   // Link to attach the object to
   aco.link_name = ee_parent_link;
 
-  loadAttachedPub(); // always call this before publishing
-  pub_attach_collision_obj_.publish(aco);
-  ros::spinOnce();
-
-  return true;
+  return processAttachedCollisionObjectMsg(aco);
 }
 
 bool MoveItVisualTools::publishCollisionBlock(const geometry_msgs::Pose& block_pose, const std::string& block_name,

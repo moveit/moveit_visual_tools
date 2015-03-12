@@ -63,7 +63,6 @@ namespace moveit_visual_tools
 // Default constants
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 static const std::string COLLISION_TOPIC = "/collision_object";
-static const std::string ATTACHED_COLLISION_TOPIC = "/attached_collision_object";
 static const std::string DISPLAY_PLANNED_PATH_TOPIC = "/move_group/display_planned_path";
 static const std::string DISPLAY_ROBOT_STATE_TOPIC = "/move_group/robot_state";
 static const std::string PLANNING_SCENE_TOPIC = "/move_group/monitored_planning_scene";
@@ -132,6 +131,13 @@ public:
                                  const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
 
   /**
+   * \brief Skip a ROS message call by sending directly to planning scene monitor
+   * \param attached collision object message
+   * \return true on success
+   */
+  bool processAttachedCollisionObjectMsg(const moveit_msgs::AttachedCollisionObject& msg);
+
+  /**
    * \brief When mannual_trigger_update_ is true, use this to tell the planning scene to send
    *        an update out. Do not use otherwise
    */
@@ -181,7 +187,6 @@ public:
   /**
    * \brief Load publishers as needed
    */
-  void loadAttachedPub();
   void loadTrajectoryPub(const std::string& display_planned_path_topic = DISPLAY_PLANNED_PATH_TOPIC);
   void loadRobotStatePub(const std::string &robot_state_topic = "");
 
@@ -510,7 +515,6 @@ private:
 protected:
 
   // ROS publishers
-  ros::Publisher pub_attach_collision_obj_; // for MoveIt attached objects
   ros::Publisher pub_display_path_; // for MoveIt trajectories
   ros::Publisher pub_robot_state_; // publish a RobotState message
 
