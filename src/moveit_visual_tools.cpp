@@ -158,7 +158,7 @@ bool MoveItVisualTools::processAttachedCollisionObjectMsg(const moveit_msgs::Att
 bool MoveItVisualTools::triggerPlanningSceneUpdate()
 {
   getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
-  ros::spin();
+  ros::spinOnce();
   return true;
 }
 
