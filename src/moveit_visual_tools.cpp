@@ -140,10 +140,9 @@ bool MoveItVisualTools::processAttachedCollisionObjectMsg(const moveit_msgs::Att
   // Apply command directly to planning scene to avoid a ROS msg call
   {
     planning_scene_monitor::LockedPlanningSceneRW scene(getPlanningSceneMonitor());
-    ROS_WARN_STREAM_NAMED("temp","remove the next line");
-    scene->getCurrentStateNonConst().update(); // hack to prevent bad transforms
+    ROS_WARN_STREAM_NAMED("temp","check if need the next line");
+    //scene->getCurrentStateNonConst().update(); // hack to prevent bad transforms
     scene->processAttachedCollisionObjectMsg(msg);
-    //scene->setObjectColor(msg.id, getColor(color));
   }
 
   // Trigger an update
@@ -175,6 +174,7 @@ bool MoveItVisualTools::loadSharedRobotState()
       robot_model_ = psm->getRobotModel();
     }
     shared_robot_state_.reset(new robot_state::RobotState(robot_model_));
+    hidden_robot_state_.reset(new robot_state::RobotState(robot_model_));
   }
 
   return shared_robot_state_;
@@ -584,7 +584,7 @@ bool MoveItVisualTools::publishIKSolutions(const std::vector<trajectory_msgs::Jo
   trajectory_pt_timed.time_from_start = ros::Duration(running_time);
   trajectory_msg.joint_trajectory.points.push_back(trajectory_pt_timed);
 
-  return publishTrajectoryPath(trajectory_msg, true);
+  return publishTrajectoryPath(trajectory_msg, shared_robot_state_, true);
 }
 
 bool MoveItVisualTools::removeAllCollisionObjects()
@@ -1084,14 +1084,10 @@ bool MoveItVisualTools::publishContactPoints(const moveit::core::RobotState &rob
 bool MoveItVisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
                                          const std::string &planning_group, double display_time)
 {
-  loadSharedRobotState();
-
-  // Get robot model
-  robot_model::RobotModelConstPtr robot_model = shared_robot_state_->getRobotModel();
   // Get joint state group
-  const robot_model::JointModelGroup* joint_model_group = robot_model->getJointModelGroup(planning_group);
+  const robot_model::JointModelGroup* jmg = robot_model_->getJointModelGroup(planning_group);
 
-  if (joint_model_group == NULL) // not found
+  if (jmg == NULL) // not found
   {
     ROS_ERROR_STREAM_NAMED("publishTrajectoryPoint","Could not find joint model group " << planning_group);
     return false;
@@ -1104,11 +1100,11 @@ bool MoveItVisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTraje
   // Create a trajectory with one point
   moveit_msgs::RobotTrajectory trajectory_msg;
   trajectory_msg.joint_trajectory.header.frame_id = base_frame_;
-  trajectory_msg.joint_trajectory.joint_names = joint_model_group->getJointModelNames();
+  trajectory_msg.joint_trajectory.joint_names = jmg->getJointModelNames();
   trajectory_msg.joint_trajectory.points.push_back(trajectory_pt);
   trajectory_msg.joint_trajectory.points.push_back(trajectory_pt_timed);
 
-  return publishTrajectoryPath(trajectory_msg, true);
+  return publishTrajectoryPath(trajectory_msg, shared_robot_state_, true);
 }
 
 bool MoveItVisualTools::publishTrajectoryPath(const std::vector<robot_state::RobotStatePtr>& trajectory,
@@ -1129,7 +1125,7 @@ bool MoveItVisualTools::publishTrajectoryPath(const std::vector<robot_state::Rob
   moveit_msgs::RobotTrajectory trajectory_msg;
   robot_trajectory->getRobotTrajectoryMsg(trajectory_msg);
 
-  return publishTrajectoryPath(trajectory_msg, blocking);
+  return publishTrajectoryPath(trajectory_msg, shared_robot_state_, blocking);
 }
 
 bool MoveItVisualTools::publishTrajectoryPath(const robot_trajectory::RobotTrajectory& trajectory, bool blocking)
@@ -1149,13 +1145,12 @@ bool MoveItVisualTools::publishTrajectoryPath(const robot_trajectory::RobotTraje
     }
   }
 
-  return publishTrajectoryPath(trajectory_msg, blocking);
+  return publishTrajectoryPath(trajectory_msg, shared_robot_state_, blocking);
 }
 
-bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg, bool blocking)
+bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg,
+                                              const robot_state::RobotStateConstPtr robot_state, bool blocking)
 {
-  loadSharedRobotState();
-
   // Check if we have enough points
   if (!trajectory_msg.joint_trajectory.points.size())
   {
@@ -1169,8 +1164,8 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
   display_trajectory_msg.trajectory.resize(1);
   display_trajectory_msg.trajectory[0] = trajectory_msg;
 
-  // Convert the current shared robot state to the trajectory start, so that we can e.g. provide vjoint positions
-  robot_state::robotStateToRobotStateMsg(*shared_robot_state_, display_trajectory_msg.trajectory_start);
+  // Convert the current robot state to the trajectory start, so that we can e.g. provide vjoint positions
+  robot_state::robotStateToRobotStateMsg(*robot_state, display_trajectory_msg.trajectory_start);
 
   // Publish message
   loadTrajectoryPub(); // always call this before publishing
@@ -1280,19 +1275,18 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState &robot_s
 }
 
 bool MoveItVisualTools::publishRobotState(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
-                                    const std::string &planning_group)
+                                          const robot_model::JointModelGroup* jmg,
+                                          const rviz_visual_tools::colors &color)
 {
-  // TODO allow color
-
   // Always load the robot state before using
   loadSharedRobotState();
 
   // Set robot state
   shared_robot_state_->setToDefaultValues(); // reset the state just in case
-  shared_robot_state_->setJointGroupPositions(planning_group, trajectory_pt.positions);
+  shared_robot_state_->setJointGroupPositions(jmg, trajectory_pt.positions);
 
   // Publish robot state
-  publishRobotState(*shared_robot_state_);
+  publishRobotState(*shared_robot_state_, color);
 
   return true;
 }
@@ -1303,13 +1297,13 @@ bool MoveItVisualTools::hideRobot()
   loadSharedRobotState();
 
   // Check if joint and variable exist
-  if (shared_robot_state_->getRobotModel()->hasJointModel("virtual_joint") &
-      shared_robot_state_->getRobotModel()->getJointModel("virtual_joint")->hasVariable("virtual_joint/trans_x"))
+  if (hidden_robot_state_->getRobotModel()->hasJointModel("virtual_joint") &
+      hidden_robot_state_->getRobotModel()->getJointModel("virtual_joint")->hasVariable("virtual_joint/trans_x"))
   {
-    shared_robot_state_->setVariablePosition("virtual_joint/trans_x", rviz_visual_tools::LARGE_SCALE);
-    shared_robot_state_->setVariablePosition("virtual_joint/trans_y", rviz_visual_tools::LARGE_SCALE);
-    shared_robot_state_->setVariablePosition("virtual_joint/trans_z", rviz_visual_tools::LARGE_SCALE);
-    return publishRobotState(shared_robot_state_);
+    hidden_robot_state_->setVariablePosition("virtual_joint/trans_x", rviz_visual_tools::LARGE_SCALE);
+    hidden_robot_state_->setVariablePosition("virtual_joint/trans_y", rviz_visual_tools::LARGE_SCALE);
+    hidden_robot_state_->setVariablePosition("virtual_joint/trans_z", rviz_visual_tools::LARGE_SCALE);
+    return publishRobotState(hidden_robot_state_);
   }
 
   ROS_WARN_STREAM_NAMED("temp","Unable to hide robot because a variable does not exist (or joint model)");

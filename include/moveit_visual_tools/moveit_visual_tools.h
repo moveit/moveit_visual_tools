@@ -461,13 +461,15 @@ public:
    * \brief Animate trajectory in rviz
    * \param trajectory the actual plan
    * \param blocking whether we need to wait for the animation to complete
-   * \note: if you need to specify other joints for the robot, e.g. vjoints, first set the shared_robot_state_ as desired
+   * \param robot_state - the base state to add the joint trajectory message to
    * \return true on success
    */
   bool publishTrajectoryPath(const std::vector<robot_state::RobotStatePtr>& trajectory, const moveit::core::JointModelGroup* jmg, 
                              double speed = 0.01, bool blocking = false);
   bool publishTrajectoryPath(const robot_trajectory::RobotTrajectory& trajectory, bool blocking = false);
-  bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory, bool blocking = false);
+  bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg, const robot_state::RobotStateConstPtr robot_state, 
+                             bool blocking);
+                             
 
   /**
    * \brief Display trajectory as series of end effector position points
@@ -492,11 +494,12 @@ public:
 
   /**
    * \brief Publish a MoveIt robot state to a topic that the Rviz "RobotState" display can show
-   * \param trajectory_pt
-   * \param planning_group - group corresponding to trajectory pt
+   * \param trajectory_pt of joint positions
+   * \param joint model group - planning group corresponding to trajectory pt
    * \return true on success
    */
-  bool publishRobotState(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt, const std::string &planning_group);
+  bool publishRobotState(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt, const robot_model::JointModelGroup* jmg,
+                         const rviz_visual_tools::colors &color = rviz_visual_tools::DEFAULT);
 
   /**
    * \brief Fake removing a Robot State display in Rviz by simply moving it very far away
@@ -531,9 +534,14 @@ protected:
   // and ensuring efficiency
   std::map<rviz_visual_tools::colors, moveit_msgs::DisplayRobotState> display_robot_msgs_;
 
-  // Cached objects
-  robot_state::RobotStatePtr shared_robot_state_; // Note: call loadSharedRobotState() before using this
+  // Pointer to the robot model
   robot_state::RobotModelConstPtr robot_model_;
+
+  // Note: call loadSharedRobotState() before using this
+  robot_state::RobotStatePtr shared_robot_state_; 
+
+  // Note: call loadSharedRobotState() before using this. Use only for hiding the robot
+  robot_state::RobotStatePtr hidden_robot_state_; 
 
   // Prevent the planning scene from always auto-pushing, but rather do it manually
   bool mannual_trigger_update_;
