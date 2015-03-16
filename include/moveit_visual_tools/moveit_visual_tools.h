@@ -57,6 +57,12 @@
 // ROS Messages
 #include <trajectory_msgs/JointTrajectory.h>
 
+// Shape tools
+#include <shape_tools/solid_primitive_dims.h> // TODO move this into the cpp file
+#include <geometric_shapes/shape_operations.h> // TODO move this into the cpp file
+//#include <shape_msgs/ShapeMsg.h> // TODO use this instead
+
+
 namespace moveit_visual_tools
 {
 
@@ -366,7 +372,9 @@ public:
                             const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
   bool publishCollisionMesh(const Eigen::Affine3d& object_pose, const std::string& object_name, const std::string &mesh_path,
                             const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
-
+  bool publishCollisionMesh(const geometry_msgs::Pose& object_pose, const std::string& object_name,
+                            const shapes::ShapeMsg& shape_msg, const rviz_visual_tools::colors &color);
+  
   /**
    * \brief Publish a connected birectional graph
    * \param graph of nodes and edges

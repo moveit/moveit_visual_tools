@@ -49,10 +49,6 @@
 #include <tf_conversions/tf_eigen.h>
 #include <eigen_conversions/eigen_msg.h>
 
-// Shape tools
-#include <shape_tools/solid_primitive_dims.h>
-#include <geometric_shapes/shape_operations.h>
-
 namespace moveit_visual_tools
 {
 
@@ -824,6 +820,16 @@ bool MoveItVisualTools::publishCollisionMesh(const geometry_msgs::Pose& object_p
     return false;
   }
 
+  if (!publishCollisionMesh(object_pose, object_name, shape_msg, color))
+    return false;
+
+  ROS_DEBUG_NAMED("visual_tools","Loaded mesh from '%s'", mesh_path.c_str());
+  return true;
+}
+
+bool MoveItVisualTools::publishCollisionMesh(const geometry_msgs::Pose& object_pose, const std::string& object_name,
+                                             const shapes::ShapeMsg& shape_msg, const rviz_visual_tools::colors &color)
+{
   // Create collision message
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
@@ -834,8 +840,6 @@ bool MoveItVisualTools::publishCollisionMesh(const geometry_msgs::Pose& object_p
   collision_obj.mesh_poses[0] = object_pose;
   collision_obj.meshes.resize(1);
   collision_obj.meshes[0] = boost::get<shape_msgs::Mesh>(shape_msg);
-
-  ROS_DEBUG_NAMED("visual_tools","Loaded mesh from '%s'", mesh_path.c_str());
 
   return processCollisionObjectMsg(collision_obj, color);
 }
