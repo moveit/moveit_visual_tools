@@ -1043,7 +1043,7 @@ bool MoveItVisualTools::publishCollisionTests()
 
 bool MoveItVisualTools::publishWorkspaceParameters(const moveit_msgs::WorkspaceParameters& params)
 {
-  return publishRectangle(convertPoint(params.min_corner), convertPoint(params.max_corner), rviz_visual_tools::TRANSLUCENT);
+  return publishCuboid(convertPoint(params.min_corner), convertPoint(params.max_corner), rviz_visual_tools::TRANSLUCENT);
 }
 
 bool MoveItVisualTools::publishContactPoints(const moveit::core::RobotState &robot_state,
