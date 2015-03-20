@@ -102,10 +102,10 @@ public:
     visual_tools_->publishCollisionBlock(pose1, "Block", 0.1, rviz_visual_tools::RAND);
     ros::Duration(1.0).sleep();
 
-    ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Rectangle");
+    ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Rectanglular Cuboid");
     visual_tools_->generateRandomPose(pose1);
     visual_tools_->generateRandomPose(pose2);
-    visual_tools_->publishCollisionRectangle(pose1.position, pose2.position, "Rectangle", rviz_visual_tools::RAND);
+    visual_tools_->publishCollisionCuboid(pose1.position, pose2.position, "Rectangle", rviz_visual_tools::RAND);
     ros::Duration(1.0).sleep();
 
     ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Floor");

@@ -635,13 +635,13 @@ bool MoveItVisualTools::attachCO(const std::string& name, const std::string& ee_
   return processAttachedCollisionObjectMsg(aco);
 }
 
-bool MoveItVisualTools::publishCollisionBlock(const geometry_msgs::Pose& block_pose, const std::string& block_name,
+bool MoveItVisualTools::publishCollisionBlock(const geometry_msgs::Pose& block_pose, const std::string& name,
                                               double block_size, const rviz_visual_tools::colors &color)
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
   collision_obj.header.frame_id = base_frame_;
-  collision_obj.id = block_name;
+  collision_obj.id = name;
   collision_obj.operation = moveit_msgs::CollisionObject::ADD;
 
   collision_obj.primitives.resize(1);
@@ -654,23 +654,23 @@ bool MoveItVisualTools::publishCollisionBlock(const geometry_msgs::Pose& block_p
   collision_obj.primitive_poses[0] = block_pose;
 
   //ROS_INFO_STREAM_NAMED("visual_tools","CollisionObject: \n " << collision_obj);
-  //ROS_DEBUG_STREAM_NAMED("visual_tools","Published collision object " << block_name);
+  //ROS_DEBUG_STREAM_NAMED("visual_tools","Published collision object " << name);
   return processCollisionObjectMsg(collision_obj, color);
 }
 
-bool MoveItVisualTools::publishCollisionRectangle(const Eigen::Vector3d &point1, const Eigen::Vector3d &point2,
-                                                  const std::string& block_name, const rviz_visual_tools::colors &color)
+bool MoveItVisualTools::publishCollisionCuboid(const Eigen::Vector3d &point1, const Eigen::Vector3d &point2,
+                                               const std::string& name, const rviz_visual_tools::colors &color)
 {
-  return publishCollisionRectangle( convertPoint(point1), convertPoint(point2), block_name, color );
+  return publishCollisionCuboid( convertPoint(point1), convertPoint(point2), name, color );
 }
 
-bool MoveItVisualTools::publishCollisionRectangle(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2,
-                                                  const std::string& rectangle_name, const rviz_visual_tools::colors &color)
+bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2,
+                                               const std::string& name, const rviz_visual_tools::colors &color)
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
   collision_obj.header.frame_id = base_frame_;
-  collision_obj.id = rectangle_name;
+  collision_obj.id = name;
   collision_obj.operation = moveit_msgs::CollisionObject::ADD;
 
   // Calculate center pose
@@ -702,37 +702,37 @@ bool MoveItVisualTools::publishCollisionRectangle(const geometry_msgs::Point &po
 bool MoveItVisualTools::publishCollisionFloor(double z, const std::string& plane_name, const rviz_visual_tools::colors &color)
 {
   /*
-  TODO: I don't think collision planes are implemented... could not get this to work
-  moveit_msgs::CollisionObject collision_obj;
-  collision_obj.header.stamp = ros::Time::now();
-  collision_obj.header.frame_id = base_frame_;
-  collision_obj.id = plane_name;
-  collision_obj.operation = moveit_msgs::CollisionObject::ADD;
+    TODO: I don't think collision planes are implemented... could not get this to work
+    moveit_msgs::CollisionObject collision_obj;
+    collision_obj.header.stamp = ros::Time::now();
+    collision_obj.header.frame_id = base_frame_;
+    collision_obj.id = plane_name;
+    collision_obj.operation = moveit_msgs::CollisionObject::ADD;
 
-  // Representation of a plane, using the plane equation ax + by + cz + d = 0
-  collision_obj.planes.resize(1);
-  collision_obj.planes[0].coef[0] = -2; // a
-  collision_obj.planes[0].coef[1] = 3; // b
-  collision_obj.planes[0].coef[2] = 5; // c
-  collision_obj.planes[0].coef[3] = 6; // d
+    // Representation of a plane, using the plane equation ax + by + cz + d = 0
+    collision_obj.planes.resize(1);
+    collision_obj.planes[0].coef[0] = -2; // a
+    collision_obj.planes[0].coef[1] = 3; // b
+    collision_obj.planes[0].coef[2] = 5; // c
+    collision_obj.planes[0].coef[3] = 6; // d
 
-  // Pose
-  geometry_msgs::Pose floor_pose;
+    // Pose
+    geometry_msgs::Pose floor_pose;
 
-  // Position
-  floor_pose.position.x = 0;
-  floor_pose.position.y = 0;
-  floor_pose.position.z = z;
+    // Position
+    floor_pose.position.x = 0;
+    floor_pose.position.y = 0;
+    floor_pose.position.z = z;
 
-  // Orientation
-  Eigen::Quaterniond quat(Eigen::AngleAxis<double>(0.0, Eigen::Vector3d::UnitZ()));
-  floor_pose.orientation.x = quat.x();
-  floor_pose.orientation.y = quat.y();
-  floor_pose.orientation.z = quat.z();
-  floor_pose.orientation.w = quat.w();
+    // Orientation
+    Eigen::Quaterniond quat(Eigen::AngleAxis<double>(0.0, Eigen::Vector3d::UnitZ()));
+    floor_pose.orientation.x = quat.x();
+    floor_pose.orientation.y = quat.y();
+    floor_pose.orientation.z = quat.z();
+    floor_pose.orientation.w = quat.w();
 
-  collision_obj.plane_poses.resize(1);
-  collision_obj.plane_poses[0] = floor_pose;
+    collision_obj.plane_poses.resize(1);
+    collision_obj.plane_poses[0] = floor_pose;
   */
 
   // Instead just generate a rectangle
@@ -747,7 +747,7 @@ bool MoveItVisualTools::publishCollisionFloor(double z, const std::string& plane
   point2.y = -rviz_visual_tools::LARGE_SCALE;
   point2.z = z-rviz_visual_tools::SMALL_SCALE;;
 
-  return publishCollisionRectangle(point1, point2, plane_name, color);
+  return publishCollisionCuboid(point1, point2, plane_name, color);
 }
 
 bool MoveItVisualTools::publishCollisionCylinder(const geometry_msgs::Point &a, const geometry_msgs::Point& b,
@@ -916,7 +916,7 @@ bool MoveItVisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph &g
 }
 
 void MoveItVisualTools::getCollisionWallMsg(double x, double y, double angle, double width, const std::string name,
-                                      moveit_msgs::CollisionObject &collision_obj)
+                                            moveit_msgs::CollisionObject &collision_obj)
 {
   collision_obj.header.stamp = ros::Time::now();
   collision_obj.header.frame_id = base_frame_;
@@ -1043,7 +1043,8 @@ bool MoveItVisualTools::publishCollisionTests()
 
 bool MoveItVisualTools::publishWorkspaceParameters(const moveit_msgs::WorkspaceParameters& params)
 {
-  return publishCuboid(convertPoint(params.min_corner), convertPoint(params.max_corner), rviz_visual_tools::TRANSLUCENT);
+  return publishCollisionCuboid(convertPoint(params.min_corner), convertPoint(params.max_corner), "workspace", 
+                                rviz_visual_tools::TRANSLUCENT);
 }
 
 bool MoveItVisualTools::publishContactPoints(const moveit::core::RobotState &robot_state,
@@ -1086,7 +1087,7 @@ bool MoveItVisualTools::publishContactPoints(const moveit::core::RobotState &rob
 }
 
 bool MoveItVisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
-                                         const std::string &planning_group, double display_time)
+                                               const std::string &planning_group, double display_time)
 {
   // Get joint state group
   const robot_model::JointModelGroup* jmg = robot_model_->getJointModelGroup(planning_group);
