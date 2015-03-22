@@ -820,15 +820,21 @@ bool MoveItVisualTools::publishCollisionMesh(const geometry_msgs::Pose& object_p
     return false;
   }
 
-  if (!publishCollisionMesh(object_pose, object_name, shape_msg, color))
+  if (!publishCollisionMesh(object_pose, object_name, boost::get<shape_msgs::Mesh>(shape_msg), color))
     return false;
 
   ROS_DEBUG_NAMED("visual_tools","Loaded mesh from '%s'", mesh_path.c_str());
   return true;
 }
 
+bool MoveItVisualTools::publishCollisionMesh(const Eigen::Affine3d& object_pose, const std::string& object_name,
+                                             const shape_msgs::Mesh& mesh_msg, const rviz_visual_tools::colors &color)
+{
+  return publishCollisionMesh(convertPose(object_pose), object_name, mesh_msg, color);
+}
+
 bool MoveItVisualTools::publishCollisionMesh(const geometry_msgs::Pose& object_pose, const std::string& object_name,
-                                             const shapes::ShapeMsg& shape_msg, const rviz_visual_tools::colors &color)
+                                             const shape_msgs::Mesh& mesh_msg, const rviz_visual_tools::colors &color)
 {
   // Create collision message
   moveit_msgs::CollisionObject collision_obj;
@@ -839,7 +845,7 @@ bool MoveItVisualTools::publishCollisionMesh(const geometry_msgs::Pose& object_p
   collision_obj.mesh_poses.resize(1);
   collision_obj.mesh_poses[0] = object_pose;
   collision_obj.meshes.resize(1);
-  collision_obj.meshes[0] = boost::get<shape_msgs::Mesh>(shape_msg);
+  collision_obj.meshes[0] = mesh_msg;
 
   return processCollisionObjectMsg(collision_obj, color);
 }

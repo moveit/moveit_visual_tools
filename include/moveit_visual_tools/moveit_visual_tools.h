@@ -384,8 +384,10 @@ planning_scene_topic_ = planning_scene_topic;
                             const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
   bool publishCollisionMesh(const Eigen::Affine3d& object_pose, const std::string& object_name, const std::string &mesh_path,
                             const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
+  bool publishCollisionMesh(const Eigen::Affine3d& object_pose, const std::string& object_name,
+                            const shape_msgs::Mesh& mesh_msg, const rviz_visual_tools::colors &color);
   bool publishCollisionMesh(const geometry_msgs::Pose& object_pose, const std::string& object_name,
-                            const shapes::ShapeMsg& shape_msg, const rviz_visual_tools::colors &color);
+                            const shape_msgs::Mesh& mesh_msg, const rviz_visual_tools::colors &color);
 
   /**
    * \brief Publish a connected birectional graph
