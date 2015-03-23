@@ -136,7 +136,6 @@ bool MoveItVisualTools::processAttachedCollisionObjectMsg(const moveit_msgs::Att
   // Apply command directly to planning scene to avoid a ROS msg call
   {
     planning_scene_monitor::LockedPlanningSceneRW scene(getPlanningSceneMonitor());
-    ROS_WARN_STREAM_NAMED("temp","check if need the next line");
     //scene->getCurrentStateNonConst().update(); // hack to prevent bad transforms
     scene->processAttachedCollisionObjectMsg(msg);
   }
