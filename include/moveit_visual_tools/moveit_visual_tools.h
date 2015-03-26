@@ -69,7 +69,7 @@ namespace moveit_visual_tools
 // Default constants
 static const std::string ROBOT_DESCRIPTION = "robot_description"; // this is the default used in ROS
 static const std::string DISPLAY_PLANNED_PATH_TOPIC = "/move_group/display_planned_path"; // this is the default when adding the Rviz plugin
-static const std::string DISPLAY_ROBOT_STATE_TOPIC = "display_robot_state"; // this is the default when adding the Rviz plugin
+static const std::string DISPLAY_ROBOT_STATE_TOPIC = "/display_robot_state"; // this is the default when adding the Rviz plugin
 static const std::string PLANNING_SCENE_TOPIC = "planning_scene"; // this is the default when adding the Rviz plugin
 
 class MoveItVisualTools : public rviz_visual_tools::RvizVisualTools
@@ -263,7 +263,7 @@ planning_scene_topic_ = planning_scene_topic;
    * \param display_time - amount of time to sleep between sending trajectories, optional
    */
   bool publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions,
-                          const std::string& planning_group, double display_time = 0.4);
+                          const robot_model::JointModelGroup* arm_jmg, double display_time = 0.4);
 
   /**
    * \brief Remove all collision objects that this class has added to the MoveIt! planning scene
@@ -450,8 +450,7 @@ planning_scene_topic_ = planning_scene_topic;
 
   /**
    * \brief Display size of workspace used for planning with OMPL, etc. Important for virtual joints
-   * \param input - description
-   * \param input - description
+   * \param display bounds of workspace
    * \return true on sucess
    */
   bool publishWorkspaceParameters(const moveit_msgs::WorkspaceParameters& params);

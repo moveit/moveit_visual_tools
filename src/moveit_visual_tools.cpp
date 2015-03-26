@@ -526,7 +526,7 @@ bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, co
 }
 
 bool MoveItVisualTools::publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions,
-                                           const std::string& planning_group, double display_time)
+                                           const robot_model::JointModelGroup* arm_jmg, double display_time)
 {
   if(muted_)
   {
@@ -544,22 +544,13 @@ bool MoveItVisualTools::publishIKSolutions(const std::vector<trajectory_msgs::Jo
 
   ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing " << ik_solutions.size() << " inverse kinematic solutions");
 
-  // Get joint state group
-  const robot_model::JointModelGroup* joint_model_group = robot_model_->getJointModelGroup(planning_group);
-
-  if (joint_model_group == NULL) // not found
-  {
-    ROS_ERROR_STREAM_NAMED("visual_tools","Could not find joint model group " << planning_group);
-    return false;
-  }
-
   // Apply the time to the trajectory
   trajectory_msgs::JointTrajectoryPoint trajectory_pt_timed;
 
   // Create a trajectory with one point
   moveit_msgs::RobotTrajectory trajectory_msg;
   trajectory_msg.joint_trajectory.header.frame_id = base_frame_;
-  trajectory_msg.joint_trajectory.joint_names = joint_model_group->getActiveJointModelNames();
+  trajectory_msg.joint_trajectory.joint_names = arm_jmg->getActiveJointModelNames();
 
   // Overall length of trajectory
   double running_time = 0;
