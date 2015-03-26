@@ -67,11 +67,10 @@ namespace moveit_visual_tools
 {
 
 // Default constants
-static const std::string ROBOT_DESCRIPTION = "robot_description";
-static const std::string COLLISION_TOPIC = "/collision_object";
-static const std::string DISPLAY_PLANNED_PATH_TOPIC = "/move_group/display_planned_path";
-static const std::string DISPLAY_ROBOT_STATE_TOPIC = "/move_group/robot_state";
-static const std::string PLANNING_SCENE_TOPIC = "/move_group/monitored_planning_scene";
+static const std::string ROBOT_DESCRIPTION = "robot_description"; // this is the default used in ROS
+static const std::string DISPLAY_PLANNED_PATH_TOPIC = "/move_group/display_planned_path"; // this is the default when adding the Rviz plugin
+static const std::string DISPLAY_ROBOT_STATE_TOPIC = "display_robot_state"; // this is the default when adding the Rviz plugin
+static const std::string PLANNING_SCENE_TOPIC = "planning_scene"; // this is the default when adding the Rviz plugin
 
 class MoveItVisualTools : public rviz_visual_tools::RvizVisualTools
 {
