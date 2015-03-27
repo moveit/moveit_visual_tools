@@ -1044,7 +1044,8 @@ bool MoveItVisualTools::publishWorkspaceParameters(const moveit_msgs::WorkspaceP
 }
 
 bool MoveItVisualTools::publishContactPoints(const moveit::core::RobotState &robot_state,
-                                             const planning_scene::PlanningScene* planning_scene)
+                                             const planning_scene::PlanningScene* planning_scene,
+                                             const rviz_visual_tools::colors &color)
 {
   // Compute the contacts if any
   collision_detection::CollisionRequest c_req;
@@ -1075,6 +1076,7 @@ bool MoveItVisualTools::publishContactPoints(const moveit::core::RobotState &rob
       arr.markers[i].scale.x = 0.04;
       arr.markers[i].scale.y = 0.04;
       arr.markers[i].scale.z = 0.04;
+      arr.markers[i].color = getColor(color);
     }
 
     return publishMarkers(arr);

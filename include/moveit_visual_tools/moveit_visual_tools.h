@@ -459,9 +459,11 @@ planning_scene_topic_ = planning_scene_topic;
    * \brief Given a planning scene and robot state, publish any collisions
    * \param robot_state
    * \param planning_scene
+   * \param color
    * \return true on success
    */
-  bool publishContactPoints(const moveit::core::RobotState &robot_state, const planning_scene::PlanningScene* planning_scene);
+  bool publishContactPoints(const moveit::core::RobotState &robot_state, const planning_scene::PlanningScene* planning_scene,
+                            const rviz_visual_tools::colors &color = rviz_visual_tools::RED);
 
   /**
    * \brief Move a joint group in MoveIt for visualization
