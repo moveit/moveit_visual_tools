@@ -169,7 +169,7 @@ bool MoveItVisualTools::loadSharedRobotState()
       robot_model_ = psm->getRobotModel();
     }
     shared_robot_state_.reset(new robot_state::RobotState(robot_model_));
-    hidden_robot_state_.reset(new robot_state::RobotState(robot_model_));
+    hidden_robot_state_.reset(new robot_state::RobotState(*shared_robot_state_));
   }
 
   return shared_robot_state_;
