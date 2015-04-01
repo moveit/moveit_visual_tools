@@ -341,9 +341,6 @@ planning_scene_monitor::PlanningSceneMonitorPtr MoveItVisualTools::getPlanningSc
 bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const robot_model::JointModelGroup* ee_jmg,
                                          const rviz_visual_tools::colors &color, const std::string &ns)
 {
-  if(muted_)
-    return true;
-
   // Check if we have not loaded the EE markers
   if( ee_markers_map_[ee_jmg].markers.empty() || ee_poses_map_[ee_jmg].empty())
   {
@@ -394,12 +391,6 @@ bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose &pose, const 
 bool MoveItVisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
                                       const robot_model::JointModelGroup* ee_jmg, double animate_speed)
 {
-  if(muted_)
-  {
-    ROS_DEBUG_STREAM_NAMED("visual_tools","Not visualizing grasps - muted.");
-    return false;
-  }
-
   ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing " << possible_grasps.size() << " grasps with EE joint model group "
                          << ee_jmg->getName());
 
@@ -420,12 +411,6 @@ bool MoveItVisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& pos
 bool MoveItVisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
                                               const robot_model::JointModelGroup* ee_jmg, double animate_speed)
 {
-  if(muted_)
-  {
-    ROS_DEBUG_STREAM_NAMED("visual_tools","Not visualizing grasps - muted.");
-    return false;
-  }
-
   ROS_DEBUG_STREAM_NAMED("visual_tools","Visualizing " << possible_grasps.size() << " grasps with joint model group "
                          << ee_jmg->getName() << " at speed " << animate_speed);
 
@@ -446,9 +431,6 @@ bool MoveItVisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Gra
 bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, const robot_model::JointModelGroup* ee_jmg,
                                              double animate_speed)
 {
-  if(muted_)
-    return true;
-
   // Grasp Pose Variables
   geometry_msgs::Pose grasp_pose = grasp.grasp_pose.pose;
 
@@ -528,12 +510,6 @@ bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, co
 bool MoveItVisualTools::publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint> &ik_solutions,
                                            const robot_model::JointModelGroup* arm_jmg, double display_time)
 {
-  if(muted_)
-  {
-    ROS_DEBUG_STREAM_NAMED("visual_tools","Not visualizing inverse kinematic solutions - muted.");
-    return false;
-  }
-
   if (ik_solutions.empty())
   {
     ROS_WARN_STREAM_NAMED("visual_tools","Empty ik_solutions vector passed into publishIKSolutions()");
