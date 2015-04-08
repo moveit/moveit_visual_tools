@@ -60,8 +60,6 @@
 // Shape tools
 #include <shape_tools/solid_primitive_dims.h> // TODO move this into the cpp file
 #include <geometric_shapes/shape_operations.h> // TODO move this into the cpp file
-//#include <shape_msgs/ShapeMsg.h> // TODO use this instead
-
 
 namespace moveit_visual_tools
 {
