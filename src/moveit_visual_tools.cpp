@@ -1015,7 +1015,7 @@ bool MoveItVisualTools::publishCollisionTests()
 
 bool MoveItVisualTools::publishWorkspaceParameters(const moveit_msgs::WorkspaceParameters& params)
 {
-  return publishCollisionCuboid(convertPoint(params.min_corner), convertPoint(params.max_corner), "workspace", 
+  return publishCollisionCuboid(convertPoint(params.min_corner), convertPoint(params.max_corner), "workspace",
                                 rviz_visual_tools::TRANSLUCENT);
 }
 
@@ -1169,6 +1169,28 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
   return true;
 }
 
+bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::RobotTrajectory& trajectory_msg,
+                                              const moveit::core::LinkModel* ee_parent_link,
+                                              const robot_model::JointModelGroup* arm_jmg,
+                                              const rviz_visual_tools::colors &color)
+{
+  std::vector<geometry_msgs::Point> path;
+
+  robot_trajectory::RobotTrajectoryPtr robot_trajectory(new robot_trajectory::RobotTrajectory(robot_model_, arm_jmg));
+  robot_trajectory->setRobotTrajectoryMsg(*shared_robot_state_, trajectory_msg);
+
+  // Visualize end effector position of cartesian path
+  for (std::size_t i = 0; i < robot_trajectory->getWayPointCount(); ++i)
+  {
+    const Eigen::Affine3d& tip_pose =
+      robot_trajectory->getWayPoint(i).getGlobalLinkTransform(ee_parent_link);
+
+    path.push_back(convertPose(tip_pose).position);
+    publishSphere(tip_pose, color);
+  }
+
+  return publishPath(path, color);
+}
 
 bool MoveItVisualTools::publishTrajectoryPoints(const std::vector<robot_state::RobotStatePtr>& robot_state_trajectory,
                                                 const moveit::core::LinkModel* ee_parent_link,
@@ -1204,7 +1226,8 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState &robot_s
     if (color != rviz_visual_tools::DEFAULT) // ignore color highlights when set to default
     {
       // Get links names
-      const std::vector<const moveit::core::LinkModel*>& link_names = robot_state.getRobotModel()->getLinkModelsWithCollisionGeometry();
+      const std::vector<const moveit::core::LinkModel*>& link_names 
+        = robot_state.getRobotModel()->getLinkModelsWithCollisionGeometry();
       display_robot_msg.highlight_links.resize(link_names.size());
 
       // Get color

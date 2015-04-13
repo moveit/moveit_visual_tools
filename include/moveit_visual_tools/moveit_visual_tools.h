@@ -492,6 +492,15 @@ planning_scene_topic_ = planning_scene_topic;
 
 
   /**
+   * \brief Show line of trajectory path
+   * \return true on success
+   */
+  bool publishTrajectoryLine(const moveit_msgs::RobotTrajectory& trajectory_msg,
+                             const moveit::core::LinkModel* ee_parent_link,
+                             const robot_model::JointModelGroup* arm_jmg,
+                             const rviz_visual_tools::colors &color);
+
+  /**
    * \brief Display trajectory as series of end effector position points
    * \param trajectory the actual plan
    * \return true on success
