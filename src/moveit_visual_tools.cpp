@@ -1179,6 +1179,8 @@ bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::RobotTrajectory
   robot_trajectory::RobotTrajectoryPtr robot_trajectory(new robot_trajectory::RobotTrajectory(robot_model_, arm_jmg));
   robot_trajectory->setRobotTrajectoryMsg(*shared_robot_state_, trajectory_msg);
 
+  enableInternalBatchPublishing(true);
+
   // Visualize end effector position of cartesian path
   for (std::size_t i = 0; i < robot_trajectory->getWayPointCount(); ++i)
   {
@@ -1186,10 +1188,12 @@ bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::RobotTrajectory
       robot_trajectory->getWayPoint(i).getGlobalLinkTransform(ee_parent_link);
 
     path.push_back(convertPose(tip_pose).position);
-    publishSphere(tip_pose, color);
+    publishSphere(tip_pose, color, rviz_visual_tools::LARGE);
   }
 
-  return publishPath(path, color);
+  publishPath(path, color, rviz_visual_tools::XSMALL);
+  
+  return triggerInternalBatchPublishAndDisable();
 }
 
 bool MoveItVisualTools::publishTrajectoryPoints(const std::vector<robot_state::RobotStatePtr>& robot_state_trajectory,
