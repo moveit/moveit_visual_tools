@@ -58,7 +58,7 @@
 #include <trajectory_msgs/JointTrajectory.h>
 
 // Shape tools
-#include <shape_tools/solid_primitive_dims.h> // TODO move this into the cpp file
+#include <geometric_shapes/solid_primitive_dims.h> // TODO move this into the cpp file
 #include <geometric_shapes/shape_operations.h> // TODO move this into the cpp file
 
 namespace moveit_visual_tools
