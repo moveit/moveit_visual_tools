@@ -176,14 +176,9 @@ planning_scene_topic_ = planning_scene_topic;
    * \param ee_group_name - name of planning_group for the end effector
    * \return true if it is successful
    */
-  MOVEIT_DEPRECATED
-  bool loadEEMarker(const std::string& ee_group_name, const std::string& dummy)
-  {
-    loadEEMarker(ee_group_name);
-  }
   bool loadEEMarker(const std::string& ee_group_name)
   {
-    loadEEMarker(robot_model_->getJointModelGroup(ee_group_name));
+    return loadEEMarker(robot_model_->getJointModelGroup(ee_group_name));
   }
   bool loadEEMarker(const robot_model::JointModelGroup* ee_jmg);
 
@@ -221,7 +216,7 @@ planning_scene_topic_ = planning_scene_topic;
   bool publishEEMarkers(const Eigen::Affine3d &pose, const robot_model::JointModelGroup* ee_jmg,
                         const rviz_visual_tools::colors &color = rviz_visual_tools::CLEAR, const std::string &ns="end_effector")
   {
-    publishEEMarkers(convertPose(pose), ee_jmg, color, ns);
+    return publishEEMarkers(convertPose(pose), ee_jmg, color, ns);
   }
   bool publishEEMarkers(const geometry_msgs::Pose &pose, const robot_model::JointModelGroup* ee_jmg,
                         const rviz_visual_tools::colors &color = rviz_visual_tools::CLEAR, const std::string &ns="end_effector");
