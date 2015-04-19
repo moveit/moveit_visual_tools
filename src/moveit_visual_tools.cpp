@@ -1180,12 +1180,15 @@ bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::RobotTrajectory
   robot_trajectory->setRobotTrajectoryMsg(*shared_robot_state_, trajectory_msg);
 
   enableInternalBatchPublishing(true);
-
+  
   // Visualize end effector position of cartesian path
   for (std::size_t i = 0; i < robot_trajectory->getWayPointCount(); ++i)
   {
-    const Eigen::Affine3d& tip_pose =
-      robot_trajectory->getWayPoint(i).getGlobalLinkTransform(ee_parent_link);
+    const Eigen::Affine3d &tip_pose = robot_trajectory->getWayPoint(i).getGlobalLinkTransform(ee_parent_link);
+
+    // Error Check
+    if (tip_pose.translation().x() != tip_pose.translation().x())
+      ROS_ERROR_STREAM_NAMED("moveit_visual_tools","IS NAN ON i=" << i);
 
     path.push_back(convertPose(tip_pose).position);
     publishSphere(tip_pose, color, rviz_visual_tools::LARGE);
