@@ -175,45 +175,6 @@ bool MoveItVisualTools::loadSharedRobotState()
   return shared_robot_state_;
 }
 
-bool MoveItVisualTools::loadRobotMarkers()
-{
-  ROS_ERROR_STREAM_NAMED("temp","This function is going to be removed soon because it is incorrect");
-  // Always load the robot state before using
-  loadSharedRobotState();
-
-  // Get all link names
-  const std::vector<std::string> &link_names = shared_robot_state_->getRobotModel()->getLinkModelNames();;
-
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Number of links in robot: " << link_names.size());
-
-  // Get EE link markers for Rviz
-  visualization_msgs::MarkerArray robot_marker_array;
-  shared_robot_state_->getRobotMarkers(robot_marker_array, link_names, getColor( rviz_visual_tools::GREY ), "test", ros::Duration());
-
-  ROS_DEBUG_STREAM_NAMED("visual_tools","Number of rviz markers: " << robot_marker_array.markers.size());
-
-  // Publish the markers
-  for (std::size_t i = 0 ; i < robot_marker_array.markers.size() ; ++i)
-  {
-    // Make sure ROS is still spinning
-    if( !ros::ok() )
-      break;
-
-    // Header
-    robot_marker_array.markers[i].header.frame_id = base_frame_;
-    robot_marker_array.markers[i].header.stamp = ros::Time::now();
-
-    // Options for meshes
-    if( robot_marker_array.markers[i].type == visualization_msgs::Marker::MESH_RESOURCE )
-      robot_marker_array.markers[i].mesh_use_embedded_materials = true;
-
-    // Helper for publishing rviz markers
-    publishMarker( robot_marker_array.markers[i] );
-  }
-
-  return true;
-}
-
 moveit::core::RobotStatePtr& MoveItVisualTools::getSharedRobotState()
 {
   // Always load the robot state before using

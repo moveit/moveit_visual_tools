@@ -74,54 +74,54 @@ class MoveItVisualTools : public rviz_visual_tools::RvizVisualTools
 {
 public:
 
-/**
- * \brief Constructor
- * \param base_frame - common base for all visualization markers, usually "/world" or "/odom"
- * \param marker_topic - rostopic to publish markers to - your Rviz display should match
- * \param planning_scene_monitor - optionally pass in a pre-loaded planning scene monitor to
- *        avoid having to re-load the URDF, kinematic solvers, etc
- */
-MoveItVisualTools(const std::string& base_frame,
+  /**
+   * \brief Constructor
+   * \param base_frame - common base for all visualization markers, usually "/world" or "/odom"
+   * \param marker_topic - rostopic to publish markers to - your Rviz display should match
+   * \param planning_scene_monitor - optionally pass in a pre-loaded planning scene monitor to
+   *        avoid having to re-load the URDF, kinematic solvers, etc
+   */
+  MoveItVisualTools(const std::string& base_frame,
                     const std::string& marker_topic,
                     planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor);
 
-/**
- * \brief Constructor
- * \param base_frame - common base for all visualization markers, usually "/world" or "/odom"
- * \param marker_topic - rostopic to publish markers to - your Rviz display should match
- * \param robot_model - load robot model pointer so that we don't have do re-parse it here
- */
-MoveItVisualTools(const std::string& base_frame,
+  /**
+   * \brief Constructor
+   * \param base_frame - common base for all visualization markers, usually "/world" or "/odom"
+   * \param marker_topic - rostopic to publish markers to - your Rviz display should match
+   * \param robot_model - load robot model pointer so that we don't have do re-parse it here
+   */
+  MoveItVisualTools(const std::string& base_frame,
                     const std::string& marker_topic = rviz_visual_tools::RVIZ_MARKER_TOPIC,
                     robot_model::RobotModelConstPtr robot_model = robot_model::RobotModelConstPtr());
 
-/**
- * \brief Deconstructor
- */
-~MoveItVisualTools() {};
+  /**
+   * \brief Deconstructor
+   */
+  ~MoveItVisualTools() {};
 
-/**
- * \brief Set the ROS topic for publishing a robot state
- * \param topic
- */
-void setRobotStateTopic(const std::string &robot_state_topic)
-{
-robot_state_topic_ = robot_state_topic;
-}
+  /**
+   * \brief Set the ROS topic for publishing a robot state
+   * \param topic
+   */
+  void setRobotStateTopic(const std::string &robot_state_topic)
+  {
+    robot_state_topic_ = robot_state_topic;
+  }
 
-/**
- * \brief Set the planning scene topic
- * \param topic
- */
-void setPlanningSceneTopic(const std::string &planning_scene_topic)
-{
-planning_scene_topic_ = planning_scene_topic;
-}
+  /**
+   * \brief Set the planning scene topic
+   * \param topic
+   */
+  void setPlanningSceneTopic(const std::string &planning_scene_topic)
+  {
+    planning_scene_topic_ = planning_scene_topic;
+  }
 
-/**
- * \brief Load a planning scene monitor if one was not passed into the constructor
- * \return true if successful in loading
- */
+  /**
+   * \brief Load a planning scene monitor if one was not passed into the constructor
+   * \return true if successful in loading
+   */
   bool loadPlanningSceneMonitor();
 
   /**
@@ -151,13 +151,6 @@ planning_scene_topic_ = planning_scene_topic;
    * \return true if successful in loading
    */
   bool loadSharedRobotState();
-
-  /**
-   * \brief Caches the meshes and geometry of a robot. NOTE: perhaps not maintained...
-   * \return true if successful in loading
-   */
-  MOVEIT_DEPRECATED
-  bool loadRobotMarkers();
 
   /**
    * \brief Allow robot state to be altered.
@@ -214,12 +207,14 @@ planning_scene_topic_ = planning_scene_topic;
    * \return true on success
    */
   bool publishEEMarkers(const Eigen::Affine3d &pose, const robot_model::JointModelGroup* ee_jmg,
-                        const rviz_visual_tools::colors &color = rviz_visual_tools::CLEAR, const std::string &ns="end_effector")
+                        const rviz_visual_tools::colors &color = rviz_visual_tools::CLEAR, 
+                        const std::string &ns="end_effector")
   {
     return publishEEMarkers(convertPose(pose), ee_jmg, color, ns);
   }
   bool publishEEMarkers(const geometry_msgs::Pose &pose, const robot_model::JointModelGroup* ee_jmg,
-                        const rviz_visual_tools::colors &color = rviz_visual_tools::CLEAR, const std::string &ns="end_effector");
+                        const rviz_visual_tools::colors &color = rviz_visual_tools::CLEAR, 
+                        const std::string &ns="end_effector");
 
   /**
    * \brief Show grasps generated from moveit_simple_grasps or other MoveIt Grasp message sources
@@ -247,7 +242,8 @@ planning_scene_topic_ = planning_scene_topic;
    * \param animate_speed - how fast the gripper approach is animated
    * \return true on sucess
    */
-  bool publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, const robot_model::JointModelGroup* ee_jmg, double animate_speed);
+  bool publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, const robot_model::JointModelGroup* ee_jmg, 
+                            double animate_speed);
 
   /**
    * \brief Display an vector of inverse kinematic solutions for the IK service in Rviz
