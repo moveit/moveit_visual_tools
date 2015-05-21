@@ -368,14 +368,18 @@ public:
    * \param color to display the collision object with
    * \return true on success
    */
-  bool publishCollisionMesh(const geometry_msgs::Pose& object_pose, const std::string& object_name, const std::string &mesh_path,
+  bool publishCollisionMesh(const geometry_msgs::Pose& object_pose, const std::string& object_name, 
+                            const std::string &mesh_path,
                             const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
-  bool publishCollisionMesh(const Eigen::Affine3d& object_pose, const std::string& object_name, const std::string &mesh_path,
+  bool publishCollisionMesh(const Eigen::Affine3d& object_pose, const std::string& object_name, 
+                            const std::string &mesh_path,
                             const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
   bool publishCollisionMesh(const Eigen::Affine3d& object_pose, const std::string& object_name,
-                            const shape_msgs::Mesh& mesh_msg, const rviz_visual_tools::colors &color);
+                            const shape_msgs::Mesh& mesh_msg, const rviz_visual_tools::colors &color 
+                            = rviz_visual_tools::GREEN);
   bool publishCollisionMesh(const geometry_msgs::Pose& object_pose, const std::string& object_name,
-                            const shape_msgs::Mesh& mesh_msg, const rviz_visual_tools::colors &color);
+                            const shape_msgs::Mesh& mesh_msg, const rviz_visual_tools::colors &color 
+                            = rviz_visual_tools::GREEN);
 
   /**
    * \brief Publish a connected birectional graph
