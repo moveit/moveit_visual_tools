@@ -1212,6 +1212,7 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState &robot_s
 
   // Modify colors to also indicate which are fixed
   // TODO not compatibile with mainstream
+  /*
   if (robot_state.hasFixedLinks())
   {
     // Get links names
@@ -1232,6 +1233,7 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState &robot_s
       }
     }
   }
+  */
 
   // Convert state to message
   robot_state::robotStateToRobotStateMsg(robot_state, display_robot_msg.state);
