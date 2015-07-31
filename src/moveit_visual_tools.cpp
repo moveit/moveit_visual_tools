@@ -169,7 +169,11 @@ bool MoveItVisualTools::loadSharedRobotState()
       robot_model_ = psm->getRobotModel();
     }
     shared_robot_state_.reset(new robot_state::RobotState(robot_model_));
-    hidden_robot_state_.reset(new robot_state::RobotState(*shared_robot_state_));
+    hidden_robot_state_.reset(new robot_state::RobotState(robot_model_));
+
+    // TODO: this seems to be a work around for a weird NaN number bug
+    hidden_robot_state_->setToDefaultValues();
+    hidden_robot_state_->update(true);
   }
 
   return shared_robot_state_;
@@ -1141,7 +1145,7 @@ bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::RobotTrajectory
   robot_trajectory->setRobotTrajectoryMsg(*shared_robot_state_, trajectory_msg);
 
   enableInternalBatchPublishing(true);
-  
+
   // Visualize end effector position of cartesian path
   for (std::size_t i = 0; i < robot_trajectory->getWayPointCount(); ++i)
   {
@@ -1156,7 +1160,7 @@ bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::RobotTrajectory
   }
 
   publishPath(path, color, rviz_visual_tools::XSMALL);
-  
+
   return triggerInternalBatchPublishAndDisable();
 }
 
@@ -1194,7 +1198,7 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState &robot_s
     if (color != rviz_visual_tools::DEFAULT) // ignore color highlights when set to default
     {
       // Get links names
-      const std::vector<const moveit::core::LinkModel*>& link_names 
+      const std::vector<const moveit::core::LinkModel*>& link_names
         = robot_state.getRobotModel()->getLinkModelsWithCollisionGeometry();
       display_robot_msg.highlight_links.resize(link_names.size());
 
@@ -1275,6 +1279,7 @@ bool MoveItVisualTools::hideRobot()
     hidden_robot_state_->setVariablePosition("virtual_joint/trans_x", rviz_visual_tools::LARGE_SCALE);
     hidden_robot_state_->setVariablePosition("virtual_joint/trans_y", rviz_visual_tools::LARGE_SCALE);
     hidden_robot_state_->setVariablePosition("virtual_joint/trans_z", rviz_visual_tools::LARGE_SCALE);
+
     return publishRobotState(hidden_robot_state_);
   }
 
