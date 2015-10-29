@@ -171,7 +171,11 @@ bool MoveItVisualTools::loadSharedRobotState()
       robot_model_ = psm->getRobotModel();
     }
     shared_robot_state_.reset(new robot_state::RobotState(robot_model_));
-    hidden_robot_state_.reset(new robot_state::RobotState(*shared_robot_state_));
+    hidden_robot_state_.reset(new robot_state::RobotState(robot_model_));
+
+    // TODO: this seems to be a work around for a weird NaN number bug
+    hidden_robot_state_->setToDefaultValues();
+    hidden_robot_state_->update(true);
   }
 
   return shared_robot_state_;
