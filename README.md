@@ -47,7 +47,7 @@ You can also test the collision objects generation:
 	
 ## Code API
 
-See [VisualTools Class Reference](http://docs.ros.org/indigo/api/moveit_visual_tools/html/classmoveit__visual__tools_1_1VisualTools.html)
+See [VisualTools Class Reference](http://docs.ros.org/indigo/api/moveit_visual_tools/html/classmoveit__visual__tools_1_1MoveItVisualTools.html)
 
 ## Upgrade Notes
 
