@@ -2,6 +2,48 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Release 3.0
+* Added travis support
+* fix the how to link a demo img
+* Updated link to Doxygen API description
+* Formatting and better debug output
+* Fix hide robot bug
+* Remove incompatible humanoid function
+* Default color when publishing collision meshes
+* Added error check for bad value
+* API change for removal of shape_tools
+* New publish trajectory line function
+* Remove slash from topic name
+* Removed mute functionality
+* Improved loading efficiency
+* publishContactPoints accepts a color
+* Change topics to default when opening Rviz
+* New publishCollisionMesh() function
+* Changed publishCollisionMesh() API
+* Renamed publishCollisionRectangle to publishCollisionCuboid()
+* Updated rviz_visual_tools API
+* New publishMesh from ROS msg function
+* publishRobotState() for a RobotStateMsg now allows color
+* publishTrajectoryPath() for a ROS msg now requires a RobotState
+* New method for attaching collision objects that does not require a publisher
+* Specify scene name and cleanup logging
+* Fixed error checking for hideRobot() function
+* loadTrajectoryPub() allows custom topic
+* New publishTrajectoryPoints() function
+* New publishContactPoints function
+* New publishTrajectoryPath() function
+* New getRobotModel() function
+* New ability to visualize IK solutions with arbitrary virtual joint
+* API Broken: ability to have different end effectors for different arms, auto EE marker loading
+* Publish collision meshes
+* Added check for virtual joint
+* Fixed which arrow gets published
+* Publish fixed link arrows to show footstep locations
+* Ability to specify robot_state_topic without loading the publisher
+* Contributors: Dave Coleman, Daiki Maekawa, simonschmeisser
+
 2.2.0 (2015-01-07)
 ------------------
 * Code cleanup
@@ -124,8 +166,8 @@ Changelog for package moveit_visual_tools
 
 1.0.0 (2014-05-05)
 ------------------
-* Enabled dual arm manipulation 
-* Removed notions of a global planning group, ee group name, or ee parent link. 
+* Enabled dual arm manipulation
+* Removed notions of a global planning group, ee group name, or ee parent link.
 * Changed functionality of loadEEMarker
 * Added new print function
 * Made getPlanningSceneMonitor() private function
