@@ -14,7 +14,7 @@ This package includes:
 
 Developed by [Dave Coleman](http://dav.ee) at the Correll Robotics Lab, University of Colorado Boulder with outside contributors.
 
-<img align="right" src="https://raw.github.com/davetcoleman/moveit_visual_tools/indigo-devel/resources/demo.png" />
+![](resources/demo.png)
 
 ## Install
 
