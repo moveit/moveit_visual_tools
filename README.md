@@ -14,6 +14,10 @@ This package includes:
 
 Developed by [Dave Coleman](http://dav.ee) at the Correll Robotics Lab, University of Colorado Boulder with outside contributors.
 
+ * [![Build Status](https://travis-ci.org/davetcoleman/moveit_visual_tools.svg)](https://travis-ci.org/davetcoleman/moveit_visual_tools) Travis CI
+ * [![Devel Job Status](http://jenkins.ros.org/buildStatus/icon?job=devel-indigo-moveit-visual-tools)](http://jenkins.ros.org/job/devel-indigo-moveit_visual_tools) Devel Job Status
+ * [![Build Status](http://jenkins.ros.org/buildStatus/icon?job=ros-indigo-moveit-visual-tools_binarydeb_trusty_amd64)](http://jenkins.ros.org/job/ros-indigo-moveit-visual-tools_binarydeb_trusty_amd64/) AMD64 Debian Job Status
+
 ![](resources/demo.png)
 
 ## Install
@@ -44,7 +48,7 @@ You should see something like:
 You can also test the collision objects generation:
 
     roslaunch moveit_visual_tools collision_objects_test.launch
-	
+
 ## Code API
 
 See [VisualTools Class Reference](http://docs.ros.org/indigo/api/moveit_visual_tools/html/classmoveit__visual__tools_1_1MoveItVisualTools.html)
