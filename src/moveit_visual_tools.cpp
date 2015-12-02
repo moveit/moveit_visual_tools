@@ -49,6 +49,10 @@
 #include <tf_conversions/tf_eigen.h>
 #include <eigen_conversions/eigen_msg.h>
 
+// Shape tools
+#include <geometric_shapes/solid_primitive_dims.h>
+#include <geometric_shapes/shape_operations.h>
+
 namespace moveit_visual_tools
 {
 MoveItVisualTools::MoveItVisualTools(
@@ -676,40 +680,6 @@ bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::Point& point
 bool MoveItVisualTools::publishCollisionFloor(double z, const std::string& plane_name,
                                               const rviz_visual_tools::colors& color)
 {
-  /*
-    TODO: I don't think collision planes are implemented... could not get this to work
-    moveit_msgs::CollisionObject collision_obj;
-    collision_obj.header.stamp = ros::Time::now();
-    collision_obj.header.frame_id = base_frame_;
-    collision_obj.id = plane_name;
-    collision_obj.operation = moveit_msgs::CollisionObject::ADD;
-
-    // Representation of a plane, using the plane equation ax + by + cz + d = 0
-    collision_obj.planes.resize(1);
-    collision_obj.planes[0].coef[0] = -2; // a
-    collision_obj.planes[0].coef[1] = 3; // b
-    collision_obj.planes[0].coef[2] = 5; // c
-    collision_obj.planes[0].coef[3] = 6; // d
-
-    // Pose
-    geometry_msgs::Pose floor_pose;
-
-    // Position
-    floor_pose.position.x = 0;
-    floor_pose.position.y = 0;
-    floor_pose.position.z = z;
-
-    // Orientation
-    Eigen::Quaterniond quat(Eigen::AngleAxis<double>(0.0, Eigen::Vector3d::UnitZ()));
-    floor_pose.orientation.x = quat.x();
-    floor_pose.orientation.y = quat.y();
-    floor_pose.orientation.z = quat.z();
-    floor_pose.orientation.w = quat.w();
-
-    collision_obj.plane_poses.resize(1);
-    collision_obj.plane_poses[0] = floor_pose;
-  */
-
   // Instead just generate a rectangle
   geometry_msgs::Point point1;
   geometry_msgs::Point point2;
@@ -1179,7 +1149,7 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
     return false;
   }
 
-  // Create the message  TODO move to member function to load less often
+  // Create the message
   moveit_msgs::DisplayTrajectory display_trajectory_msg;
   display_trajectory_msg.model_id = robot_model_->getName();
   display_trajectory_msg.trajectory.resize(1);
@@ -1223,7 +1193,7 @@ bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::RobotTrajectory
   std::vector<geometry_msgs::Point> path;
 
   robot_trajectory::RobotTrajectoryPtr robot_trajectory(
-      new robot_trajectory::RobotTrajectory(robot_model_, arm_jmg));
+                                                        new robot_trajectory::RobotTrajectory(robot_model_, arm_jmg->getName()));
   robot_trajectory->setRobotTrajectoryMsg(*shared_robot_state_, trajectory_msg);
 
   enableInternalBatchPublishing(true);
@@ -1298,7 +1268,7 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState& robot_s
   }
 
   // Modify colors to also indicate which are fixed
-  // TODO not compatibile with mainstream
+  // TODO not compatibile with mainstream moveit
   /*
   if (robot_state.hasFixedLinks())
   {
@@ -1382,7 +1352,7 @@ bool MoveItVisualTools::hideRobot()
     }
   }
   ROS_WARN_STREAM_NAMED("moveit_visual_tools", "Unable to hide robot because a "
-                                               "variable does not exist (or joint model)");  
+                                               "variable does not exist (or joint model)");
   const std::vector<std::string>& names = hidden_robot_state_->getRobotModel()->getJointModelNames();
   ROS_WARN_STREAM_NAMED("moveit_visual_tools","Available names:");
   std::copy(names.begin(), names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));

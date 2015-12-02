@@ -57,10 +57,6 @@
 // ROS Messages
 #include <trajectory_msgs/JointTrajectory.h>
 
-// Shape tools
-#include <geometric_shapes/solid_primitive_dims.h> // TODO move this into the cpp file
-#include <geometric_shapes/shape_operations.h> // TODO move this into the cpp file
-
 namespace moveit_visual_tools
 {
 
@@ -207,13 +203,13 @@ public:
    * \return true on success
    */
   bool publishEEMarkers(const Eigen::Affine3d &pose, const robot_model::JointModelGroup* ee_jmg,
-                        const rviz_visual_tools::colors &color = rviz_visual_tools::CLEAR, 
+                        const rviz_visual_tools::colors &color = rviz_visual_tools::CLEAR,
                         const std::string &ns="end_effector")
   {
     return publishEEMarkers(convertPose(pose), ee_jmg, color, ns);
   }
   bool publishEEMarkers(const geometry_msgs::Pose &pose, const robot_model::JointModelGroup* ee_jmg,
-                        const rviz_visual_tools::colors &color = rviz_visual_tools::CLEAR, 
+                        const rviz_visual_tools::colors &color = rviz_visual_tools::CLEAR,
                         const std::string &ns="end_effector");
 
   /**
@@ -242,7 +238,7 @@ public:
    * \param animate_speed - how fast the gripper approach is animated
    * \return true on sucess
    */
-  bool publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, const robot_model::JointModelGroup* ee_jmg, 
+  bool publishAnimatedGrasp(const moveit_msgs::Grasp &grasp, const robot_model::JointModelGroup* ee_jmg,
                             double animate_speed);
 
   /**
@@ -368,17 +364,17 @@ public:
    * \param color to display the collision object with
    * \return true on success
    */
-  bool publishCollisionMesh(const geometry_msgs::Pose& object_pose, const std::string& object_name, 
-                            const std::string &mesh_path,
-                            const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
-  bool publishCollisionMesh(const Eigen::Affine3d& object_pose, const std::string& object_name, 
+  bool publishCollisionMesh(const geometry_msgs::Pose& object_pose, const std::string& object_name,
                             const std::string &mesh_path,
                             const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
   bool publishCollisionMesh(const Eigen::Affine3d& object_pose, const std::string& object_name,
-                            const shape_msgs::Mesh& mesh_msg, const rviz_visual_tools::colors &color 
+                            const std::string &mesh_path,
+                            const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
+  bool publishCollisionMesh(const Eigen::Affine3d& object_pose, const std::string& object_name,
+                            const shape_msgs::Mesh& mesh_msg, const rviz_visual_tools::colors &color
                             = rviz_visual_tools::GREEN);
   bool publishCollisionMesh(const geometry_msgs::Pose& object_pose, const std::string& object_name,
-                            const shape_msgs::Mesh& mesh_msg, const rviz_visual_tools::colors &color 
+                            const shape_msgs::Mesh& mesh_msg, const rviz_visual_tools::colors &color
                             = rviz_visual_tools::GREEN);
 
   /**
