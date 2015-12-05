@@ -4,9 +4,9 @@ project(moveit_visual_tools)
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED COMPONENTS
   rviz_visual_tools
-  eigen_conversions 
+  eigen_conversions
   geometry_msgs
-  moveit_ros_robot_interaction 
+  moveit_ros_robot_interaction
   moveit_core
   roscpp
   tf_conversions
@@ -29,7 +29,7 @@ catkin_package(
     moveit_ros_robot_interaction
     moveit_core
     geometry_msgs
-    visualization_msgs 
+    visualization_msgs
     graph_msgs
     std_msgs
     moveit_msgs
@@ -40,10 +40,10 @@ catkin_package(
 # Enable gdb to show line numbers
 #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -W -Wno-unused-parameter -fno-strict-aliasing")
 
-## Build 
+## Build
 
 include_directories(
-  include 
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -57,14 +57,17 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # Test executable
-add_executable(moveit_visual_tools_test src/moveit_visual_tools_test.cpp)
-target_link_libraries(moveit_visual_tools_test 
+add_executable(${PROJECT_NAME}_test src/${PROJECT_NAME}_test.cpp)
+target_link_libraries(${PROJECT_NAME}_test
   ${catkin_LIBRARIES} ${PROJECT_NAME}
 )
 
 # Test executable
-add_executable(collision_objects_test src/collision_objects_test.cpp)
-target_link_libraries(collision_objects_test 
+add_executable(${PROJECT_NAME}_collision_objects_test src/collision_objects_test.cpp)
+set_target_properties(${PROJECT_NAME}_collision_objects_test
+  PROPERTIES OUTPUT_NAME collision_objects_test PREFIX ""
+)
+target_link_libraries(${PROJECT_NAME}_collision_objects_test
   ${catkin_LIBRARIES} ${PROJECT_NAME}
 )
 
@@ -82,7 +85,7 @@ install(DIRECTORY launch    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 install(DIRECTORY resources DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 # Install executables
-install(TARGETS moveit_visual_tools_test collision_objects_test
+install(TARGETS ${PROJECT_NAME}_test ${PROJECT_NAME}_collision_objects_test
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
