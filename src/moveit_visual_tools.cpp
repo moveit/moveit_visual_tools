@@ -892,6 +892,8 @@ void MoveItVisualTools::getCollisionWallMsg(double x, double y, double angle, do
                                             const std::string name,
                                             moveit_msgs::CollisionObject& collision_obj)
 {
+  double floor_to_base_height = 0; // TODO(davetcoleman): set this to a better value
+
   collision_obj.header.stamp = ros::Time::now();
   collision_obj.header.frame_id = base_frame_;
   collision_obj.operation = moveit_msgs::CollisionObject::ADD;
@@ -912,7 +914,7 @@ void MoveItVisualTools::getCollisionWallMsg(double x, double y, double angle, do
   // Position
   rec_pose.position.x = x;
   rec_pose.position.y = y;
-  rec_pose.position.z = height / 2 + floor_to_base_height_;
+  rec_pose.position.z = height / 2 + floor_to_base_height;
 
   // Size
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = depth;
@@ -944,12 +946,14 @@ bool MoveItVisualTools::publishCollisionTable(double x, double y, double angle, 
                                               double height, double depth, const std::string name,
                                               const rviz_visual_tools::colors& color)
 {
+  double floor_to_base_height = 0; // TODO(davetcoleman): set this to a better value
+
   geometry_msgs::Pose table_pose;
 
   // Position
   table_pose.position.x = x;
   table_pose.position.y = y;
-  table_pose.position.z = height / 2 + floor_to_base_height_;
+  table_pose.position.z = height / 2 + floor_to_base_height;
 
   // Orientation
   Eigen::Quaterniond quat(Eigen::AngleAxis<double>(double(angle), Eigen::Vector3d::UnitZ()));
