@@ -2,6 +2,12 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Updated README
+* Temp fix missing variable
+* Contributors: Dave Coleman
+
 3.0.1 (2015-12-05)
 ------------------
 * catkin lint cleanup
