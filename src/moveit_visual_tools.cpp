@@ -63,6 +63,7 @@ MoveItVisualTools::MoveItVisualTools(
   , mannual_trigger_update_(false)
   , robot_state_topic_(DISPLAY_ROBOT_STATE_TOPIC)
   , planning_scene_topic_(PLANNING_SCENE_TOPIC)
+  , name_("visual_tools")
 {
 }
 
@@ -79,11 +80,11 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
   // Check if we already have one
   if (planning_scene_monitor_)
   {
-    ROS_WARN_STREAM_NAMED("visual_tools", "Will not load a new planning scene monitor when one has "
+    ROS_WARN_STREAM_NAMED(name_, "Will not load a new planning scene monitor when one has "
                                           "already been set for Visual Tools");
     return false;
   }
-  ROS_DEBUG_STREAM_NAMED("visual_tools", "Loading planning scene monitor");
+  ROS_DEBUG_STREAM_NAMED(name_, "Loading planning scene monitor");
 
   // Regular version b/c the other one causes problems with recognizing end effectors
   planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(
@@ -101,14 +102,14 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
 
     planning_scene_monitor_->startPublishingPlanningScene(
         planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE, planning_scene_topic_);
-    ROS_DEBUG_STREAM_NAMED("visual_tools", "Publishing planning scene on "
+    ROS_DEBUG_STREAM_NAMED(name_, "Publishing planning scene on "
                                                << planning_scene_topic_);
 
     planning_scene_monitor_->getPlanningScene()->setName("visual_tools_scene");
   }
   else
   {
-    ROS_ERROR_STREAM_NAMED("visual_tools", "Planning scene not configured");
+    ROS_ERROR_STREAM_NAMED(name_, "Planning scene not configured");
     return false;
   }
 
@@ -178,6 +179,8 @@ bool MoveItVisualTools::loadSharedRobotState()
     hidden_robot_state_.reset(new robot_state::RobotState(robot_model_));
 
     // TODO: this seems to be a work around for a weird NaN number bug
+    shared_robot_state_->setToDefaultValues();
+    shared_robot_state_->update(true);
     hidden_robot_state_->setToDefaultValues();
     hidden_robot_state_->update(true);
   }
@@ -204,7 +207,7 @@ bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg)
   // Get joint state group
   if (ee_jmg == NULL)  // make sure EE_GROUP exists
   {
-    ROS_ERROR_STREAM_NAMED("visual_tools", "Unable to find joint model group with address"
+    ROS_ERROR_STREAM_NAMED(name_, "Unable to find joint model group with address"
                                                << ee_jmg);
     return false;
   }
@@ -235,11 +238,11 @@ bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg)
 
   shared_robot_state_->getRobotMarkers(ee_markers_map_[ee_jmg], ee_link_names, marker_color,
                                        ee_jmg->getName(), ros::Duration());
-  ROS_DEBUG_STREAM_NAMED("visual_tools", "Number of rviz markers in end effector: "
+  ROS_DEBUG_STREAM_NAMED(name_, "Number of rviz markers in end effector: "
                                              << ee_markers_map_[ee_jmg].markers.size());
 
   const std::string& ee_parent_link_name = ee_jmg->getEndEffectorParentGroup().second;
-  // ROS_DEBUG_STREAM_NAMED("visual_tools","EE Parent link: " << ee_parent_link_name);
+  // ROS_DEBUG_STREAM_NAMED(name_,"EE Parent link: " << ee_parent_link_name);
   const moveit::core::LinkModel* ee_parent_link = robot_model_->getLinkModel(ee_parent_link_name);
 
   Eigen::Affine3d ee_marker_global_transform =
@@ -280,7 +283,7 @@ void MoveItVisualTools::loadTrajectoryPub(const std::string& display_planned_pat
   // Trajectory paths
   pub_display_path_ =
       nh_.advertise<moveit_msgs::DisplayTrajectory>(display_planned_path_topic, 10, false);
-  ROS_DEBUG_STREAM_NAMED("visual_tools", "Publishing MoveIt trajectory on topic "
+  ROS_DEBUG_STREAM_NAMED(name_, "Publishing MoveIt trajectory on topic "
                                              << pub_display_path_.getTopic());
 
   // Wait for topic to be ready
@@ -298,7 +301,7 @@ void MoveItVisualTools::loadRobotStatePub(const std::string& robot_state_topic)
 
   // RobotState Message
   pub_robot_state_ = nh_.advertise<moveit_msgs::DisplayRobotState>(robot_state_topic_, 1);
-  ROS_DEBUG_STREAM_NAMED("visual_tools", "Publishing MoveIt robot state on topic "
+  ROS_DEBUG_STREAM_NAMED(name_, "Publishing MoveIt robot state on topic "
                                              << pub_robot_state_.getTopic());
 
   // Wait for topic to be ready
@@ -309,7 +312,7 @@ planning_scene_monitor::PlanningSceneMonitorPtr MoveItVisualTools::getPlanningSc
 {
   if (!planning_scene_monitor_)
   {
-    ROS_INFO_STREAM_NAMED("visual_tools",
+    ROS_INFO_STREAM_NAMED(name_,
                           "No planning scene passed into moveit_visual_tools, creating one.");
     loadPlanningSceneMonitor();
     ros::spinOnce();
@@ -328,7 +331,7 @@ bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose& pose,
   {
     if (!loadEEMarker(ee_jmg))
     {
-      ROS_ERROR_STREAM_NAMED("visual_tools",
+      ROS_ERROR_STREAM_NAMED(name_,
                              "Unable to publish EE marker, unable to load EE markers");
       return false;
     }
@@ -375,7 +378,7 @@ bool MoveItVisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& pos
                                       const robot_model::JointModelGroup* ee_jmg,
                                       double animate_speed)
 {
-  ROS_DEBUG_STREAM_NAMED("visual_tools", "Visualizing " << possible_grasps.size()
+  ROS_DEBUG_STREAM_NAMED(name_, "Visualizing " << possible_grasps.size()
                                                         << " grasps with EE joint model group "
                                                         << ee_jmg->getName());
 
@@ -398,7 +401,7 @@ bool MoveItVisualTools::publishAnimatedGrasps(
     const robot_model::JointModelGroup* ee_jmg, double animate_speed)
 {
   ROS_DEBUG_STREAM_NAMED(
-      "visual_tools", "Visualizing " << possible_grasps.size() << " grasps with joint model group "
+      name_, "Visualizing " << possible_grasps.size() << " grasps with joint model group "
                                      << ee_jmg->getName() << " at speed " << animate_speed);
 
   // Loop through all grasps
@@ -509,14 +512,14 @@ bool MoveItVisualTools::publishIKSolutions(
 {
   if (ik_solutions.empty())
   {
-    ROS_WARN_STREAM_NAMED("visual_tools",
+    ROS_WARN_STREAM_NAMED(name_,
                           "Empty ik_solutions vector passed into publishIKSolutions()");
     return false;
   }
 
   loadSharedRobotState();
 
-  ROS_DEBUG_STREAM_NAMED("visual_tools", "Visualizing " << ik_solutions.size()
+  ROS_DEBUG_STREAM_NAMED(name_, "Visualizing " << ik_solutions.size()
                                                         << " inverse kinematic solutions");
 
   // Apply the time to the trajectory
@@ -620,8 +623,8 @@ bool MoveItVisualTools::publishCollisionBlock(const geometry_msgs::Pose& block_p
   collision_obj.primitive_poses.resize(1);
   collision_obj.primitive_poses[0] = block_pose;
 
-  // ROS_INFO_STREAM_NAMED("visual_tools","CollisionObject: \n " << collision_obj);
-  // ROS_DEBUG_STREAM_NAMED("visual_tools","Published collision object " << name);
+  // ROS_INFO_STREAM_NAMED(name_,"CollisionObject: \n " << collision_obj);
+  // ROS_DEBUG_STREAM_NAMED(name_,"Published collision object " << name);
   return processCollisionObjectMsg(collision_obj, color);
 }
 
@@ -673,7 +676,7 @@ bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::Point& point
     collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] =
         rviz_visual_tools::SMALL_SCALE;
 
-  // ROS_INFO_STREAM_NAMED("visual_tools","CollisionObject: \n " << collision_obj);
+  // ROS_INFO_STREAM_NAMED(name_,"CollisionObject: \n " << collision_obj);
   return processCollisionObjectMsg(collision_obj, color);
 }
 
@@ -753,7 +756,7 @@ bool MoveItVisualTools::publishCollisionCylinder(const geometry_msgs::Pose& obje
   collision_obj.primitive_poses.resize(1);
   collision_obj.primitive_poses[0] = object_pose;
 
-  // ROS_INFO_STREAM_NAMED("visual_tools","CollisionObject: \n " << collision_obj);
+  // ROS_INFO_STREAM_NAMED(name_,"CollisionObject: \n " << collision_obj);
   return processCollisionObjectMsg(collision_obj, color);
 }
 
@@ -775,7 +778,7 @@ bool MoveItVisualTools::publishCollisionMesh(const geometry_msgs::Pose& object_p
   shapes::ShapeMsg shape_msg;  // this is a boost::variant type from shape_messages.h
   if (!mesh || !shapes::constructMsgFromShape(mesh, shape_msg))
   {
-    ROS_ERROR_STREAM_NAMED("visual_tools", "Unable to create mesh shape message from resource "
+    ROS_ERROR_STREAM_NAMED(name_, "Unable to create mesh shape message from resource "
                                                << mesh_path);
     return false;
   }
@@ -784,7 +787,7 @@ bool MoveItVisualTools::publishCollisionMesh(const geometry_msgs::Pose& object_p
                             color))
     return false;
 
-  ROS_DEBUG_NAMED("visual_tools", "Loaded mesh from '%s'", mesh_path.c_str());
+  ROS_DEBUG_NAMED(name_, "Loaded mesh from '%s'", mesh_path.c_str());
   return true;
 }
 
@@ -1004,14 +1007,14 @@ bool MoveItVisualTools::loadCollisionSceneFromFile(const std::string& path,
       }
       else
       {
-        ROS_WARN_STREAM_NAMED("visual_tools", "Unable to get locked planning scene RW");
+        ROS_WARN_STREAM_NAMED(name_, "Unable to get locked planning scene RW");
         return false;
       }
     }
-    ROS_INFO_NAMED("visual_tools", "Loaded scene geometry from '%s'", path.c_str());
+    ROS_INFO_NAMED(name_, "Loaded scene geometry from '%s'", path.c_str());
   }
   else
-    ROS_WARN_NAMED("visual_tools", "Unable to load scene geometry from '%s'", path.c_str());
+    ROS_WARN_NAMED(name_, "Unable to load scene geometry from '%s'", path.c_str());
 
   fin.close();
 
@@ -1047,7 +1050,7 @@ bool MoveItVisualTools::publishContactPoints(const moveit::core::RobotState& rob
     visualization_msgs::MarkerArray arr;
     collision_detection::getCollisionMarkersFromContacts(arr, planning_scene->getPlanningFrame(),
                                                          c_res.contacts);
-    ROS_INFO_STREAM_NAMED("visual_tools", "Completed listing of explanations for invalid states.");
+    ROS_INFO_STREAM_NAMED(name_, "Completed listing of explanations for invalid states.");
 
     // Check for markers
     if (arr.markers.empty())
@@ -1148,7 +1151,7 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
   // Check if we have enough points
   if (!trajectory_msg.joint_trajectory.points.size())
   {
-    ROS_WARN_STREAM_NAMED("visual_tools",
+    ROS_WARN_STREAM_NAMED(name_,
                           "Unable to publish trajectory path because trajectory has zero points");
     return false;
   }
@@ -1171,7 +1174,7 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
   // Wait the duration of the trajectory
   if (blocking)
   {
-    ROS_INFO_STREAM_NAMED("visual_tools",
+    ROS_INFO_STREAM_NAMED(name_,
                           "Waiting for trajectory animation "
                               << trajectory_msg.joint_trajectory.points.back().time_from_start
                               << " seconds");
@@ -1192,15 +1195,37 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
 bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::RobotTrajectory& trajectory_msg,
                                               const moveit::core::LinkModel* ee_parent_link,
                                               const robot_model::JointModelGroup* arm_jmg,
-                                              const rviz_visual_tools::colors& color)
+                                              const rviz_visual_tools::colors& color,
+                                              bool clear_all_markers)
 {
+  // Error check
+  if (!ee_parent_link)
+  {
+    ROS_FATAL_STREAM_NAMED(name_, "ee_parent_link is NULL");
+    return false;
+  }
+  if (!arm_jmg)
+  {
+    ROS_FATAL_STREAM_NAMED(name_, "arm_jmg is NULL");
+    return false;
+  }
+
+  // Always load the robot state before using
+  loadSharedRobotState();
+
+  // Point location datastructure
   std::vector<geometry_msgs::Point> path;
 
-  robot_trajectory::RobotTrajectoryPtr robot_trajectory(
-                                                        new robot_trajectory::RobotTrajectory(robot_model_, arm_jmg->getName()));
+  // Convert trajectory into a series of RobotStates
+  robot_trajectory::RobotTrajectoryPtr
+    robot_trajectory(new robot_trajectory::RobotTrajectory(robot_model_, arm_jmg->getName()));
   robot_trajectory->setRobotTrajectoryMsg(*shared_robot_state_, trajectory_msg);
 
+  // Group together messages
   enableInternalBatchPublishing(true);
+
+  if (clear_all_markers)
+    publishMarker(reset_marker_);
 
   // Visualize end effector position of cartesian path
   for (std::size_t i = 0; i < robot_trajectory->getWayPointCount(); ++i)
@@ -1210,7 +1235,10 @@ bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::RobotTrajectory
 
     // Error Check
     if (tip_pose.translation().x() != tip_pose.translation().x())
-      ROS_ERROR_STREAM_NAMED("moveit_visual_tools", "IS NAN ON i=" << i);
+    {
+      ROS_ERROR_STREAM_NAMED(name_, "NAN DETECTED AT TRAJECTORY POINT i=" << i);
+      return false;
+    }
 
     path.push_back(convertPose(tip_pose).position);
     publishSphere(tip_pose, color, rviz_visual_tools::LARGE);
@@ -1348,17 +1376,17 @@ bool MoveItVisualTools::hideRobot()
     else
     {
       // Debug
-      ROS_ERROR_STREAM_NAMED("moveit_visual_tools", "The only available joint variables are:");
+      ROS_ERROR_STREAM_NAMED(name_, "The only available joint variables are:");
       const std::vector<std::string>& var_names =
           hidden_robot_state_->getRobotModel()->getJointModel("virtual_joint")->getVariableNames();
       std::copy(var_names.begin(), var_names.end(),
                 std::ostream_iterator<std::string>(std::cout, "\n"));
     }
   }
-  ROS_WARN_STREAM_NAMED("moveit_visual_tools", "Unable to hide robot because a "
+  ROS_WARN_STREAM_NAMED(name_, "Unable to hide robot because a "
                                                "variable does not exist (or joint model)");
   const std::vector<std::string>& names = hidden_robot_state_->getRobotModel()->getJointModelNames();
-  ROS_WARN_STREAM_NAMED("moveit_visual_tools","Available names:");
+  ROS_WARN_STREAM_NAMED(name_, "Available names:");
   std::copy(names.begin(), names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
 
   return false;
