@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.2 (2015-12-27)
+------------------
 * Updated README
 * Temp fix missing variable
 * Contributors: Dave Coleman

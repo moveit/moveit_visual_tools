@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>moveit_visual_tools</name>
-  <version>3.0.1</version>
+  <version>3.0.2</version>
   <description>Helper functions for displaying and debugging MoveIt! data in Rviz via published markers</description>
 
   <maintainer email="davetcoleman@gmail.com">Dave Coleman</maintainer>
