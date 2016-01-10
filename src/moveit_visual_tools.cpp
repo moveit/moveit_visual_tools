@@ -1199,11 +1199,6 @@ bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::RobotTrajectory
                                               bool clear_all_markers)
 {
   // Error check
-  if (!ee_parent_link)
-  {
-    ROS_FATAL_STREAM_NAMED(name_, "ee_parent_link is NULL");
-    return false;
-  }
   if (!arm_jmg)
   {
     ROS_FATAL_STREAM_NAMED(name_, "arm_jmg is NULL");
@@ -1213,13 +1208,28 @@ bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::RobotTrajectory
   // Always load the robot state before using
   loadSharedRobotState();
 
-  // Point location datastructure
-  std::vector<geometry_msgs::Point> path;
-
   // Convert trajectory into a series of RobotStates
   robot_trajectory::RobotTrajectoryPtr
     robot_trajectory(new robot_trajectory::RobotTrajectory(robot_model_, arm_jmg->getName()));
   robot_trajectory->setRobotTrajectoryMsg(*shared_robot_state_, trajectory_msg);
+
+  return publishTrajectoryLine(robot_trajectory, ee_parent_link, color, clear_all_markers);
+}
+
+bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr robot_trajectory,
+                                              const moveit::core::LinkModel* ee_parent_link,
+                                              const rviz_visual_tools::colors& color,
+                                              bool clear_all_markers)
+{
+  // Error check
+  if (!ee_parent_link)
+  {
+    ROS_FATAL_STREAM_NAMED(name_, "ee_parent_link is NULL");
+    return false;
+  }
+
+  // Point location datastructure
+  std::vector<geometry_msgs::Point> path;
 
   // Group together messages
   enableInternalBatchPublishing(true);

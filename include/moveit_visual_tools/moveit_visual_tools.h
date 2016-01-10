@@ -454,7 +454,7 @@ public:
    * \brief Given a planning scene and robot state, publish any collisions
    * \param robot_state
    * \param planning_scene
-   * \param color
+   * \param color - display color of markers
    * \return true on success
    */
   bool publishContactPoints(const moveit::core::RobotState &robot_state,
@@ -490,19 +490,26 @@ public:
                              const robot_state::RobotStateConstPtr robot_state, bool blocking);
 
   /**
-   * \brief Show line of trajectory path
-   * \param trajectory the actual plan
-   * \param ee_jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_arm"
+   * \brief Display a line of the end effector path from a robot trajectory path
+   * \param trajectory_msg - the robot plan
+   * \param ee_parent_link - the link that we should trace a path of, e.g. the gripper link
+   * \param arm_jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_arm"
+   * \param color - display color of markers
    * \param clear_all_markers - optionally ability to delete all existing markers in Rviz before adding the trajectory path
    * \return true on success
    */
   bool publishTrajectoryLine(const moveit_msgs::RobotTrajectory &trajectory_msg,
                              const moveit::core::LinkModel *ee_parent_link, const robot_model::JointModelGroup *arm_jmg,
                              const rviz_visual_tools::colors &color, bool clear_all_markers = false);
+  bool publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr robot_trajectory,
+                             const moveit::core::LinkModel* ee_parent_link,
+                             const rviz_visual_tools::colors& color,
+                             bool clear_all_markers);
 
   /**
    * \brief Display trajectory as series of end effector position points
    * \param trajectory the actual plan
+   * \param color - display color of markers
    * \return true on success
    */
   bool publishTrajectoryPoints(const std::vector<robot_state::RobotStatePtr> &robot_state_trajectory,
@@ -513,8 +520,7 @@ public:
    * \brief Publish a complete robot state to Rviz
    *        To use, add a RobotState marker to Rviz and subscribe to the DISPLAY_ROBOT_STATE_TOPIC, above
    * \param robot_state - joint values of robot
-   * \param color - how to highlight the robot (solid-ly) if desired,
-   *                by default leaves robot in color as specified in URDF
+   * \param color - how to highlight the robot (solid-ly) if desired, default keeps color as specified in URDF
    */
   bool publishRobotState(const robot_state::RobotState &robot_state,
                          const rviz_visual_tools::colors &color = rviz_visual_tools::DEFAULT);
@@ -525,6 +531,7 @@ public:
    * \brief Publish a MoveIt robot state to a topic that the Rviz "RobotState" display can show
    * \param trajectory_pt of joint positions
    * \param jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_arm"
+   * \param color - how to highlight the robot (solid-ly) if desired, default keeps color as specified in URDF
    * \return true on success
    */
   bool publishRobotState(const trajectory_msgs::JointTrajectoryPoint &trajectory_pt,
