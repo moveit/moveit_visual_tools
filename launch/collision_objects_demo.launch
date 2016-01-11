@@ -1,0 +1,17 @@
+<launch>
+
+  <arg name="debug" default="false" />
+  <arg unless="$(arg debug)" name="launch_prefix" value="" />
+  <arg     if="$(arg debug)" name="launch_prefix"
+       value="gdb -x $(find moveit_visual_tools)/launch/debug_settings.gdb --ex run --args" />
+
+  <!-- Load universal robot description format (URDF) -->
+  <param name="robot_description" textfile="$(find moveit_visual_tools)/resources/rrbot.urdf"/>
+  <param name="robot_description_semantic" textfile="$(find moveit_visual_tools)/resources/rrbot.srdf" />
+
+  <!-- Start demo -->
+  <node name="collision_objects_demo" launch-prefix="$(arg launch_prefix)" pkg="moveit_visual_tools"
+  	type="collision_objects_demo" output="screen">
+  </node>
+
+</launch>

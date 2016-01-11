@@ -86,9 +86,15 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
   }
   ROS_DEBUG_STREAM_NAMED(name_, "Loading planning scene monitor");
 
+  // Create tf transformer
+  boost::shared_ptr<tf::TransformListener> tf;
+  // tf.reset(new tf::TransformListener(nh_));
+  // ros::spinOnce();
+
   // Regular version b/c the other one causes problems with recognizing end effectors
   planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(
-      ROBOT_DESCRIPTION, boost::shared_ptr<tf::Transformer>(), "visual_tools_scene"));
+                                                                                 //ROBOT_DESCRIPTION, boost::shared_ptr<tf::Transformer>(), "visual_tools_scene"));
+                                                                                 ROBOT_DESCRIPTION, tf, "visual_tools_scene"));
   ros::spinOnce();
   ros::Duration(0.1).sleep();
   ros::spinOnce();
@@ -123,10 +129,11 @@ bool MoveItVisualTools::processCollisionObjectMsg(const moveit_msgs::CollisionOb
   {
     planning_scene_monitor::LockedPlanningSceneRW scene(getPlanningSceneMonitor());
     scene->getCurrentStateNonConst().update();  // hack to prevent bad transforms
+    std::cout << "before processCollisionObjectMsg" << std::endl;
     scene->processCollisionObjectMsg(msg);
+    std::cout << "after processCollisionObjectMsg" << std::endl;
     scene->setObjectColor(msg.id, getColor(color));
   }
-
   // Trigger an update
   if (!mannual_trigger_update_)
   {
@@ -957,7 +964,7 @@ bool MoveItVisualTools::publishCollisionTable(double x, double y, double angle, 
   table_pose.position.x = x;
   table_pose.position.y = y;
   table_pose.position.z = height / 2 + floor_to_base_height;
-
+  std::cout << "1 " << std::endl;
   // Orientation
   Eigen::Quaterniond quat(Eigen::AngleAxis<double>(double(angle), Eigen::Vector3d::UnitZ()));
   table_pose.orientation.x = quat.x();
@@ -974,7 +981,7 @@ bool MoveItVisualTools::publishCollisionTable(double x, double y, double angle, 
   collision_obj.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
   collision_obj.primitives[0].dimensions.resize(
       geometric_shapes::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>::value);
-
+  std::cout << "2 " << std::endl;
   // Size
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = depth;
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = width;
@@ -982,7 +989,7 @@ bool MoveItVisualTools::publishCollisionTable(double x, double y, double angle, 
 
   collision_obj.primitive_poses.resize(1);
   collision_obj.primitive_poses[0] = table_pose;
-
+  std::cout << "3 " << std::endl;
   return processCollisionObjectMsg(collision_obj, color);
 }
 

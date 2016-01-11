@@ -56,18 +56,18 @@ target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES} ${Boost_LIBRARIES}
 )
 
-# Test executable
-add_executable(${PROJECT_NAME}_test src/${PROJECT_NAME}_test.cpp)
-target_link_libraries(${PROJECT_NAME}_test
+# Demo executable
+add_executable(${PROJECT_NAME}_demo src/${PROJECT_NAME}_demo.cpp)
+target_link_libraries(${PROJECT_NAME}_demo
   ${catkin_LIBRARIES} ${PROJECT_NAME}
 )
 
-# Test executable
-add_executable(${PROJECT_NAME}_collision_objects_test src/collision_objects_test.cpp)
-set_target_properties(${PROJECT_NAME}_collision_objects_test
-  PROPERTIES OUTPUT_NAME collision_objects_test PREFIX ""
+# Demo executable
+add_executable(${PROJECT_NAME}_collision_objects_demo src/collision_objects_demo.cpp)
+set_target_properties(${PROJECT_NAME}_collision_objects_demo
+  PROPERTIES OUTPUT_NAME collision_objects_demo PREFIX ""
 )
-target_link_libraries(${PROJECT_NAME}_collision_objects_test
+target_link_libraries(${PROJECT_NAME}_collision_objects_demo
   ${catkin_LIBRARIES} ${PROJECT_NAME}
 )
 
@@ -85,7 +85,7 @@ install(DIRECTORY launch    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 install(DIRECTORY resources DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 # Install executables
-install(TARGETS ${PROJECT_NAME}_test ${PROJECT_NAME}_collision_objects_test
+install(TARGETS ${PROJECT_NAME}_demo ${PROJECT_NAME}_collision_objects_demo
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

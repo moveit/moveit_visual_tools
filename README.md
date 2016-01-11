@@ -33,19 +33,20 @@ Clone this repository into a catkin workspace, then use the rosdep install tool 
 rosdep install --from-paths src --ignore-src --rosdistro indigo
 ```
 
-## Quick Start
+## Quick Start Demo
 
 To see random shapes generated in Rviz:
 
-    roslaunch moveit_visual_tools visual_tools_test.launch
+    roslaunch moveit_visual_tools visual_tools_demo.launch
 
 You should see something like:
 
 <img align="right" src="https://raw.github.com/davetcoleman/moveit_visual_tools/indigo-devel/resources/screenshot.png" />
 
-You can also test the collision objects generation:
+You can also demo the collision objects generation TODO: THIS IS CURRENTLY BROKEN :(
 
-    roslaunch moveit_visual_tools collision_objects_test.launch
+    roslaunch moveit_visual_tools collision_objects_demo_rviz.launch
+    roslaunch moveit_visual_tools collision_objects_demo.launch
 
 ## Code API
 
@@ -151,8 +152,6 @@ And more...
 ### Collision Object Functions
 
 Helpers for adding and removing objects from the MoveIt! planning scene. CO stands for Collision Object and ACO stands for Active Collision Object.
-
-*DEVELOPER TODO: make it so that to use these functions, you must first instanciate a planning scene monitor outside of moveit_visual_tools. Remove publish collision message*
 
  - cleanupCO
  - cleanupACO

@@ -1,5 +1,5 @@
 <launch>
-  
+
   <arg name="debug" default="false" />
   <arg unless="$(arg debug)" name="launch_prefix" value="" />
   <arg     if="$(arg debug)" name="launch_prefix" value="gdb --ex run --args" />
@@ -10,15 +10,10 @@
 
   <!-- Load Rviz -->
   <node name="$(anon rviz)" pkg="rviz" type="rviz" respawn="false"
-	args="-d $(find moveit_visual_tools)/launch/visual_tools_test.rviz" output="screen">
-  </node>  
+	args="-d $(find moveit_visual_tools)/launch/visual_tools_demo.rviz" output="screen">
+  </node>
 
   <!--Broadcast static tf to hide errors -->
-  <node pkg="tf" type="static_transform_publisher" name="virtual_joint_broadcaster_0" args="0 0 0 0 0 0 /world /base 100" />
-
-  <!-- Start test -->
-  <node name="collision_objects_test" launch-prefix="$(arg launch_prefix)" pkg="moveit_visual_tools" 
-	type="collision_objects_test" output="screen">
-  </node>
+  <node pkg="tf" type="static_transform_publisher" name="virtual_joint_broadcaster_0" args="0 0 0 0 0 0 /world /base 30" />
 
 </launch>
