@@ -2,6 +2,20 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Renamed test to demo
+* New publishTrajectoryLine() function
+* Fix travis
+* Deprecated loadEEMarker() that uses string
+* Formatted code
+* Switched from MOVEIT deprecated to RVIZ_VISUAL_TOOLS deprecated
+* Fixed shared_robot_state to initialize correctly every time
+* Switched to using name\_ variables
+* Add error checks to publishTrajectoryLine
+* Added ability for publishTrajectoryLine to clear all previous markers
+* Contributors: Dave Coleman
+
 3.0.2 (2015-12-27)
 ------------------
 * Updated README
