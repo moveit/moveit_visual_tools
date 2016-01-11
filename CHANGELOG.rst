@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.3 (2016-01-10)
+------------------
 * Renamed test to demo
 * New publishTrajectoryLine() function
 * Fix travis
