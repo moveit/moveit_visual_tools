@@ -129,9 +129,7 @@ bool MoveItVisualTools::processCollisionObjectMsg(const moveit_msgs::CollisionOb
   {
     planning_scene_monitor::LockedPlanningSceneRW scene(getPlanningSceneMonitor());
     scene->getCurrentStateNonConst().update();  // hack to prevent bad transforms
-    std::cout << "before processCollisionObjectMsg" << std::endl;
     scene->processCollisionObjectMsg(msg);
-    std::cout << "after processCollisionObjectMsg" << std::endl;
     scene->setObjectColor(msg.id, getColor(color));
   }
   // Trigger an update
@@ -964,7 +962,7 @@ bool MoveItVisualTools::publishCollisionTable(double x, double y, double angle, 
   table_pose.position.x = x;
   table_pose.position.y = y;
   table_pose.position.z = height / 2 + floor_to_base_height;
-  std::cout << "1 " << std::endl;
+
   // Orientation
   Eigen::Quaterniond quat(Eigen::AngleAxis<double>(double(angle), Eigen::Vector3d::UnitZ()));
   table_pose.orientation.x = quat.x();
@@ -981,7 +979,7 @@ bool MoveItVisualTools::publishCollisionTable(double x, double y, double angle, 
   collision_obj.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
   collision_obj.primitives[0].dimensions.resize(
       geometric_shapes::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>::value);
-  std::cout << "2 " << std::endl;
+
   // Size
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = depth;
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = width;
@@ -989,7 +987,6 @@ bool MoveItVisualTools::publishCollisionTable(double x, double y, double angle, 
 
   collision_obj.primitive_poses.resize(1);
   collision_obj.primitive_poses[0] = table_pose;
-  std::cout << "3 " << std::endl;
   return processCollisionObjectMsg(collision_obj, color);
 }
 
