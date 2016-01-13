@@ -1372,41 +1372,46 @@ bool MoveItVisualTools::publishRobotState(
 
 bool MoveItVisualTools::hideRobot()
 {
+  static const std::string VJOINT_NAME = "virtual_joint";
+
   // Always load the robot state before using
   loadSharedRobotState();
 
-  // Check if joint and variable exist
-  if (hidden_robot_state_->getRobotModel()->hasJointModel("virtual_joint"))
+  // Check if joint
+  if (!hidden_robot_state_->getRobotModel()->hasJointModel(VJOINT_NAME))
   {
-    if (hidden_robot_state_->getRobotModel()
-            ->getJointModel("virtual_joint")
-            ->hasVariable("virtual_joint/trans_x"))
-    {
-      hidden_robot_state_->setVariablePosition("virtual_joint/trans_x",
-                                               rviz_visual_tools::LARGE_SCALE);
-      hidden_robot_state_->setVariablePosition("virtual_joint/trans_y",
-                                               rviz_visual_tools::LARGE_SCALE);
-      hidden_robot_state_->setVariablePosition("virtual_joint/trans_z",
-                                               rviz_visual_tools::LARGE_SCALE);
-      return publishRobotState(hidden_robot_state_);
-    }
-    else
-    {
-      // Debug
-      ROS_ERROR_STREAM_NAMED(name_, "The only available joint variables are:");
-      const std::vector<std::string>& var_names =
-          hidden_robot_state_->getRobotModel()->getJointModel("virtual_joint")->getVariableNames();
-      std::copy(var_names.begin(), var_names.end(),
-                std::ostream_iterator<std::string>(std::cout, "\n"));
-    }
-  }
-  ROS_WARN_STREAM_NAMED(name_, "Unable to hide robot because a "
-                                               "variable does not exist (or joint model)");
-  const std::vector<std::string>& names = hidden_robot_state_->getRobotModel()->getJointModelNames();
-  ROS_WARN_STREAM_NAMED(name_, "Available names:");
-  std::copy(names.begin(), names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
+    ROS_WARN_STREAM_NAMED(name_, "Unable to hide robot because joint '" << VJOINT_NAME
+                          << "' does not exist.");
+    const std::vector<std::string>& names = hidden_robot_state_->getRobotModel()->getJointModelNames();
+    ROS_WARN_STREAM_NAMED(name_, "Available names:");
+    std::copy(names.begin(), names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
 
-  return false;
+    return false;
+  }
+
+  // Check if variables exist
+  if (!hidden_robot_state_->getRobotModel()->getJointModel(VJOINT_NAME)
+      ->hasVariable(VJOINT_NAME + "/trans_x"))
+  {
+    // Debug
+    ROS_WARN_STREAM_NAMED(name_, "Unable to hide robot because variables for joint '" << VJOINT_NAME
+                          << "' do not exist. Try making this vjoint floating");
+    ROS_WARN_STREAM_NAMED(name_, "The only available joint variables are:");
+    const std::vector<std::string>& var_names =
+      hidden_robot_state_->getRobotModel()->getJointModel(VJOINT_NAME)->getVariableNames();
+    std::copy(var_names.begin(), var_names.end(),
+              std::ostream_iterator<std::string>(std::cout, "\n"));
+    return false;
+  }
+
+  // Hide the robot
+  hidden_robot_state_->setVariablePosition(VJOINT_NAME + "/trans_x",
+                                           rviz_visual_tools::LARGE_SCALE);
+  hidden_robot_state_->setVariablePosition(VJOINT_NAME + "/trans_y",
+                                           rviz_visual_tools::LARGE_SCALE);
+  hidden_robot_state_->setVariablePosition(VJOINT_NAME + "/trans_z",
+                                           rviz_visual_tools::LARGE_SCALE);
+  return publishRobotState(hidden_robot_state_);
 }
 
 }  // namespace
