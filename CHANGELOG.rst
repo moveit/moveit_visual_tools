@@ -2,6 +2,12 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Removed stray debug output
+* Improved debugging output for the hideRobot() feature and virtual_joints
+* Contributors: Dave Coleman
+
 3.0.3 (2016-01-10)
 ------------------
 * Renamed test to demo
