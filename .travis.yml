@@ -21,8 +21,7 @@ script:
   - source /opt/ros/$CI_ROS_DISTRO/setup.bash
   - mkdir -p $CATKIN_WS_SRC
   - ln -s $TRAVIS_BUILD_DIR $CATKIN_WS_SRC
-  # moveit_visual_tools often breaks when an unreleased change in rviz_visual_tools occurs, so build that from
-  # source, too
+  # build packages that often cause this package to break because of unreleased changes
   - cd $CATKIN_WS_SRC
   - git clone https://github.com/davetcoleman/rviz_visual_tools.git
   - rosdep install --from-paths ./ -y --ignore-src --rosdistro $CI_ROS_DISTRO
