@@ -13,8 +13,9 @@ This package includes:
 Developed by [Dave Coleman](http://dav.ee) at the Correll Robotics Lab, University of Colorado Boulder with outside contributors.
 
  * [![Build Status](https://travis-ci.org/davetcoleman/moveit_visual_tools.svg)](https://travis-ci.org/davetcoleman/moveit_visual_tools) Travis CI
- * [![Devel Job Status](http://jenkins.ros.org/buildStatus/icon?job=devel-indigo-moveit_visual_tools)](http://jenkins.ros.org/job/devel-indigo-moveit_visual_tools) Devel Job Status
- * [![Build Status](http://jenkins.ros.org/buildStatus/icon?job=ros-indigo-moveit-visual-tools_binarydeb_trusty_amd64)](http://jenkins.ros.org/job/ros-indigo-moveit-visual-tools_binarydeb_trusty_amd64/) AMD64 Debian Job Status
+ * [![Build Status](http://build.ros.org/buildStatus/icon?job=Jsrc_uT__moveit_visual_tools__ubuntu_trusty__source)](http://build.ros.org/view/Jsrc_uT/job/Jsrc_uT__moveit_visual_tools__ubuntu_trusty__source/) ROS Buildfarm - Trusty Devel Source Build
+ * [![Build Status](http://build.ros.org/buildStatus/icon?job=Jbin_uT64__moveit_visual_tools__ubuntu_trusty_amd64__binary)](http://build.ros.org/view/Jbin_uT64/job/Jbin_uT64__moveit_visual_tools__ubuntu_trusty_amd64__binary/) ROS Buildfarm - AMD64 Trusty Debian Build
+
 
 ![](resources/demo.png)
 
