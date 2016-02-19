@@ -1029,8 +1029,8 @@ bool MoveItVisualTools::publishCollisionTests() { ROS_ERROR_STREAM_NAMED("temp",
 
 bool MoveItVisualTools::publishWorkspaceParameters(const moveit_msgs::WorkspaceParameters& params)
 {
-  return publishCollisionCuboid(convertPoint(params.min_corner), convertPoint(params.max_corner),
-                                "workspace", rviz_visual_tools::TRANSLUCENT);
+  return publishCuboid(convertPoint(params.min_corner), convertPoint(params.max_corner),
+                       rviz_visual_tools::TRANSLUCENT, "Planning_Workspace", 1);
 }
 
 bool MoveItVisualTools::publishContactPoints(const moveit::core::RobotState& robot_state,
