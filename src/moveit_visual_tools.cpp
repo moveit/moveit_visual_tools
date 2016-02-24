@@ -1178,10 +1178,14 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
   // Wait the duration of the trajectory
   if (blocking)
   {
-    ROS_INFO_STREAM_NAMED(name_,
-                          "Waiting for trajectory animation "
-                              << trajectory_msg.joint_trajectory.points.back().time_from_start
-                              << " seconds");
+    double duration = trajectory_msg.joint_trajectory.points.back().time_from_start.toSec();
+
+    // If trajectory has not been parameterized, assume each waypoint takes 0.05 seconds (based on Rviz)
+    if (duration < std::numeric_limits<double>::epsilon())
+    {
+      duration = 0.05 * trajectory_msg.joint_trajectory.points.size();
+    }
+    ROS_INFO_STREAM_NAMED(name_, "Waiting for trajectory animation " << duration << " seconds");
 
     // Check if ROS is ok in intervals
     double counter = 0;
