@@ -1189,11 +1189,11 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
 
     // Check if ROS is ok in intervals
     double counter = 0;
-    while (ros::ok() &&
-           counter < trajectory_msg.joint_trajectory.points.back().time_from_start.toSec())
+    static const double CHECK_TIME_INTERVAL = 0.25; // check every fourth second
+    while (ros::ok() && counter <= duration)
     {
-      counter += 0.25;  // check every fourth second
-      ros::Duration(0.25).sleep();
+      counter += CHECK_TIME_INTERVAL;
+      ros::Duration(CHECK_TIME_INTERVAL).sleep();
     }
   }
 
