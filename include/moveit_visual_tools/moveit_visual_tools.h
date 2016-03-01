@@ -544,6 +544,12 @@ public:
    */
   bool hideRobot();
 
+  /**
+   * \brief Print to console the current robot state's joint values within its limits visually
+   * \param robot_state - the robot to show
+   */
+  void showJointLimits(robot_state::RobotStatePtr robot_state);
+
 private:
   /**
    * @brief Get the planning scene monitor that this class is using

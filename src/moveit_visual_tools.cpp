@@ -44,6 +44,7 @@
 // MoveIt
 #include <moveit/robot_state/conversions.h>
 #include <moveit/collision_detection/collision_tools.h>
+#include <moveit/macros/console_colors.h>
 
 // Conversions
 #include <tf_conversions/tf_eigen.h>
@@ -1413,6 +1414,57 @@ bool MoveItVisualTools::hideRobot()
   hidden_robot_state_->setVariablePosition(VJOINT_NAME + "/trans_z",
                                            rviz_visual_tools::LARGE_SCALE);
   return publishRobotState(hidden_robot_state_);
+}
+
+void MoveItVisualTools::showJointLimits(robot_state::RobotStatePtr robot_state)
+{
+  const std::vector<const moveit::core::JointModel*>& joints = robot_model_->getActiveJointModels();
+
+  // Loop through joints
+  for (std::size_t i = 0; i < joints.size(); ++i)
+  {
+    // Assume all joints have only one variable
+    if (joints[i]->getVariableCount() > 1)
+    {
+      //ROS_WARN_STREAM_NAMED(name_, "Unable to handle joints with more than one var, skipping '"
+      //<< joints[i]->getName() << "'");
+      continue;
+    }
+
+    double current_value = robot_state->getVariablePosition(joints[i]->getName());
+
+    // check if bad position
+    bool out_of_bounds = !robot_state->satisfiesBounds(joints[i]);
+
+    const moveit::core::VariableBounds& bound = joints[i]->getVariableBounds()[0];
+
+    if (out_of_bounds)
+      std::cout << MOVEIT_CONSOLE_COLOR_RED;
+
+    std::cout << "   " << std::fixed << std::setprecision(5) << bound.min_position_ << "\t";
+    double delta = bound.max_position_ - bound.min_position_;
+    // std::cout << "delta: " << delta << " ";
+    double step = delta / 20.0;
+
+    bool marker_shown = false;
+    for (double value = bound.min_position_; value < bound.max_position_; value += step)
+    {
+      // show marker of current value
+      if (!marker_shown && current_value < value)
+      {
+        std::cout << "|";
+        marker_shown = true;
+      }
+      else
+        std::cout << "-";
+    }
+    // show max position
+    std::cout << " \t" << std::fixed << std::setprecision(5) << bound.max_position_ << "  \t" << joints[i]->getName()
+              << " current: " << std::fixed << std::setprecision(5) << current_value << std::endl;
+
+    if (out_of_bounds)
+      std::cout << MOVEIT_CONSOLE_COLOR_RESET;
+  }
 }
 
 }  // namespace
