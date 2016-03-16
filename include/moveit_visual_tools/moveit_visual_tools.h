@@ -504,7 +504,11 @@ public:
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr robot_trajectory,
                              const moveit::core::LinkModel* ee_parent_link,
                              const rviz_visual_tools::colors& color,
-                             bool clear_all_markers);
+                             bool clear_all_markers = false);
+  bool publishTrajectoryLine(const robot_trajectory::RobotTrajectory& robot_trajectory,
+                             const moveit::core::LinkModel* ee_parent_link,
+                             const rviz_visual_tools::colors& color,
+                             bool clear_all_markers = false);
 
   /**
    * \brief Display trajectory as series of end effector position points

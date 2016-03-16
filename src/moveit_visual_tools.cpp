@@ -1230,6 +1230,14 @@ bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTraje
                                               const rviz_visual_tools::colors& color,
                                               bool clear_all_markers)
 {
+  return publishTrajectoryLine(*robot_trajectory, ee_parent_link, color, clear_all_markers);
+}
+
+bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTrajectory& robot_trajectory,
+                                              const moveit::core::LinkModel* ee_parent_link,
+                                              const rviz_visual_tools::colors& color,
+                                              bool clear_all_markers)
+{
   // Error check
   if (!ee_parent_link)
   {
@@ -1237,6 +1245,38 @@ bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTraje
     return false;
   }
 
+  // Point location datastructure
+  std::vector<Eigen::Vector3d> path;
+
+  // Group together messages
+  enableInternalBatchPublishing(true);
+
+  if (clear_all_markers)
+    publishMarker(reset_marker_);
+
+  // Visualize end effector position of cartesian path
+  for (std::size_t i = 0; i < robot_trajectory.getWayPointCount(); ++i)
+  {
+    const Eigen::Affine3d& tip_pose =
+        robot_trajectory.getWayPoint(i).getGlobalLinkTransform(ee_parent_link);
+
+    // Error Check
+    if (tip_pose.translation().x() != tip_pose.translation().x())
+    {
+      ROS_ERROR_STREAM_NAMED(name_, "NAN DETECTED AT TRAJECTORY POINT i=" << i);
+      return false;
+    }
+
+    path.push_back(tip_pose.translation());
+    publishSphere(tip_pose, color, rviz_visual_tools::LARGE);
+  }
+
+  const double radius = 0.005;
+  publishPath(path, color, radius);
+
+  return triggerInternalBatchPublishAndDisable();
+
+  /*
   // Point location datastructure
   std::vector<geometry_msgs::Point> path;
 
@@ -1247,10 +1287,10 @@ bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTraje
     publishMarker(reset_marker_);
 
   // Visualize end effector position of cartesian path
-  for (std::size_t i = 0; i < robot_trajectory->getWayPointCount(); ++i)
+  for (std::size_t i = 0; i < robot_trajectory.getWayPointCount(); ++i)
   {
     const Eigen::Affine3d& tip_pose =
-        robot_trajectory->getWayPoint(i).getGlobalLinkTransform(ee_parent_link);
+        robot_trajectory.getWayPoint(i).getGlobalLinkTransform(ee_parent_link);
 
     // Error Check
     if (tip_pose.translation().x() != tip_pose.translation().x())
@@ -1266,6 +1306,7 @@ bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTraje
   publishPath(path, color, rviz_visual_tools::XSMALL);
 
   return triggerInternalBatchPublishAndDisable();
+  */
 }
 
 bool MoveItVisualTools::publishTrajectoryPoints(
