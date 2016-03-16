@@ -483,11 +483,11 @@ public:
    * \param ee_jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_arm"
    * \return true on success
    */
-  bool publishTrajectoryPath(const std::vector<robot_state::RobotStatePtr> &trajectory,
+  bool publishTrajectoryPath(const std::vector<moveit::core::RobotStatePtr> &trajectory,
                              const moveit::core::JointModelGroup *jmg, double speed = 0.01, bool blocking = false);
   bool publishTrajectoryPath(const robot_trajectory::RobotTrajectory &trajectory, bool blocking = false);
   bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory &trajectory_msg,
-                             const robot_state::RobotStateConstPtr robot_state, bool blocking);
+                             const moveit::core::RobotStateConstPtr robot_state, bool blocking);
 
   /**
    * \brief Display a line of the end effector path from a robot trajectory path
@@ -516,7 +516,7 @@ public:
    * \param color - display color of markers
    * \return true on success
    */
-  bool publishTrajectoryPoints(const std::vector<robot_state::RobotStatePtr> &robot_state_trajectory,
+  bool publishTrajectoryPoints(const std::vector<moveit::core::RobotStatePtr> &robot_state_trajectory,
                                const moveit::core::LinkModel *ee_parent_link,
                                const rviz_visual_tools::colors &color = rviz_visual_tools::YELLOW);
 
@@ -526,9 +526,9 @@ public:
    * \param robot_state - joint values of robot
    * \param color - how to highlight the robot (solid-ly) if desired, default keeps color as specified in URDF
    */
-  bool publishRobotState(const robot_state::RobotState &robot_state,
+  bool publishRobotState(const moveit::core::RobotState &robot_state,
                          const rviz_visual_tools::colors &color = rviz_visual_tools::DEFAULT);
-  bool publishRobotState(const robot_state::RobotStatePtr &robot_state,
+  bool publishRobotState(const moveit::core::RobotStatePtr &robot_state,
                          const rviz_visual_tools::colors &color = rviz_visual_tools::DEFAULT);
 
   /**
@@ -552,7 +552,7 @@ public:
    * \brief Print to console the current robot state's joint values within its limits visually
    * \param robot_state - the robot to show
    */
-  void showJointLimits(robot_state::RobotStatePtr robot_state);
+  void showJointLimits(moveit::core::RobotStatePtr robot_state);
 
 private:
   /**
@@ -583,13 +583,13 @@ protected:
   std::map<rviz_visual_tools::colors, moveit_msgs::DisplayRobotState> display_robot_msgs_;
 
   // Pointer to the robot model
-  robot_state::RobotModelConstPtr robot_model_;
+  moveit::core::RobotModelConstPtr robot_model_;
 
   // Note: call loadSharedRobotState() before using this
-  robot_state::RobotStatePtr shared_robot_state_;
+  moveit::core::RobotStatePtr shared_robot_state_;
 
   // Note: call loadSharedRobotState() before using this. Use only for hiding the robot
-  robot_state::RobotStatePtr hidden_robot_state_;
+  moveit::core::RobotStatePtr hidden_robot_state_;
 
   // Prevent the planning scene from always auto-pushing, but rather do it manually
   bool mannual_trigger_update_;

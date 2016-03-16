@@ -1186,7 +1186,7 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
     {
       duration = 0.05 * trajectory_msg.joint_trajectory.points.size();
     }
-    ROS_INFO_STREAM_NAMED(name_, "Waiting for trajectory animation " << duration << " seconds");
+    ROS_DEBUG_STREAM_NAMED(name_, "Waiting for trajectory animation " << duration << " seconds");
 
     // Check if ROS is ok in intervals
     double counter = 0;
