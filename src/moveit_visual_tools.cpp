@@ -1127,6 +1127,12 @@ bool MoveItVisualTools::publishTrajectoryPath(
   return publishTrajectoryPath(trajectory_msg, shared_robot_state_, blocking);
 }
 
+bool MoveItVisualTools::publishTrajectoryPath(const robot_trajectory::RobotTrajectoryPtr& trajectory,
+                                              bool blocking)
+{
+  return publishTrajectoryPath(*trajectory, blocking);
+}
+
 bool MoveItVisualTools::publishTrajectoryPath(const robot_trajectory::RobotTrajectory& trajectory,
                                               bool blocking)
 {

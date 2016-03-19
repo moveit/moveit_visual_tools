@@ -485,6 +485,7 @@ public:
    */
   bool publishTrajectoryPath(const std::vector<moveit::core::RobotStatePtr> &trajectory,
                              const moveit::core::JointModelGroup *jmg, double speed = 0.01, bool blocking = false);
+  bool publishTrajectoryPath(const robot_trajectory::RobotTrajectoryPtr &trajectory, bool blocking = false);
   bool publishTrajectoryPath(const robot_trajectory::RobotTrajectory &trajectory, bool blocking = false);
   bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory &trajectory_msg,
                              const moveit::core::RobotStateConstPtr robot_state, bool blocking);
