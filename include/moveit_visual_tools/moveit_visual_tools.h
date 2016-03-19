@@ -498,18 +498,69 @@ public:
    * \param color - display color of markers
    * \param clear_all_markers - optionally ability to delete all existing markers in Rviz before adding the trajectory path
    * \return true on success
+   * DEPRECATED - do not use clear_all_markers argument anymore!
    */
+  RVIZ_VISUAL_TOOLS_DEPRECATED
   bool publishTrajectoryLine(const moveit_msgs::RobotTrajectory &trajectory_msg,
                              const moveit::core::LinkModel *ee_parent_link, const robot_model::JointModelGroup *arm_jmg,
-                             const rviz_visual_tools::colors &color, bool clear_all_markers = false);
+                             const rviz_visual_tools::colors &color, bool clear_all_markers)
+  {
+    // Group together messages
+    enableInternalBatchPublishing(true);
+
+    if (clear_all_markers)
+      publishMarker(reset_marker_);
+
+    return publishTrajectoryLine(trajectory_msg, ee_parent_link, arm_jmg, color);
+  }
+
+  RVIZ_VISUAL_TOOLS_DEPRECATED
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr robot_trajectory,
                              const moveit::core::LinkModel* ee_parent_link,
                              const rviz_visual_tools::colors& color,
-                             bool clear_all_markers = false);
+                             bool clear_all_markers)
+  {
+    // Group together messages
+    enableInternalBatchPublishing(true);
+
+    if (clear_all_markers)
+      publishMarker(reset_marker_);
+
+    return publishTrajectoryLine(robot_trajectory, ee_parent_link, color);
+  }
+
+  RVIZ_VISUAL_TOOLS_DEPRECATED
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectory& robot_trajectory,
                              const moveit::core::LinkModel* ee_parent_link,
                              const rviz_visual_tools::colors& color,
-                             bool clear_all_markers = false);
+                             bool clear_all_markers)
+  {
+    // Group together messages
+    enableInternalBatchPublishing(true);
+
+    if (clear_all_markers)
+      publishMarker(reset_marker_);
+
+    return publishTrajectoryLine(robot_trajectory, ee_parent_link, color);
+  }
+
+  /**
+   * \brief Display a line of the end effector path from a robot trajectory path
+   * \param trajectory_msg - the robot plan
+   * \param ee_parent_link - the link that we should trace a path of, e.g. the gripper link
+   * \param arm_jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_arm"
+   * \param color - display color of markers
+   * \return true on success
+   */
+  bool publishTrajectoryLine(const moveit_msgs::RobotTrajectory &trajectory_msg,
+                             const moveit::core::LinkModel *ee_parent_link, const robot_model::JointModelGroup *arm_jmg,
+                             const rviz_visual_tools::colors &color);
+  bool publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr robot_trajectory,
+                             const moveit::core::LinkModel* ee_parent_link,
+                             const rviz_visual_tools::colors& color);
+  bool publishTrajectoryLine(const robot_trajectory::RobotTrajectory& robot_trajectory,
+                             const moveit::core::LinkModel* ee_parent_link,
+                             const rviz_visual_tools::colors& color);
 
   /**
    * \brief Display trajectory as series of end effector position points
