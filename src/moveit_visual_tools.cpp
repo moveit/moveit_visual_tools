@@ -897,7 +897,7 @@ bool MoveItVisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph& g
   return processCollisionObjectMsg(collision_obj, color);
 }
 
-void MoveItVisualTools::getCollisionWallMsg(double x, double y, double angle, double width,
+void MoveItVisualTools::getCollisionWallMsg(double x, double y, double angle, double width, double height,
                                             const std::string name,
                                             moveit_msgs::CollisionObject& collision_obj)
 {
@@ -918,7 +918,6 @@ void MoveItVisualTools::getCollisionWallMsg(double x, double y, double angle, do
   collision_obj.id = name;
 
   double depth = 0.1;
-  double height = 2.5;
 
   // Position
   rec_pose.position.x = x;
@@ -946,7 +945,18 @@ bool MoveItVisualTools::publishCollisionWall(double x, double y, double angle, d
                                              const rviz_visual_tools::colors& color)
 {
   moveit_msgs::CollisionObject collision_obj;
-  getCollisionWallMsg(x, y, angle, width, name, collision_obj);
+  getCollisionWallMsg(x, y, angle, width, 2.5, name, collision_obj);
+
+  return processCollisionObjectMsg(collision_obj, color);
+}
+
+
+bool MoveItVisualTools::publishCollisionWall(double x, double y, double angle, double width, double height,
+                                             const std::string name,
+                                             const rviz_visual_tools::colors& color)
+{
+  moveit_msgs::CollisionObject collision_obj;
+  getCollisionWallMsg(x, y, angle, width, height, name, collision_obj);
 
   return processCollisionObjectMsg(collision_obj, color);
 }

@@ -396,7 +396,7 @@ public:
   /**
    * \brief Helper for publishCollisionWall
    */
-  void getCollisionWallMsg(double x, double y, double angle, double width, const std::string name,
+  void getCollisionWallMsg(double x, double y, double angle, double width, double height, const std::string name,
                            moveit_msgs::CollisionObject &collision_obj);
 
   /**
@@ -405,11 +405,16 @@ public:
    * \param y
    * \param angle
    * \param width
+   * \param height
    * \param name
    * \param color to display the collision object with
    * \return true on sucess
    */
+  RVIZ_VISUAL_TOOLS_DEPRECATED
   bool publishCollisionWall(double x, double y, double angle, double width, const std::string name,
+                            const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
+
+  bool publishCollisionWall(double x, double y, double angle = 0.0, double width = 2.0, double height = 1.5, const std::string name = "wall",
                             const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
 
   /**
@@ -488,7 +493,7 @@ public:
   bool publishTrajectoryPath(const robot_trajectory::RobotTrajectoryPtr &trajectory, bool blocking = false);
   bool publishTrajectoryPath(const robot_trajectory::RobotTrajectory &trajectory, bool blocking = false);
   bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory &trajectory_msg,
-                             const moveit::core::RobotStateConstPtr robot_state, bool blocking);
+                             const moveit::core::RobotStateConstPtr robot_state, bool blocking = false);
 
   /**
    * \brief Display a line of the end effector path from a robot trajectory path
