@@ -577,16 +577,11 @@ public:
                                const moveit::core::LinkModel *ee_parent_link,
                                const rviz_visual_tools::colors &color = rviz_visual_tools::YELLOW);
 
-  /**
-   * \brief Publish a complete robot state to Rviz
-   *        To use, add a RobotState marker to Rviz and subscribe to the DISPLAY_ROBOT_STATE_TOPIC, above
-   * \param robot_state - joint values of robot
-   * \param color - how to highlight the robot (solid-ly) if desired, default keeps color as specified in URDF
-   */
-  bool publishRobotState(const moveit::core::RobotState &robot_state,
-                         const rviz_visual_tools::colors &color = rviz_visual_tools::DEFAULT);
-  bool publishRobotState(const moveit::core::RobotStatePtr &robot_state,
-                         const rviz_visual_tools::colors &color = rviz_visual_tools::DEFAULT);
+  /** \brief All published robot states will have their virtual joint moved by offset */
+  void enableRobotStateRootOffet(const Eigen::Affine3d &offset);
+
+  /** \brief Turn off the root offset feature */
+  void disableRobotStateRootOffet();
 
   /**
    * \brief Publish a MoveIt robot state to a topic that the Rviz "RobotState" display can show
@@ -597,6 +592,17 @@ public:
    */
   bool publishRobotState(const trajectory_msgs::JointTrajectoryPoint &trajectory_pt,
                          const robot_model::JointModelGroup *jmg,
+                         const rviz_visual_tools::colors &color = rviz_visual_tools::DEFAULT);
+
+  /**
+   * \brief Publish a complete robot state to Rviz
+   *        To use, add a RobotState marker to Rviz and subscribe to the DISPLAY_ROBOT_STATE_TOPIC, above
+   * \param robot_state - joint values of robot
+   * \param color - how to highlight the robot (solid-ly) if desired, default keeps color as specified in URDF
+   */
+  bool publishRobotState(const moveit::core::RobotState &robot_state,
+                         const rviz_visual_tools::colors &color = rviz_visual_tools::DEFAULT);
+  bool publishRobotState(const moveit::core::RobotStatePtr &robot_state,
                          const rviz_visual_tools::colors &color = rviz_visual_tools::DEFAULT);
 
   /**
@@ -618,9 +624,16 @@ private:
    */
   planning_scene_monitor::PlanningSceneMonitorPtr getPlanningSceneMonitor();
 
+  /**
+   * \brief Error check that the robot's SRDF was properly setup with a virtual joint that was named a certain way
+   * \return true on success
+   */
+  bool checkForVirtualJoint(const moveit::core::RobotState &robot_state);
+
+  /** \brief Before publishing a robot state, optionally change its root transform */
+  bool applyVirtualJointTransform(moveit::core::RobotState& robot_state, const Eigen::Affine3d &offset);
+
 protected:
-  // Short name for this class
-  std::string name_;
 
   // ROS publishers
   ros::Publisher pub_display_path_;  // for MoveIt trajectories
@@ -647,6 +660,10 @@ protected:
 
   // Note: call loadSharedRobotState() before using this. Use only for hiding the robot
   moveit::core::RobotStatePtr hidden_robot_state_;
+
+  // Optional offset that can be applied to all outgoing/published robot states
+  bool robot_state_root_offset_enabled_;
+  Eigen::Affine3d robot_state_root_offset_;
 
   // Prevent the planning scene from always auto-pushing, but rather do it manually
   bool mannual_trigger_update_;

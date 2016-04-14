@@ -64,7 +64,7 @@ MoveItVisualTools::MoveItVisualTools(
   , mannual_trigger_update_(false)
   , robot_state_topic_(DISPLAY_ROBOT_STATE_TOPIC)
   , planning_scene_topic_(PLANNING_SCENE_TOPIC)
-  , name_("visual_tools")
+  , robot_state_root_offset_enabled_(false)
 {
 }
 
@@ -289,7 +289,7 @@ void MoveItVisualTools::loadTrajectoryPub(const std::string& display_planned_pat
   // Trajectory paths
   pub_display_path_ =
       nh_.advertise<moveit_msgs::DisplayTrajectory>(display_planned_path_topic, 10, false);
-  ROS_DEBUG_STREAM_NAMED(name_, "Publishing MoveIt trajectory on topic "
+  ROS_DEBUG_STREAM_NAMED(name_, "Publishing MoveIt! trajectory on topic "
                                              << pub_display_path_.getTopic());
 
   // Wait for topic to be ready
@@ -307,24 +307,11 @@ void MoveItVisualTools::loadRobotStatePub(const std::string& robot_state_topic)
 
   // RobotState Message
   pub_robot_state_ = nh_.advertise<moveit_msgs::DisplayRobotState>(robot_state_topic_, 1);
-  ROS_DEBUG_STREAM_NAMED(name_, "Publishing MoveIt robot state on topic "
+  ROS_DEBUG_STREAM_NAMED(name_, "Publishing MoveIt! robot state on topic "
                                              << pub_robot_state_.getTopic());
 
   // Wait for topic to be ready
   waitForSubscriber(pub_robot_state_);
-}
-
-planning_scene_monitor::PlanningSceneMonitorPtr MoveItVisualTools::getPlanningSceneMonitor()
-{
-  if (!planning_scene_monitor_)
-  {
-    ROS_INFO_STREAM_NAMED(name_,
-                          "No planning scene passed into moveit_visual_tools, creating one.");
-    loadPlanningSceneMonitor();
-    ros::spinOnce();
-    ros::Duration(1).sleep();
-  }
-  return planning_scene_monitor_;
 }
 
 bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose& pose,
@@ -1303,6 +1290,32 @@ bool MoveItVisualTools::publishTrajectoryPoints(
   return true;
 }
 
+void MoveItVisualTools::enableRobotStateRootOffet(const Eigen::Affine3d &offset)
+{
+  robot_state_root_offset_enabled_ = true;
+  robot_state_root_offset_ = offset;
+}
+
+void MoveItVisualTools::disableRobotStateRootOffet()
+{
+  robot_state_root_offset_enabled_ = false;
+}
+
+bool MoveItVisualTools::publishRobotState(
+    const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
+    const robot_model::JointModelGroup* jmg, const rviz_visual_tools::colors& color)
+{
+  // Always load the robot state before using
+  loadSharedRobotState();
+
+  // Set robot state
+  shared_robot_state_->setToDefaultValues();  // reset the state just in case
+  shared_robot_state_->setJointGroupPositions(jmg, trajectory_pt.positions);
+
+  // Publish robot state
+  return publishRobotState(*shared_robot_state_, color);
+}
+
 bool MoveItVisualTools::publishRobotState(const robot_state::RobotStatePtr& robot_state,
                                           const rviz_visual_tools::colors& color)
 {
@@ -1338,56 +1351,29 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState& robot_s
     }
   }
 
-  // Modify colors to also indicate which are fixed
-  // TODO not compatibile with mainstream moveit
-  /*
-  if (robot_state.hasFixedLinks())
+  // Apply the offset
+  if (robot_state_root_offset_enabled_)
   {
-    // Get links names
-    const std::vector<const moveit::core::LinkModel*>& link_names =
-  robot_state.getRobotModel()->getLinkModelsWithCollisionGeometry();
+    loadSharedRobotState();
 
-    for (std::size_t i = 0; i < robot_model_->getFixableLinks().size(); ++i)
-    {
-      if (robot_state.fixedLinkEnabled(i))
-      {
-        for (std::size_t j = 0; j < link_names.size(); ++j)
-        {
-          if (link_names[j] == robot_model_->getFixableLinks()[i])
-            if ( robot_state.getPrimaryFixedLinkID() == i ) // is primary
-              display_robot_msg.highlight_links[j].color = getColor(rviz_visual_tools::BLUE);
-            else
-              display_robot_msg.highlight_links[j].color = getColor(rviz_visual_tools::RED);
-        }
-      }
-    }
+    // Copy robot state
+    *shared_robot_state_ = robot_state;
+
+    applyVirtualJointTransform(*shared_robot_state_, robot_state_root_offset_);
+
+    // Convert state to message
+    robot_state::robotStateToRobotStateMsg(*shared_robot_state_, display_robot_msg.state);
   }
-  */
-
-  // Convert state to message
-  robot_state::robotStateToRobotStateMsg(robot_state, display_robot_msg.state);
+  else
+  {
+    // Convert state to message
+    robot_state::robotStateToRobotStateMsg(robot_state, display_robot_msg.state);
+  }
 
   // Publish
   loadRobotStatePub();
   pub_robot_state_.publish(display_robot_msg);
   ros::spinOnce();
-
-  return true;
-}
-
-bool MoveItVisualTools::publishRobotState(
-    const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
-    const robot_model::JointModelGroup* jmg, const rviz_visual_tools::colors& color)
-{
-  // Always load the robot state before using
-  loadSharedRobotState();
-
-  // Set robot state
-  shared_robot_state_->setToDefaultValues();  // reset the state just in case
-  shared_robot_state_->setJointGroupPositions(jmg, trajectory_pt.positions);
-
-  // Publish robot state
-  publishRobotState(*shared_robot_state_, color);
 
   return true;
 }
@@ -1399,40 +1385,14 @@ bool MoveItVisualTools::hideRobot()
   // Always load the robot state before using
   loadSharedRobotState();
 
-  // Check if joint
-  if (!hidden_robot_state_->getRobotModel()->hasJointModel(VJOINT_NAME))
-  {
-    ROS_WARN_STREAM_NAMED(name_, "Unable to hide robot because joint '" << VJOINT_NAME
-                          << "' does not exist.");
-    const std::vector<std::string>& names = hidden_robot_state_->getRobotModel()->getJointModelNames();
-    ROS_WARN_STREAM_NAMED(name_, "Available names:");
-    std::copy(names.begin(), names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
+  // Apply transform
+  Eigen::Affine3d offset;
+  offset.translation().x() = rviz_visual_tools::LARGE_SCALE;
+  offset.translation().y() = rviz_visual_tools::LARGE_SCALE;
+  offset.translation().z() = rviz_visual_tools::LARGE_SCALE;
+  applyVirtualJointTransform(*hidden_robot_state_, offset);
 
-    return false;
-  }
-
-  // Check if variables exist
-  if (!hidden_robot_state_->getRobotModel()->getJointModel(VJOINT_NAME)
-      ->hasVariable(VJOINT_NAME + "/trans_x"))
-  {
-    // Debug
-    ROS_WARN_STREAM_NAMED(name_, "Unable to hide robot because variables for joint '" << VJOINT_NAME
-                          << "' do not exist. Try making this vjoint floating");
-    ROS_WARN_STREAM_NAMED(name_, "The only available joint variables are:");
-    const std::vector<std::string>& var_names =
-      hidden_robot_state_->getRobotModel()->getJointModel(VJOINT_NAME)->getVariableNames();
-    std::copy(var_names.begin(), var_names.end(),
-              std::ostream_iterator<std::string>(std::cout, "\n"));
-    return false;
-  }
-
-  // Hide the robot
-  hidden_robot_state_->setVariablePosition(VJOINT_NAME + "/trans_x",
-                                           rviz_visual_tools::LARGE_SCALE);
-  hidden_robot_state_->setVariablePosition(VJOINT_NAME + "/trans_y",
-                                           rviz_visual_tools::LARGE_SCALE);
-  hidden_robot_state_->setVariablePosition(VJOINT_NAME + "/trans_z",
-                                           rviz_visual_tools::LARGE_SCALE);
+  // Publish
   return publishRobotState(hidden_robot_state_);
 }
 
@@ -1486,5 +1446,79 @@ void MoveItVisualTools::showJointLimits(robot_state::RobotStatePtr robot_state)
       std::cout << MOVEIT_CONSOLE_COLOR_RESET;
   }
 }
+
+/**
+ * --------------------------------------------------------------------------------------
+ * Private Functions
+ * --------------------------------------------------------------------------------------
+ */
+
+planning_scene_monitor::PlanningSceneMonitorPtr MoveItVisualTools::getPlanningSceneMonitor()
+{
+  if (!planning_scene_monitor_)
+  {
+    ROS_INFO_STREAM_NAMED(name_,
+                          "No planning scene passed into moveit_visual_tools, creating one.");
+    loadPlanningSceneMonitor();
+    ros::spinOnce();
+    ros::Duration(1).sleep();
+  }
+  return planning_scene_monitor_;
+}
+
+bool MoveItVisualTools::checkForVirtualJoint(const moveit::core::RobotState &robot_state)
+{
+  static const std::string VJOINT_NAME = "virtual_joint";
+
+  // Check if joint exists
+  if (!hidden_robot_state_->getRobotModel()->hasJointModel(VJOINT_NAME))
+  {
+    ROS_WARN_STREAM_NAMED(name_, "Joint '" << VJOINT_NAME
+                          << "' does not exist.");
+    const std::vector<std::string>& names = hidden_robot_state_->getRobotModel()->getJointModelNames();
+    ROS_WARN_STREAM_NAMED(name_, "Available names:");
+    std::copy(names.begin(), names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
+
+    return false;
+  }
+
+  // Check if variables exist
+  if (!hidden_robot_state_->getRobotModel()->getJointModel(VJOINT_NAME)
+      ->hasVariable(VJOINT_NAME + "/trans_x"))
+  {
+    // Debug
+    ROS_WARN_STREAM_NAMED(name_, "Variables for joint '" << VJOINT_NAME
+                          << "' do not exist. Try making this vjoint floating");
+    ROS_WARN_STREAM_NAMED(name_, "The only available joint variables are:");
+    const std::vector<std::string>& var_names =
+      hidden_robot_state_->getRobotModel()->getJointModel(VJOINT_NAME)->getVariableNames();
+    std::copy(var_names.begin(), var_names.end(),
+              std::ostream_iterator<std::string>(std::cout, "\n"));
+    return false;
+  }
+
+  return true;
+}
+
+bool MoveItVisualTools::applyVirtualJointTransform(moveit::core::RobotState &robot_state,
+                                                   const Eigen::Affine3d &offset)
+{
+  static const std::string VJOINT_NAME = "virtual_joint";
+
+  // Error check
+  if (!checkForVirtualJoint(robot_state))
+  {
+    ROS_ERROR_STREAM_NAMED(name_, "Unable to apply virtual joint transform");
+    return false;
+  }
+
+  // Hide the robot
+  robot_state.setVariablePosition(VJOINT_NAME + "/trans_x", offset.translation().x());
+  robot_state.setVariablePosition(VJOINT_NAME + "/trans_y", offset.translation().y());
+  robot_state.setVariablePosition(VJOINT_NAME + "/trans_z", offset.translation().z());
+
+  return true;
+}
+
 
 }  // namespace
