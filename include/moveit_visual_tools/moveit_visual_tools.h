@@ -661,6 +661,10 @@ protected:
   // Note: call loadSharedRobotState() before using this. Use only for hiding the robot
   moveit::core::RobotStatePtr hidden_robot_state_;
 
+  // A robot state whose virtual_joint remains at identity so that getGlobalLinkTransform() isn't tainted
+  // Note: call loadSharedRobotState() before using this
+  moveit::core::RobotStatePtr root_robot_state_;
+
   // Optional offset that can be applied to all outgoing/published robot states
   bool robot_state_root_offset_enabled_;
   Eigen::Affine3d robot_state_root_offset_;
