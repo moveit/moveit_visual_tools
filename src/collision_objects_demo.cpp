@@ -124,10 +124,10 @@ public:
 
       // TODO: test publishCollisionGraph
 
-      ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Wall");
-      visual_tools_->generateRandomPose(pose1);
-      visual_tools_->publishCollisionWall(pose1.position.x, pose1.position.y, 0, 1, "Wall", rviz_visual_tools::RAND);
-      ros::Duration(1.0).sleep();
+      // ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Wall");
+      // visual_tools_->generateRandomPose(pose1);
+      // visual_tools_->publishCollisionWall(pose1.position.x, pose1.position.y, 0, 1, "Wall", rviz_visual_tools::RAND);
+      // ros::Duration(1.0).sleep();
 
       ROS_INFO_STREAM_NAMED("visual_tools","Publishing Collision Table");
       visual_tools_->generateRandomPose(pose1);
