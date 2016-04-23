@@ -73,6 +73,7 @@ MoveItVisualTools::MoveItVisualTools(const std::string& base_frame, const std::s
   : RvizVisualTools::RvizVisualTools(base_frame, marker_topic)
   , robot_model_(robot_model)
   , mannual_trigger_update_(false)
+  , robot_state_root_offset_enabled_(false)
 {
 }
 

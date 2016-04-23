@@ -76,7 +76,8 @@ public:
     while (ros::ok())
     {
       // Run through demo
-      visual_tools_->publishTests();
+      // Deprecated... for similar funcitionality see rviz_visual_tools/src/rviz_visual_tools_demo.cpp
+      //visual_tools_->publishTests();
     }
   }
 
