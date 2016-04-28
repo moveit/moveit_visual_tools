@@ -62,15 +62,6 @@ target_link_libraries(${PROJECT_NAME}_demo
   ${catkin_LIBRARIES} ${PROJECT_NAME}
 )
 
-# Demo executable
-add_executable(${PROJECT_NAME}_collision_objects_demo src/collision_objects_demo.cpp)
-set_target_properties(${PROJECT_NAME}_collision_objects_demo
-  PROPERTIES OUTPUT_NAME collision_objects_demo PREFIX ""
-)
-target_link_libraries(${PROJECT_NAME}_collision_objects_demo
-  ${catkin_LIBRARIES} ${PROJECT_NAME}
-)
-
 ## Install
 
 # Install libraries
@@ -85,7 +76,7 @@ install(DIRECTORY launch    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 install(DIRECTORY resources DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 # Install executables
-install(TARGETS ${PROJECT_NAME}_demo ${PROJECT_NAME}_collision_objects_demo
+install(TARGETS ${PROJECT_NAME}_demo
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

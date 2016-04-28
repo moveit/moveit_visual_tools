@@ -1,0 +1,15 @@
+<launch>
+
+  <!-- Load Rviz -->
+  <node name="$(anon rviz)" pkg="rviz" type="rviz" respawn="false"
+	args="-d $(find moveit_visual_tools)/launch/demo.rviz" output="screen">
+  </node>
+
+  <!-- Load universal robot description format (URDF) -->
+  <param name="robot_description" textfile="$(find moveit_visual_tools)/resources/rrbot.urdf"/>
+  <param name="robot_description_semantic" textfile="$(find moveit_visual_tools)/resources/rrbot.srdf" />
+
+  <!--Broadcast static tf to hide errors -->
+  <node pkg="tf" type="static_transform_publisher" name="virtual_joint_broadcaster_0" args="0 0 0 0 0 0 /world /base 100" />
+
+</launch>

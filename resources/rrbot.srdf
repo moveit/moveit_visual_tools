@@ -1,3 +1,10 @@
 <?xml version="1.0" ?>
 <robot name="rrbot">
+
+    <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
+    <virtual_joint name="virtual_joint" type="floating" parent_frame="world" child_link="base_link" />
+    <!--GROUPS: Representation of a set of joints and links. This can be useful for specifying DOF to plan for, defining arms, end effectors, etc-->
+    <group name="arm">
+        <chain base_link="base_link" tip_link="link3" />
+    </group>
 </robot>

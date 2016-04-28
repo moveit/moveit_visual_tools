@@ -196,7 +196,7 @@ public:
    * \brief Prevent the planning scene from always auto-pushing, but rather do it manually
    * \param bool true to enable manual mode
    */
-  void setManualSceneUpdating(bool enable_manual)
+  void setManualSceneUpdating(bool enable_manual = true)
   {
     mannual_trigger_update_ = enable_manual;
   }
@@ -611,6 +611,9 @@ public:
    */
   bool hideRobot();
 
+  /** \brief Before publishing a robot state, optionally change its root transform */
+  bool applyVirtualJointTransform(moveit::core::RobotState& robot_state, const Eigen::Affine3d &offset);
+
   /**
    * \brief Print to console the current robot state's joint values within its limits visually
    * \param robot_state - the robot to show
@@ -629,9 +632,6 @@ private:
    * \return true on success
    */
   bool checkForVirtualJoint(const moveit::core::RobotState &robot_state);
-
-  /** \brief Before publishing a robot state, optionally change its root transform */
-  bool applyVirtualJointTransform(moveit::core::RobotState& robot_state, const Eigen::Affine3d &offset);
 
 protected:
 

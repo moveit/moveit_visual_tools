@@ -1517,10 +1517,17 @@ bool MoveItVisualTools::applyVirtualJointTransform(moveit::core::RobotState &rob
     return false;
   }
 
-  // Hide the robot
+  // Apply translation
   robot_state.setVariablePosition(VJOINT_NAME + "/trans_x", offset.translation().x());
   robot_state.setVariablePosition(VJOINT_NAME + "/trans_y", offset.translation().y());
   robot_state.setVariablePosition(VJOINT_NAME + "/trans_z", offset.translation().z());
+
+  // Apply rotation
+  Eigen::Quaterniond q(offset.rotation());
+  robot_state.setVariablePosition(VJOINT_NAME + "/rot_x", q.x());
+  robot_state.setVariablePosition(VJOINT_NAME + "/rot_y", q.y());
+  robot_state.setVariablePosition(VJOINT_NAME + "/rot_z", q.z());
+  robot_state.setVariablePosition(VJOINT_NAME + "/rot_w", q.w());
 
   return true;
 }

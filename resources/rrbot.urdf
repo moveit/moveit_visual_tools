@@ -39,10 +39,11 @@
     <color rgba="1.0 1.0 1.0 1.0"/>
   </material>
   <!-- Used for fixing robot to Gazebo 'base_link' -->
-  <link name="world"/>
+  <link name="base_link"/>
   <joint name="fixed" type="fixed">
-    <parent link="world"/>
+    <parent link="base_link"/>
     <child link="link1"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
   </joint>
   <!-- Base Link -->
   <link name="link1">

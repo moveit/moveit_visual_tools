@@ -1,0 +1,13 @@
+<launch>
+
+  <arg name="debug" default="false" />
+  <arg unless="$(arg debug)" name="launch_prefix" value="" />
+  <arg     if="$(arg debug)" name="launch_prefix"
+       value="gdb -x $(find moveit_visual_tools)/launch/debug_settings.gdb --ex run --args" />
+
+  <!-- Start demo -->
+  <node name="moveit_visual_tools_demo" launch-prefix="$(arg launch_prefix)" pkg="moveit_visual_tools"
+	type="moveit_visual_tools_demo" output="screen">
+  </node>
+
+</launch>

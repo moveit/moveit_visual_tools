@@ -17,6 +17,8 @@ Developed by [Dave Coleman](http://dav.ee) at the Correll Robotics Lab, Universi
  * [![Build Status](http://build.ros.org/buildStatus/icon?job=Jbin_uT64__moveit_visual_tools__ubuntu_trusty_amd64__binary)](http://build.ros.org/view/Jbin_uT64/job/Jbin_uT64__moveit_visual_tools__ubuntu_trusty_amd64__binary/) ROS Buildfarm - AMD64 Trusty Debian Build
 
 
+![](resources/screenshot.png)
+
 ![](resources/demo.png)
 
 ## Install
@@ -36,18 +38,21 @@ rosdep install --from-paths src --ignore-src --rosdistro indigo
 
 ## Quick Start Demo
 
-To see random shapes generated in Rviz:
+First launch Rviz:
 
-    roslaunch moveit_visual_tools visual_tools_demo.launch
+    roslaunch moveit_visual_tools demo_rviz.launch
+
+Then run some demos displaying robot states and collision objects:
+
+    roslaunch moveit_visual_tools demo.launch
+
+This package is built in top of ``rviz_visual_tools`` and all those features are included. To see random shapes generated in Rviz:
+
+    roslaunch rviz_visual_tools demo.launch
 
 You should see something like:
 
-<img align="right" src="https://raw.github.com/davetcoleman/moveit_visual_tools/indigo-devel/resources/screenshot.png" />
-
-You can also demo the collision objects generation TODO: THIS IS CURRENTLY BROKEN :(
-
-    roslaunch moveit_visual_tools collision_objects_demo_rviz.launch
-    roslaunch moveit_visual_tools collision_objects_demo.launch
+![](https://raw.githubusercontent.com/davetcoleman/rviz_visual_tools/jade-devel/resources/screenshot1.png)
 
 ## Code API
 
