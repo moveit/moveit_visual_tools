@@ -2,6 +2,28 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Re-factored and fixed visual tools demo!
+* Fixes for catkin lint
+* Fixes for roslint
+* Removed deprecated function call
+* Remove deprecated test
+* New root_robot_state utilization
+* Ablity to move a RobotState's root frame permenatly around in the scene
+* Better publishCollisionWall() function
+* Deprecated old publishTrajectoryLine() functions - removed clear_all_markers argument
+* New publishTrajectoryPath() variant
+* Rename namespace of RobotState
+* Made INFO into DEBUG output
+* New publishTrajectoryLine function
+* Switched publishTrajectoryLine to use cylinders instead of lines
+* New showJointLimits() function for console debugging a robot state
+* Fix publishTrajectoryPath() bug
+* Default blocking time for trajectory if not parameterized
+* Publish workspace parameters was incorrectly creating a collision object
+* Contributors: Dave Coleman
+
 3.0.5 (2016-02-09)
 ------------------
 * Updated README
