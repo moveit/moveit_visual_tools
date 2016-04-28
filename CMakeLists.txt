@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   trajectory_msgs
   cmake_modules
+  roslint
 )
 
 find_package(Eigen REQUIRED)
@@ -62,7 +63,17 @@ target_link_libraries(${PROJECT_NAME}_demo
   ${catkin_LIBRARIES} ${PROJECT_NAME}
 )
 
-## Install
+
+#############
+## Testing ##
+#############
+
+## Test for correct C++ source code
+roslint_cpp()
+
+#############
+## Install ##
+#############
 
 # Install libraries
 install(TARGETS ${PROJECT_NAME}

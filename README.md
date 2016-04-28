@@ -118,6 +118,20 @@ Useful notes for anyone wanting to dig in deeper:
  -  All publish() ROS topics should be followed by a ``ros::spinOnce();`` but no sleep
  -  Do not want to load any features/publishers until they are actually needed since this library contains so many components
 
+## Testing and Linting
+
+To run [roslint](http://wiki.ros.org/roslint), use the following command with [catkin-tools](https://catkin-tools.readthedocs.org/):
+
+    catkin build --no-status --no-deps --this --make-args roslint
+
+To run [catkin lint](https://pypi.python.org/pypi/catkin_lint), use the following command with [catkin-tools](https://catkin-tools.readthedocs.org/):
+
+    catkin lint -W2
+
+Use the following command with [catkin-tools](https://catkin-tools.readthedocs.org/) to run the small amount of available tests:
+
+    catkin run_tests --no-deps --this -i
+
 ## Contribute
 
-Feel free to send PRs for new helper functions, fixes, etc. - I'll happily discuss and merge them. I do not, however, want to send much time helping people use this because I am a busy grad student. Use at your own risk.
+Please send PRs for new helper functions, fixes, etc!

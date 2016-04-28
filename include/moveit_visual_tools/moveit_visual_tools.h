@@ -35,19 +35,17 @@
 /* \author  Dave Coleman
  * \desc    Helper functions for displaying and debugging MoveIt! data in Rviz via published markers
  *          and MoveIt! collision objects. Very useful for debugging complex software
- *
- *          See README.md for developers notes.
  */
 
-#ifndef MOVEIT_VISUAL_TOOLS__MOVEIT_VISUAL_TOOLS_H_
-#define MOVEIT_VISUAL_TOOLS__MOVEIT_VISUAL_TOOLS_H_
+#ifndef MOVEIT_VISUAL_TOOLS_MOVEIT_VISUAL_TOOLS_H
+#define MOVEIT_VISUAL_TOOLS_MOVEIT_VISUAL_TOOLS_H
 
 // Rviz Visualization Tool
 #include <rviz_visual_tools/rviz_visual_tools.h>
 
 // MoveIt
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-//#include <moveit/macros/deprecation.h>
+// #include <moveit/macros/deprecation.h>
 #include <rviz_visual_tools/deprecation.h>
 
 // MoveIt Messages
@@ -57,6 +55,11 @@
 
 // ROS Messages
 #include <trajectory_msgs/JointTrajectory.h>
+
+// C++
+#include <map>
+#include <string>
+#include <vector>
 
 namespace moveit_visual_tools
 {
@@ -90,11 +93,6 @@ public:
   MoveItVisualTools(const std::string &base_frame,
                     const std::string &marker_topic = rviz_visual_tools::RVIZ_MARKER_TOPIC,
                     robot_model::RobotModelConstPtr robot_model = robot_model::RobotModelConstPtr());
-
-  /**
-   * \brief Deconstructor
-   */
-  ~MoveItVisualTools(){};
 
   /**
    * \brief Set the ROS topic for publishing a robot state
@@ -414,7 +412,8 @@ public:
   bool publishCollisionWall(double x, double y, double angle, double width, const std::string name,
                             const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
 
-  bool publishCollisionWall(double x, double y, double angle = 0.0, double width = 2.0, double height = 1.5, const std::string name = "wall",
+  bool publishCollisionWall(double x, double y, double angle = 0.0, double width = 2.0, double height = 1.5,
+                            const std::string name = "wall",
                             const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
 
   /**
@@ -501,7 +500,8 @@ public:
    * \param ee_parent_link - the link that we should trace a path of, e.g. the gripper link
    * \param arm_jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_arm"
    * \param color - display color of markers
-   * \param clear_all_markers - optionally ability to delete all existing markers in Rviz before adding the trajectory path
+   * \param clear_all_markers - optionally ability to delete all existing markers in Rviz before adding the trajectory
+   * path
    * \return true on success
    * DEPRECATED - do not use clear_all_markers argument anymore!
    */
@@ -521,8 +521,7 @@ public:
 
   RVIZ_VISUAL_TOOLS_DEPRECATED
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr robot_trajectory,
-                             const moveit::core::LinkModel* ee_parent_link,
-                             const rviz_visual_tools::colors& color,
+                             const moveit::core::LinkModel *ee_parent_link, const rviz_visual_tools::colors &color,
                              bool clear_all_markers)
   {
     // Group together messages
@@ -535,9 +534,8 @@ public:
   }
 
   RVIZ_VISUAL_TOOLS_DEPRECATED
-  bool publishTrajectoryLine(const robot_trajectory::RobotTrajectory& robot_trajectory,
-                             const moveit::core::LinkModel* ee_parent_link,
-                             const rviz_visual_tools::colors& color,
+  bool publishTrajectoryLine(const robot_trajectory::RobotTrajectory &robot_trajectory,
+                             const moveit::core::LinkModel *ee_parent_link, const rviz_visual_tools::colors &color,
                              bool clear_all_markers)
   {
     // Group together messages
@@ -561,11 +559,9 @@ public:
                              const moveit::core::LinkModel *ee_parent_link, const robot_model::JointModelGroup *arm_jmg,
                              const rviz_visual_tools::colors &color);
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr robot_trajectory,
-                             const moveit::core::LinkModel* ee_parent_link,
-                             const rviz_visual_tools::colors& color);
-  bool publishTrajectoryLine(const robot_trajectory::RobotTrajectory& robot_trajectory,
-                             const moveit::core::LinkModel* ee_parent_link,
-                             const rviz_visual_tools::colors& color);
+                             const moveit::core::LinkModel *ee_parent_link, const rviz_visual_tools::colors &color);
+  bool publishTrajectoryLine(const robot_trajectory::RobotTrajectory &robot_trajectory,
+                             const moveit::core::LinkModel *ee_parent_link, const rviz_visual_tools::colors &color);
 
   /**
    * \brief Display trajectory as series of end effector position points
@@ -612,7 +608,7 @@ public:
   bool hideRobot();
 
   /** \brief Before publishing a robot state, optionally change its root transform */
-  bool applyVirtualJointTransform(moveit::core::RobotState& robot_state, const Eigen::Affine3d &offset);
+  bool applyVirtualJointTransform(moveit::core::RobotState &robot_state, const Eigen::Affine3d &offset);
 
   /**
    * \brief Print to console the current robot state's joint values within its limits visually
@@ -634,7 +630,6 @@ private:
   bool checkForVirtualJoint(const moveit::core::RobotState &robot_state);
 
 protected:
-
   // ROS publishers
   ros::Publisher pub_display_path_;  // for MoveIt trajectories
   ros::Publisher pub_robot_state_;   // publish a RobotState message
@@ -675,12 +670,11 @@ protected:
   // ROS topic names to use when starting publishers
   std::string robot_state_topic_;
   std::string planning_scene_topic_;
-
 };  // class
 
 typedef boost::shared_ptr<MoveItVisualTools> MoveItVisualToolsPtr;
 typedef boost::shared_ptr<const MoveItVisualTools> MoveItVisualToolsConstPtr;
 
-}  // namespace
+}  // namespace moveit_visual_tools
 
-#endif
+#endif  // MOVEIT_VISUAL_TOOLS_MOVEIT_VISUAL_TOOLS_H

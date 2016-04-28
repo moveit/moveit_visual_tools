@@ -46,12 +46,14 @@
 // MoveIt
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 
+// C++
+#include <string>
+
 namespace rvt = rviz_visual_tools;
 
 namespace moveit_visual_tools
 {
-
-static const std::string PLANNING_GROUP_NAME = "arm"; // RRBot Specific
+static const std::string PLANNING_GROUP_NAME = "arm";  // RRBot Specific
 static const std::string THIS_PACKAGE = "moveit_visual_tools";
 
 class VisualToolsDemo
@@ -292,10 +294,9 @@ private:
   const moveit::core::JointModelGroup* jmg_;
 
   moveit::core::RobotStatePtr robot_state_;
-
 };  // end class
 
-}  // end namespace
+}  // namespace moveit_visual_tools
 
 int main(int argc, char** argv)
 {
