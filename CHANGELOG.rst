@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.1.0 (2016-04-28)
+------------------
 * Re-factored and fixed visual tools demo!
 * Fixes for catkin lint
 * Fixes for roslint
