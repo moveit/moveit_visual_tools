@@ -33,7 +33,6 @@ catkin_package(
     visualization_msgs
     graph_msgs
     std_msgs
-    moveit_msgs
     trajectory_msgs
   INCLUDE_DIRS include
 )
@@ -50,7 +49,7 @@ include_directories(
 
 # Visualization Tools Library
 add_library(${PROJECT_NAME}
-  src/moveit_visual_tools.cpp
+  src/${PROJECT_NAME}.cpp
 )
 add_dependencies(${PROJECT_NAME} graph_msgs_generate_messages_cpp)
 target_link_libraries(${PROJECT_NAME}

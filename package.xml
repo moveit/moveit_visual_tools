@@ -20,7 +20,6 @@
   <depend>eigen_conversions</depend>
   <depend>geometry_msgs</depend>
   <depend>moveit_ros_robot_interaction</depend>
-  <depend>moveit_msgs</depend>
   <depend>moveit_core</depend>
   <depend>roscpp</depend>
   <depend>tf_conversions</depend>
