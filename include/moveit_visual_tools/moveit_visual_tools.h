@@ -153,6 +153,15 @@ public:
   moveit::core::RobotStatePtr &getSharedRobotState();
 
   /**
+   * \brief Allow robot state to be altered.
+   * \return shared pointer to robot state
+   */
+  moveit::core::RobotStatePtr &getRootRobotState()
+  {
+    return root_robot_state_;
+  }
+
+  /**
    * \brief Get a pointer to the robot model
    * \return const RobotModel
    */
