@@ -68,10 +68,8 @@ MoveItVisualTools::MoveItVisualTools(const std::string& base_frame, const std::s
                                      planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
   : RvizVisualTools::RvizVisualTools(base_frame, marker_topic)
   , planning_scene_monitor_(planning_scene_monitor)
-  , mannual_trigger_update_(false)
   , robot_state_topic_(DISPLAY_ROBOT_STATE_TOPIC)
   , planning_scene_topic_(PLANNING_SCENE_TOPIC)
-  , robot_state_root_offset_enabled_(false)
 {
 }
 
@@ -79,8 +77,6 @@ MoveItVisualTools::MoveItVisualTools(const std::string& base_frame, const std::s
                                      robot_model::RobotModelConstPtr robot_model)
   : RvizVisualTools::RvizVisualTools(base_frame, marker_topic)
   , robot_model_(robot_model)
-  , mannual_trigger_update_(false)
-  , robot_state_root_offset_enabled_(false)
 {
 }
 
@@ -200,7 +196,7 @@ bool MoveItVisualTools::loadSharedRobotState()
     root_robot_state_.reset(new robot_state::RobotState(*shared_robot_state_));
   }
 
-  return shared_robot_state_;
+  return !(shared_robot_state_ == nullptr);
 }
 
 moveit::core::RobotStatePtr& MoveItVisualTools::getSharedRobotState()
@@ -885,15 +881,6 @@ void MoveItVisualTools::getCollisionWallMsg(double x, double y, double angle, do
   collision_obj.primitive_poses[0] = rec_pose;
 }
 
-bool MoveItVisualTools::publishCollisionWall(double x, double y, double angle, double width, const std::string name,
-                                             const rviz_visual_tools::colors& color)
-{
-  moveit_msgs::CollisionObject collision_obj;
-  getCollisionWallMsg(x, y, angle, width, 2.5, name, collision_obj);
-
-  return processCollisionObjectMsg(collision_obj, color);
-}
-
 bool MoveItVisualTools::publishCollisionWall(double x, double y, double angle, double width, double height,
                                              const std::string name, const rviz_visual_tools::colors& color)
 {
@@ -975,11 +962,6 @@ bool MoveItVisualTools::loadCollisionSceneFromFile(const std::string& path, cons
   fin.close();
 
   return triggerPlanningSceneUpdate();
-}
-
-bool MoveItVisualTools::publishCollisionTests()
-{
-  ROS_ERROR_STREAM_NAMED("temp", "Depricated");
 }
 
 bool MoveItVisualTools::publishWorkspaceParameters(const moveit_msgs::WorkspaceParameters& params)
@@ -1263,7 +1245,7 @@ bool MoveItVisualTools::publishRobotState(const trajectory_msgs::JointTrajectory
 bool MoveItVisualTools::publishRobotState(const robot_state::RobotStatePtr& robot_state,
                                           const rviz_visual_tools::colors& color)
 {
-  publishRobotState(*robot_state.get(), color);
+  return publishRobotState(*robot_state.get(), color);
 }
 
 bool MoveItVisualTools::publishRobotState(const robot_state::RobotState& robot_state,
