@@ -286,7 +286,7 @@ bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg)
   return true;
 }
 
-void MoveItVisualTools::loadTrajectoryPub(const std::string& display_planned_path_topic)
+void MoveItVisualTools::loadTrajectoryPub(const std::string& display_planned_path_topic, bool blocking)
 {
   if (pub_display_path_)
     return;
@@ -296,10 +296,11 @@ void MoveItVisualTools::loadTrajectoryPub(const std::string& display_planned_pat
   ROS_DEBUG_STREAM_NAMED(name_, "Publishing MoveIt! trajectory on topic " << pub_display_path_.getTopic());
 
   // Wait for topic to be ready
-  waitForSubscriber(pub_display_path_);
+  if (blocking)
+    waitForSubscriber(pub_display_path_);
 }
 
-void MoveItVisualTools::loadRobotStatePub(const std::string& robot_state_topic)
+void MoveItVisualTools::loadRobotStatePub(const std::string& robot_state_topic, bool blocking)
 {
   if (pub_robot_state_)
     return;
@@ -313,7 +314,8 @@ void MoveItVisualTools::loadRobotStatePub(const std::string& robot_state_topic)
   ROS_DEBUG_STREAM_NAMED(name_, "Publishing MoveIt! robot state on topic " << pub_robot_state_.getTopic());
 
   // Wait for topic to be ready
-  waitForSubscriber(pub_robot_state_);
+  if (blocking)
+    waitForSubscriber(pub_robot_state_);
 }
 
 bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose& pose, const robot_model::JointModelGroup* ee_jmg,
