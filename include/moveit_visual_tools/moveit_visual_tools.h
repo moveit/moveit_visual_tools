@@ -681,8 +681,8 @@ protected:
   std::string planning_scene_topic_;
 };  // class
 
-typedef boost::shared_ptr<MoveItVisualTools> MoveItVisualToolsPtr;
-typedef boost::shared_ptr<const MoveItVisualTools> MoveItVisualToolsConstPtr;
+typedef std::shared_ptr<MoveItVisualTools> MoveItVisualToolsPtr;
+typedef std::shared_ptr<const MoveItVisualTools> MoveItVisualToolsConstPtr;
 
 }  // namespace moveit_visual_tools
 
