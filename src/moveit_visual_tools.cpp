@@ -93,12 +93,9 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
 
   // Create tf transformer
   boost::shared_ptr<tf::TransformListener> tf;
-  // tf.reset(new tf::TransformListener(nh_));
-  // ros::spinOnce();
 
   // Regular version b/c the other one causes problems with recognizing end effectors
   planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(
-      // ROBOT_DESCRIPTION, boost::shared_ptr<tf::Transformer>(), "visual_tools_scene"));
       ROBOT_DESCRIPTION, tf, "visual_tools_scene"));
   ros::spinOnce();
   ros::Duration(0.1).sleep();

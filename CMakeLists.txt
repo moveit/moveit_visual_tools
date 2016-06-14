@@ -22,7 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(Eigen REQUIRED)
-find_package(Boost REQUIRED thread system)
+find_package(Boost REQUIRED system)
 
 # Catkin
 catkin_package(
