@@ -596,6 +596,9 @@ protected:
   bool robot_state_root_offset_enabled_ = false;
   Eigen::Affine3d robot_state_root_offset_;
 
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW // http://eigen.tuxfamily.org/dox/group__TopicStructHavingEigenMembers.html
+
 };  // class
 
 typedef std::shared_ptr<MoveItVisualTools> MoveItVisualToolsPtr;

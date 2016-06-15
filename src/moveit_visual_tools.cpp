@@ -1172,7 +1172,7 @@ bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTraje
   }
 
   // Point location datastructure
-  std::vector<Eigen::Vector3d> path;
+  EigenSTL::vector_Vector3d path;
 
   // Group together messages
   enableInternalBatchPublishing(true);
