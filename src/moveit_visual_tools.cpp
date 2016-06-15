@@ -1228,12 +1228,19 @@ bool MoveItVisualTools::publishRobotState(const trajectory_msgs::JointTrajectory
                                           const robot_model::JointModelGroup* jmg,
                                           const rviz_visual_tools::colors& color)
 {
+  return publishRobotState(trajectory_pt.positions, jmg, color);
+}
+
+bool MoveItVisualTools::publishRobotState(const std::vector<double> joint_positions,
+                                          const robot_model::JointModelGroup* jmg,
+                                          const rviz_visual_tools::colors& color)
+{
   // Always load the robot state before using
   loadSharedRobotState();
 
   // Set robot state
   shared_robot_state_->setToDefaultValues();  // reset the state just in case
-  shared_robot_state_->setJointGroupPositions(jmg, trajectory_pt.positions);
+  shared_robot_state_->setJointGroupPositions(jmg, joint_positions);
 
   // Publish robot state
   return publishRobotState(*shared_robot_state_, color);

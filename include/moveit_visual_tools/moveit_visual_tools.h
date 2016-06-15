@@ -514,6 +514,17 @@ public:
                          const rviz_visual_tools::colors &color = rviz_visual_tools::DEFAULT);
 
   /**
+   * \brief Publish a MoveIt robot state to a topic that the Rviz "RobotState" display can show
+   * \param joint_positions - a vector of doubles corresponding 1-to-1 to the kinematic chain named in "jmg"
+   * \param jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_arm"
+   * \param color - how to highlight the robot (solid-ly) if desired, default keeps color as specified in URDF
+   * \return true on success
+   */
+  bool publishRobotState(const std::vector<double> joint_positions,
+                                          const robot_model::JointModelGroup* jmg,
+                                          const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT);
+
+  /**
    * \brief Publish a complete robot state to Rviz
    *        To use, add a RobotState marker to Rviz and subscribe to the DISPLAY_ROBOT_STATE_TOPIC, above
    * \param robot_state - joint values of robot
