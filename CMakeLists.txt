@@ -21,7 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   roslint
 )
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED system)
 
 # Catkin
@@ -44,6 +44,7 @@ catkin_package(
 #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -W -Wno-unused-parameter -fno-strict-aliasing")
 
 ## Build
+include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS})
 
 include_directories(
   include
