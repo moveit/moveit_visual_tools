@@ -4,7 +4,7 @@
 <!-- |    EDITING THIS FILE BY HAND IS NOT RECOMMENDED                                 | -->
 <!-- =================================================================================== -->
 <!-- Revolute-Revolute Manipulator -->
-<robot name="rrbot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="rrbot" xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Constants for robot dimensions -->
   <!-- Square dimensions (widthxwidth) of beams -->
   <!-- Link 1 -->
