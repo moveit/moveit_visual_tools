@@ -163,8 +163,8 @@ bool MoveItVisualTools::processAttachedCollisionObjectMsg(const moveit_msgs::Att
 bool MoveItVisualTools::triggerPlanningSceneUpdate()
 {
   // TODO: perhaps switch to using the service call?
-  //getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
-  getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_GEOMETRY);
+  getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
+  //getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_GEOMETRY);
   ros::spinOnce();
   return true;
 }

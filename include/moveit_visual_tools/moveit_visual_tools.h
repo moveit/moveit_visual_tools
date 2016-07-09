@@ -177,7 +177,8 @@ public:
   /**
    * \brief Load publishers as needed
    */
-  void loadTrajectoryPub(const std::string &display_planned_path_topic = DISPLAY_PLANNED_PATH_TOPIC, bool blocking = true);
+  void loadTrajectoryPub(const std::string &display_planned_path_topic = DISPLAY_PLANNED_PATH_TOPIC,
+                         bool blocking = true);
   void loadRobotStatePub(const std::string &robot_state_topic = "", bool blocking = true);
 
   /**
@@ -520,9 +521,8 @@ public:
    * \param color - how to highlight the robot (solid-ly) if desired, default keeps color as specified in URDF
    * \return true on success
    */
-  bool publishRobotState(const std::vector<double> joint_positions,
-                                          const robot_model::JointModelGroup* jmg,
-                                          const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT);
+  bool publishRobotState(const std::vector<double> joint_positions, const robot_model::JointModelGroup *jmg,
+                         const rviz_visual_tools::colors &color = rviz_visual_tools::DEFAULT);
 
   /**
    * \brief Publish a complete robot state to Rviz
@@ -564,7 +564,6 @@ private:
   bool checkForVirtualJoint(const moveit::core::RobotState &robot_state);
 
 protected:
-
   // Pointer to a Planning Scene Monitor
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
@@ -608,7 +607,7 @@ protected:
   Eigen::Affine3d robot_state_root_offset_;
 
 public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW // http://eigen.tuxfamily.org/dox/group__TopicStructHavingEigenMembers.html
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW  // http://eigen.tuxfamily.org/dox/group__TopicStructHavingEigenMembers.html
 
 };  // class
 
