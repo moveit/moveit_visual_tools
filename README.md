@@ -10,6 +10,7 @@ This package helps you visualize:
  - MoveIt! and ROS trajectories
  - Robot states
  - End effectors
+ - Experimental: use interactive markers to move robot arm using IK
 
 Developed by [Dave Coleman](http://dav.ee) at the Correll Robotics Lab, University of Colorado Boulder with outside contributors.
 

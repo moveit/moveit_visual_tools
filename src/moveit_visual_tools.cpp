@@ -75,8 +75,7 @@ MoveItVisualTools::MoveItVisualTools(const std::string& base_frame, const std::s
 
 MoveItVisualTools::MoveItVisualTools(const std::string& base_frame, const std::string& marker_topic,
                                      robot_model::RobotModelConstPtr robot_model)
-  : RvizVisualTools::RvizVisualTools(base_frame, marker_topic)
-  , robot_model_(robot_model)
+  : RvizVisualTools::RvizVisualTools(base_frame, marker_topic), robot_model_(robot_model)
 {
 }
 
@@ -95,8 +94,8 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
   boost::shared_ptr<tf::TransformListener> tf;
 
   // Regular version b/c the other one causes problems with recognizing end effectors
-  planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(
-      ROBOT_DESCRIPTION, tf, "visual_tools_scene"));
+  planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(ROBOT_DESCRIPTION, tf, "visual_tools_"
+                                                                                                        "scene"));
   ros::spinOnce();
   ros::Duration(0.1).sleep();
   ros::spinOnce();
@@ -162,9 +161,9 @@ bool MoveItVisualTools::processAttachedCollisionObjectMsg(const moveit_msgs::Att
 
 bool MoveItVisualTools::triggerPlanningSceneUpdate()
 {
-  // TODO: perhaps switch to using the service call?
+  // TODO(davetcoleman): perhaps switch to using the service call?
   getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
-  //getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_GEOMETRY);
+  // getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_GEOMETRY);
   ros::spinOnce();
   return true;
 }
