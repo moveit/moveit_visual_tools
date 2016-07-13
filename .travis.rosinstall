@@ -1,0 +1,22 @@
+# This is only necessary into MoveIt! is released into Kinetic
+- git: {local-name: moveit_core, uri: 'https://github.com/ros-planning/moveit_core.git', version: kinetic-devel}
+- git: {local-name: moveit_planners, uri: 'https://github.com/ros-planning/moveit_planners.git', version: kinetic-devel}
+- git: {local-name: moveit_ros, uri: 'https://github.com/ros-planning/moveit_ros.git', version: jade-devel}
+- git: {local-name: moveit_msgs, uri: 'https://github.com/ros-planning/moveit_msgs.git', version: jade-devel}
+# Temporary until released into kinetic
+- git:
+    local-name: warehouse_ros
+    uri: https://github.com/ros-planning/warehouse_ros.git
+    version: jade-devel
+- git:
+    local-name: manipulation_msgs
+    uri: https://github.com/ros-interactive-manipulation/manipulation_msgs.git
+    version: hydro-devel
+- git:
+    local-name: household_objects_database_msgs
+    uri: https://github.com/ros-interactive-manipulation/household_objects_database_msgs.git
+    version: hydro-devel
+- git:
+    local-name: srdfdom
+    uri: https://github.com/ros-planning/srdfdom.git
+    version: indigo-devel
