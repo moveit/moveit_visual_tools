@@ -1,3 +1,7 @@
+- git:
+    local-name: rviz_visual_tools
+    uri: https://github.com/davetcoleman/rviz_visual_tools.git
+    version: kinetic-devel
 # This is only necessary into MoveIt! is released into Kinetic
 - git: {local-name: moveit_core, uri: 'https://github.com/ros-planning/moveit_core.git', version: kinetic-devel}
 - git: {local-name: moveit_planners, uri: 'https://github.com/ros-planning/moveit_planners.git', version: kinetic-devel}
