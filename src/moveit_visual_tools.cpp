@@ -1179,9 +1179,6 @@ bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTraje
   // Point location datastructure
   EigenSTL::vector_Vector3d path;
 
-  // Group together messages
-  enableInternalBatchPublishing(true);
-
   // Visualize end effector position of cartesian path
   for (std::size_t i = 0; i < robot_trajectory.getWayPointCount(); ++i)
   {
@@ -1201,7 +1198,7 @@ bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTraje
   const double radius = 0.005;
   publishPath(path, color, radius);
 
-  return triggerInternalBatchPublishAndDisable();
+  return true;
 }
 
 bool MoveItVisualTools::publishTrajectoryPoints(const std::vector<robot_state::RobotStatePtr>& robot_state_trajectory,
