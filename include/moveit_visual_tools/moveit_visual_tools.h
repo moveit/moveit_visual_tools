@@ -382,7 +382,7 @@ public:
   /**
    * \brief Helper for publishCollisionWall
    */
-  void getCollisionWallMsg(double x, double y, double angle, double width, double height, const std::string name,
+  void getCollisionWallMsg(double x, double y, double z, double angle, double width, double height, const std::string name,
                            moveit_msgs::CollisionObject &collision_obj);
 
   /**
@@ -397,6 +397,9 @@ public:
    * \return true on sucess
    */
   bool publishCollisionWall(double x, double y, double angle = 0.0, double width = 2.0, double height = 1.5,
+                            const std::string name = "wall",
+                            const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
+  bool publishCollisionWall(double x, double y, double z, double angle = 0.0, double width = 2.0, double height = 1.5,
                             const std::string name = "wall",
                             const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
 
@@ -542,7 +545,7 @@ public:
   bool hideRobot();
 
   /** \brief Before publishing a robot state, optionally change its root transform */
-  bool applyVirtualJointTransform(moveit::core::RobotState &robot_state, const Eigen::Affine3d &offset);
+  static bool applyVirtualJointTransform(moveit::core::RobotState &robot_state, const Eigen::Affine3d &offset);
 
   /**
    * \brief Print to console the current robot state's joint values within its limits visually
@@ -561,7 +564,7 @@ private:
    * \brief Error check that the robot's SRDF was properly setup with a virtual joint that was named a certain way
    * \return true on success
    */
-  bool checkForVirtualJoint(const moveit::core::RobotState &robot_state);
+  static bool checkForVirtualJoint(const moveit::core::RobotState &robot_state);
 
 protected:
   // Pointer to a Planning Scene Monitor

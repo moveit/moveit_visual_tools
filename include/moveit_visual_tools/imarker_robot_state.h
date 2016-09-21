@@ -159,7 +159,7 @@ private:
   IMarkerCallback imarker_callback_;
 
   // Amount to move interactive marker from tip link of kinematic chain
-  Eigen::Affine3d imarker_offset_ = Eigen::Affine3d::Identity();
+  //Eigen::Affine3d imarker_offset_ = Eigen::Affine3d::Identity();
 
   double total_duration_ = 0;
   std::size_t total_saves_ = 0;

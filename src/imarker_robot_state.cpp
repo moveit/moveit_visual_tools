@@ -182,7 +182,7 @@ void IMarkerRobotState::iMarkerCallback(const visualization_msgs::InteractiveMar
   tf::poseMsgToEigen(feedback->pose, robot_ee_pose);
 
   // Offset ee pose forward, because interactive marker is a special thing in front of hand
-  robot_ee_pose = robot_ee_pose * imarker_offset_;
+  //robot_ee_pose = robot_ee_pose * imarker_offset_;
 
   // Update robot
   solveIK(robot_ee_pose);
@@ -201,9 +201,9 @@ void IMarkerRobotState::iMarkerCallback(const visualization_msgs::InteractiveMar
 void IMarkerRobotState::solveIK(Eigen::Affine3d &pose)
 {
   // Cartesian settings
-  const bool collision_checking_verbose = false;
-  const bool only_check_self_collision = false;
-  const bool use_collision_checking_ = false;
+  const bool collision_checking_verbose = true;
+  const bool only_check_self_collision = true;
+  const bool use_collision_checking_ = true;
   const std::size_t attempts = 3;
   const double timeout = 1.0 / 30.0;  // 30 fps
 
@@ -222,8 +222,14 @@ void IMarkerRobotState::solveIK(Eigen::Affine3d &pose)
   // ROS_DEBUG_STREAM_THROTTLE_NAMED(1, name_, "Setting from IK");
   if (imarker_state_->setFromIK(jmg_, pose, attempts, timeout, constraint_fn))
   {
-    // ROS_INFO_STREAM_NAMED(name_, "Solved IK");
-    visual_tools_->publishRobotState(imarker_state_, color_);
+    imarker_state_->update();
+    //if (planning_scene_monitor_->getPlanningScene()->isStateValid(*imarker_state_))
+    {
+      // ROS_INFO_STREAM_NAMED(name_, "Solved IK");
+      visual_tools_->publishRobotState(imarker_state_, color_);
+    }
+    // else
+    //   visual_tools_->publishRobotState(imarker_state_, rviz_visual_tools::RED);
 
     // Save pose to file if its been long enough
     double save_every_sec = 0.1;
@@ -240,7 +246,7 @@ void IMarkerRobotState::solveIK(Eigen::Affine3d &pose)
 void IMarkerRobotState::initializeInteractiveMarkers(const Eigen::Affine3d &pose)
 {
   // Move marker to tip of fingers
-  imarker_pose_ = pose * imarker_offset_.inverse();
+  //imarker_pose_ = pose * imarker_offset_.inverse();
 
   // Convert
   geometry_msgs::Pose pose_msg;
@@ -257,7 +263,7 @@ void IMarkerRobotState::initializeInteractiveMarkers(const Eigen::Affine3d &pose
 void IMarkerRobotState::updateIMarkerPose(const Eigen::Affine3d &pose)
 {
   // Move marker to tip of fingers
-  imarker_pose_ = pose * imarker_offset_.inverse();
+  //imarker_pose_ = pose * imarker_offset_.inverse();
   sendUpdatedIMarkerPose();
 }
 
@@ -281,7 +287,7 @@ void IMarkerRobotState::make6DofMarker(const geometry_msgs::Pose &pose)
   int_marker_.description = name_;
 
   // insert a box
-  makeBoxControl(int_marker_);
+  //makeBoxControl(int_marker_);
 
   // insert mesh of robot's end effector
   // makeEEControl(int_marker_);
