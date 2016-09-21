@@ -41,7 +41,9 @@ catkin_package(
 )
 
 ## Build
-include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS})
+include_directories(SYSTEM
+  ${EIGEN3_INCLUDE_DIRS}
+)
 
 include_directories(
   include

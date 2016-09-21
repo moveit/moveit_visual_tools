@@ -1,5 +1,4 @@
-MoveIt! Visual Tools
-==========================
+# MoveIt! Visual Tools
 
 Helper functions for displaying and debugging MoveIt! data in Rviz via published markers, trajectories, and MoveIt! collision objects. It is sometimes hard to understand everything that is going on internally with MoveIt!, but using these quick convenience functions allows one to easily visualize their code.
 
@@ -27,16 +26,13 @@ Developed by [Dave Coleman](http://dav.ee) at the Correll Robotics Lab, Universi
 
 ### Ubuntu Debian
 
-```
-sudo apt-get install ros-indigo-moveit-visual-tools
-```
+    sudo apt-get install ros-jade-moveit-visual-tools
 
 ### Install From Source
 
 Clone this repository into a catkin workspace, then use the rosdep install tool to automatically download its dependencies. Depending on your current version of ROS, use:
-```
-rosdep install --from-paths src --ignore-src --rosdistro indigo
-```
+
+    rosdep install --from-paths src --ignore-src --rosdistro jade
 
 ## Quick Start Demo
 
@@ -52,7 +48,7 @@ This package is built in top of ``rviz_visual_tools`` and all those features are
 
 ## Code API
 
-See [VisualTools Class Reference](http://docs.ros.org/indigo/api/moveit_visual_tools/html/classmoveit__visual__tools_1_1MoveItVisualTools.html)
+See [VisualTools Class Reference](http://docs.ros.org/jade/api/moveit_visual_tools/html/classmoveit__visual__tools_1_1MoveItVisualTools.html)
 
 ## Usage
 
