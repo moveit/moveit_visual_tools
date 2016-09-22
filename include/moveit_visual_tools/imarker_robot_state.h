@@ -112,6 +112,23 @@ public:
 
   moveit_visual_tools::MoveItVisualToolsPtr getVisualTools();
 
+  void setCollisionCheckingVerbose(bool collision_checking_verbose)
+  {
+    collision_checking_verbose_ = collision_checking_verbose;
+  }
+
+  void setOnlyCheckSelfCollision(bool only_check_self_collision)
+  {
+    only_check_self_collision_ = only_check_self_collision;
+  }
+
+  void setUseCollisionChecking(bool use_collision_checking)
+  {
+    use_collision_checking_ = use_collision_checking;
+  }
+
+
+
 private:
   // --------------------------------------------------------
 
@@ -165,6 +182,12 @@ private:
   std::size_t total_saves_ = 0;
 
   std::ofstream output_file_;
+
+  // Verbose settings
+  bool collision_checking_verbose_ = false;
+  bool only_check_self_collision_ = false;
+  bool use_collision_checking_ = false;
+
 };  // end class
 
 // Create boost pointers for this class

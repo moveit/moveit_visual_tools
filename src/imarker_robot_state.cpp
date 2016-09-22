@@ -163,6 +163,18 @@ bool IMarkerRobotState::setPoseFromRobotState()
 
 void IMarkerRobotState::iMarkerCallback(const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback)
 {
+  if (feedback->event_type == visualization_msgs::InteractiveMarkerFeedback::MOUSE_UP)
+  {
+    // Save pose to file if its been long enough
+    double save_every_sec = 0.1;
+    if (time_since_last_save_ < ros::Time::now() - ros::Duration(save_every_sec))
+    {
+      saveToFile();
+      time_since_last_save_ = ros::Time::now();
+    }
+    return;
+  }
+
   // Ignore if not pose update
   if (feedback->event_type != visualization_msgs::InteractiveMarkerFeedback::POSE_UPDATE)
     return;
@@ -201,10 +213,7 @@ void IMarkerRobotState::iMarkerCallback(const visualization_msgs::InteractiveMar
 void IMarkerRobotState::solveIK(Eigen::Affine3d &pose)
 {
   // Cartesian settings
-  const bool collision_checking_verbose = false;
-  const bool only_check_self_collision = false;
-  const bool use_collision_checking_ = false;
-  const std::size_t attempts = 3;
+  const std::size_t attempts = 2;
   const double timeout = 1.0 / 30.0;  // 30 fps
 
   // Optionally collision check
@@ -215,38 +224,31 @@ void IMarkerRobotState::solveIK(Eigen::Affine3d &pose)
     boost::scoped_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls;
     ls.reset(new planning_scene_monitor::LockedPlanningSceneRO(planning_scene_monitor_));
     constraint_fn = boost::bind(&isStateValid, static_cast<const planning_scene::PlanningSceneConstPtr &>(*ls).get(),
-                                collision_checking_verbose, only_check_self_collision, visual_tools_, _1, _2, _3);
+                                collision_checking_verbose_, only_check_self_collision_, visual_tools_, _1, _2, _3);
   }
 
   // Attempt to set robot to new pose
-  // ROS_DEBUG_STREAM_THROTTLE_NAMED(1, name_, "Setting from IK");
   if (imarker_state_->setFromIK(jmg_, pose, attempts, timeout, constraint_fn))
   {
     imarker_state_->update();
     //if (planning_scene_monitor_->getPlanningScene()->isStateValid(*imarker_state_))
-    {
-      // ROS_INFO_STREAM_NAMED(name_, "Solved IK");
-      visual_tools_->publishRobotState(imarker_state_, color_);
-    }
+    //{
+    // ROS_INFO_STREAM_NAMED(name_, "Solved IK");
+    visual_tools_->publishRobotState(imarker_state_, color_);
+    //}
     // else
+    // {
     //   visual_tools_->publishRobotState(imarker_state_, rviz_visual_tools::RED);
-
-    // Save pose to file if its been long enough
-    double save_every_sec = 0.1;
-    if (time_since_last_save_ < ros::Time::now() - ros::Duration(save_every_sec))
-    {
-      saveToFile();
-      time_since_last_save_ = ros::Time::now();
-    }
+    //   std::cout << "invalid state returned " << std::endl;
+    //   exit(0);
+    // }
   }
-  // else
-  //   ROS_DEBUG_STREAM_NAMED(name_, "Failed to set IK");
 }
 
 void IMarkerRobotState::initializeInteractiveMarkers(const Eigen::Affine3d &pose)
 {
   // Move marker to tip of fingers
-  //imarker_pose_ = pose * imarker_offset_.inverse();
+  imarker_pose_ = pose; // * imarker_offset_.inverse();
 
   // Convert
   geometry_msgs::Pose pose_msg;
@@ -467,7 +469,7 @@ bool isStateValid(const planning_scene::PlanningScene *planning_scene, bool verb
     // No easy API exists for only checking self-collision, so we do it here.
     // TODO(davetcoleman): move this into planning_scene.cpp
     collision_detection::CollisionRequest req;
-    req.verbose = false;
+    req.verbose = verbose;
     req.group_name = group->getName();
     collision_detection::CollisionResult res;
     planning_scene->checkSelfCollision(req, res, *robot_state);
@@ -483,7 +485,6 @@ bool isStateValid(const planning_scene::PlanningScene *planning_scene, bool verb
     visual_tools->publishRobotState(*robot_state, rviz_visual_tools::RED);
     planning_scene->isStateColliding(*robot_state, group->getName(), true);
     visual_tools->publishContactPoints(*robot_state, planning_scene);
-    ros::Duration(0.4).sleep();
   }
   ROS_WARN_STREAM_THROTTLE_NAMED(2.0, "cart_path_planner", "Collision");
   return false;
