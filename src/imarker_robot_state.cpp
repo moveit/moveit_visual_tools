@@ -201,9 +201,9 @@ void IMarkerRobotState::iMarkerCallback(const visualization_msgs::InteractiveMar
 void IMarkerRobotState::solveIK(Eigen::Affine3d &pose)
 {
   // Cartesian settings
-  const bool collision_checking_verbose = true;
-  const bool only_check_self_collision = true;
-  const bool use_collision_checking_ = true;
+  const bool collision_checking_verbose = false;
+  const bool only_check_self_collision = false;
+  const bool use_collision_checking_ = false;
   const std::size_t attempts = 3;
   const double timeout = 1.0 / 30.0;  // 30 fps
 
