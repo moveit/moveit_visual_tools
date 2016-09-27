@@ -38,6 +38,7 @@
 
 // MoveIt
 #include <moveit/robot_state/conversions.h>
+#include <moveit/transforms/transforms.h>
 
 // Conversions
 #include <eigen_conversions/eigen_msg.h>
@@ -228,7 +229,7 @@ void IMarkerRobotState::solveIK(Eigen::Affine3d &pose)
   }
 
   // Attempt to set robot to new pose
-  if (imarker_state_->setFromIK(jmg_, pose, attempts, timeout, constraint_fn))
+  if (imarker_state_->setFromIK(jmg_, pose, ee_link_->getName(), attempts, timeout, constraint_fn))
   {
     imarker_state_->update();
     //if (planning_scene_monitor_->getPlanningScene()->isStateValid(*imarker_state_))
