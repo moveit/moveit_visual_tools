@@ -36,17 +36,22 @@
    Desc:   Class to encapsule a visualized robot state that can be controlled using an interactive marker
 */
 
-#ifndef MOVEIT_VISUAL_TOOLS_IMARKER_ROBOT_STATE_H
-#define MOVEIT_VISUAL_TOOLS_IMARKER_ROBOT_STATE_H
+#ifndef MOVEIT_VISUAL_TOOLS_IMARKER_END_EFFECTOR_H
+#define MOVEIT_VISUAL_TOOLS_IMARKER_END_EFFECTOR_H
 
 // ROS
 #include <ros/ros.h>
 #include <interactive_markers/interactive_marker_server.h>
 #include <visualization_msgs/InteractiveMarkerFeedback.h>
+#include <visualization_msgs/InteractiveMarker.h>
+#include <interactive_markers/menu_handler.h>
 
 // MoveIt
 #include <moveit/robot_state/robot_state.h>
+
+// this package
 #include <moveit_visual_tools/moveit_visual_tools.h>
+#include <moveit_visual_tools/imarker_robot_state.h>
 
 // C++
 #include <string>
@@ -60,60 +65,68 @@ using visualization_msgs::InteractiveMarkerControl;
 typedef std::function<void(const visualization_msgs::InteractiveMarkerFeedbackConstPtr &, const Eigen::Affine3d &)>
     IMarkerCallback;
 
-typedef std::shared_ptr<interactive_markers::InteractiveMarkerServer> InteractiveMarkerServerPtr;
+class IMarkerRobotState;
 
-class IMarkerEndEffector;
-typedef std::shared_ptr<IMarkerEndEffector> IMarkerEndEffectorPtr;
-typedef std::shared_ptr<const IMarkerEndEffector> IMarkerEndEffectorConstPtr;
-
-class IMarkerRobotState
+class IMarkerEndEffector
 {
-  friend class IMarkerEndEffector;
-
 public:
   /**
    * \brief Constructor
    */
-  IMarkerRobotState(planning_scene_monitor::PlanningSceneMonitorPtr psm,
-                    const std::string &imarker_name, const moveit::core::JointModelGroup *jmg,
-                    moveit::core::LinkModel *ee_link, rviz_visual_tools::colors color, const std::string &package_path);
+  IMarkerEndEffector(IMarkerRobotState* imarker_parent,
+                     const std::string &imarker_name, const moveit::core::JointModelGroup *jmg,
+                     const moveit::core::LinkModel *ee_link, rviz_visual_tools::colors color);
 
-  ~IMarkerRobotState()
+  ~IMarkerEndEffector()
   {
-    output_file_.close();
   }
 
-  bool loadFromFile(const std::string &file_name);
+  /** \brief Get the current end effector pose */
+  void getPose(Eigen::Affine3d &pose);
 
-  bool saveToFile();
+  bool setPoseFromRobotState();
 
-  /** \brief Set where in the parent class the feedback should be sent */
-  void setIMarkerCallback(IMarkerCallback callback);
+  void iMarkerCallback(const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback);
 
-  /** \brief Get a pointer to the current robot state */
-  moveit::core::RobotStatePtr getRobotState();
+  void solveIK(Eigen::Affine3d &pose);
 
-  bool setToRandomState();
+  void initializeInteractiveMarkers();
 
-  moveit_visual_tools::MoveItVisualToolsPtr getVisualTools();
+  void updateIMarkerPose(const Eigen::Affine3d &pose);
 
-  bool getFilePath(std::string &file_path, const std::string &file_name, const std::string &subdirectory) const;
+  void sendUpdatedIMarkerPose();
 
-protected:
+  void make6DofMarker(const geometry_msgs::Pose &pose);
+
+  visualization_msgs::InteractiveMarkerControl &makeBoxControl(visualization_msgs::InteractiveMarker &msg);
+
+  void setCollisionCheckingVerbose(bool collision_checking_verbose)
+  {
+    collision_checking_verbose_ = collision_checking_verbose;
+  }
+
+  void setOnlyCheckSelfCollision(bool only_check_self_collision)
+  {
+    only_check_self_collision_ = only_check_self_collision;
+  }
+
+  void setUseCollisionChecking(bool use_collision_checking)
+  {
+    use_collision_checking_ = use_collision_checking;
+  }
+
+private:
   // --------------------------------------------------------
 
   // The short name of this class
   std::string name_;
 
-  // A shared node handle
-  ros::NodeHandle nh_;
+  // Pointer to parent
+  IMarkerRobotState* imarker_parent_;
 
   // State
   moveit::core::RobotStatePtr imarker_state_;
-
-  // End effectors
-  const std::size_t num_eefs_ = 2; // TODO: do not hard code
-  std::vector<IMarkerEndEffectorPtr> end_effectors_;
+  Eigen::Affine3d imarker_pose_;
 
   // Core MoveIt components
   planning_scene_monitor::PlanningSceneMonitorPtr psm_;
@@ -122,27 +135,39 @@ protected:
   moveit_visual_tools::MoveItVisualToolsPtr visual_tools_;
 
   // Settings
-  std::size_t refresh_rate_ = 30;
   const moveit::core::JointModelGroup *jmg_;
-  moveit::core::LinkModel *ee_link_;
+  const moveit::core::LinkModel *ee_link_;
   rviz_visual_tools::colors color_ = rviz_visual_tools::PURPLE;
 
+  // File saving
+  ros::Time time_since_last_save_;
+
   // Interactive markers
+  // interactive_markers::MenuHandler menu_handler_;
+  visualization_msgs::InteractiveMarker int_marker_;
+  bool imarker_ready_to_process_ = true;
+  boost::mutex imarker_mutex_;
+
   InteractiveMarkerServerPtr imarker_server_;
 
-  // Hook to parent class
-  IMarkerCallback imarker_callback_;
-
-  // File saving
-  std::string file_path_;
-  std::ofstream output_file_;
-  std::string package_path_; // File location of this package
+  // Verbose settings
+  bool collision_checking_verbose_ = false;
+  bool only_check_self_collision_ = false;
+  bool use_collision_checking_ = false;
 
 };  // end class
 
 // Create std pointers for this class
-typedef std::shared_ptr<IMarkerRobotState> IMarkerRobotStatePtr;
-typedef std::shared_ptr<const IMarkerRobotState> IMarkerRobotStateConstPtr;
+typedef std::shared_ptr<IMarkerEndEffector> IMarkerEndEffectorPtr;
+typedef std::shared_ptr<const IMarkerEndEffector> IMarkerEndEffectorConstPtr;
 }  // namespace moveit_visual_tools
 
-#endif  // MOVEIT_VISUAL_TOOLS_IMARKER_ROBOT_STATE_H
+namespace
+{
+/** \brief Collision checking handle for IK solvers */
+bool isStateValid(const planning_scene::PlanningScene *planning_scene, bool verbose, bool only_check_self_collision,
+                  moveit_visual_tools::MoveItVisualToolsPtr visual_tools_, robot_state::RobotState *state,
+                  const robot_state::JointModelGroup *group, const double *ik_solution);
+}
+
+#endif  // MOVEIT_VISUAL_TOOLS_IMARKER_END_EFFECTOR_H

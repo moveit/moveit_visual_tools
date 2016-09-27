@@ -41,46 +41,47 @@
 #include <moveit/transforms/transforms.h>
 
 // Conversions
-#include <eigen_conversions/eigen_msg.h>
-#include <tf_conversions/tf_eigen.h>
-
-// Boost
-#include <boost/filesystem.hpp>
-
-// C++
-#include <string>
+// #include <eigen_conversions/eigen_msg.h>
+// #include <tf_conversions/tf_eigen.h>
 
 // this package
 #include <moveit_visual_tools/imarker_robot_state.h>
+#include <moveit_visual_tools/imarker_end_effector.h>
+
+// C++
+#include <string>
+#include <vector>
 
 namespace moveit_visual_tools
 {
-IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor,
+
+IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonitorPtr psm,
                                      const std::string &imarker_name, const moveit::core::JointModelGroup *jmg,
                                      moveit::core::LinkModel *ee_link, rviz_visual_tools::colors color,
                                      const std::string &package_path)
   : name_(imarker_name)
   , nh_("~")
-  , planning_scene_monitor_(planning_scene_monitor)
+  , psm_(psm)
   , jmg_(jmg)
   , ee_link_(ee_link)
   , color_(color)
   , package_path_(package_path)
 {
-  imarker_topic_ = nh_.getNamespace() + "/" + imarker_name + "_imarker";
-
   // Load Visual tools
   visual_tools_.reset(new moveit_visual_tools::MoveItVisualTools(
-      planning_scene_monitor_->getRobotModel()->getModelFrame(), nh_.getNamespace() + "/" + imarker_name,
-      planning_scene_monitor_->getRobotModel()));
-  visual_tools_->setPlanningSceneMonitor(planning_scene_monitor_);
+      psm_->getRobotModel()->getModelFrame(), nh_.getNamespace() + "/" + imarker_name,
+      psm_->getRobotModel()));
+  visual_tools_->setPlanningSceneMonitor(psm_);
   visual_tools_->loadRobotStatePub(nh_.getNamespace() + "/imarker_" + imarker_name + "_state");
   visual_tools_->enableBatchPublishing();
 
   // Load robot state
-  imarker_state_.reset(new moveit::core::RobotState(planning_scene_monitor_->getRobotModel()));
+  imarker_state_.reset(new moveit::core::RobotState(psm_->getRobotModel()));
   imarker_state_->setToDefaultValues();
-  // imarker_state_->printStatePositions();
+
+  // Create Marker Server
+  const std::string imarker_topic = nh_.getNamespace() + "/" + imarker_name + "_imarker";
+  imarker_server_.reset(new interactive_markers::InteractiveMarkerServer(imarker_topic, "", false));
 
   // Get file name
   if (!getFilePath(file_path_, "imarker_" + name_ + ".csv", "config/imarkers"))
@@ -88,36 +89,35 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
 
   // Load previous pose from file
   if (!loadFromFile(file_path_))
-  {
     ROS_INFO_STREAM_NAMED(name_, "Unable to find state from file, setting to default");
-    // imarker_state_->printStatePositions();
 
-    // Get pose from robot state
-    setPoseFromRobotState();
+  // Create each end effector
+  end_effectors_.resize(num_eefs_);
+  for (std::size_t i = 0; i < num_eefs_; ++i)
+  {
+    std::string eef_name;
+    const moveit::core::LinkModel *eef_link;
+    const moveit::core::JointModelGroup *arm_jmg;
+    if (i == 0)
+    {
+      eef_link = psm_->getRobotModel()->getLinkModel("right_gripper_tip");
+      arm_jmg = psm_->getRobotModel()->getJointModelGroup("right_arm");
+      eef_name = imarker_name + "_right";
+    }
+    else
+    {
+      eef_link = psm_->getRobotModel()->getLinkModel("left_gripper_tip");
+      arm_jmg = psm_->getRobotModel()->getJointModelGroup("left_arm");
+      eef_name = imarker_name + "_left";
+    }
+    end_effectors_[i].reset(new IMarkerEndEffector(this, eef_name, arm_jmg, eef_link, color));
   }
 
-  // Create imarker
-  initializeInteractiveMarkers(imarker_pose_);
+  // After both end effectors have been added, apply on server
+  imarker_server_->applyChanges();
 
-  // Show initial robot state loaded from file
-  visual_tools_->publishRobotState(imarker_state_, color_);
 
   ROS_INFO_STREAM_NAMED(name_, "IMarkerRobotState '" << name_ << "' Ready.");
-}
-
-void IMarkerRobotState::setIMarkerCallback(IMarkerCallback callback)
-{
-  imarker_callback_ = callback;
-}
-
-void IMarkerRobotState::getPose(Eigen::Affine3d &pose)
-{
-  pose = imarker_pose_;
-}
-
-moveit::core::RobotStatePtr IMarkerRobotState::getRobotState()
-{
-  return imarker_state_;
 }
 
 bool IMarkerRobotState::loadFromFile(const std::string &file_name)
@@ -141,9 +141,6 @@ bool IMarkerRobotState::loadFromFile(const std::string &file_name)
   moveit::core::streamToRobotState(*imarker_state_, line);
   // imarker_state_->printStatePositions();
 
-  // Get pose from robot state
-  setPoseFromRobotState();
-
   return true;
 }
 
@@ -156,209 +153,69 @@ bool IMarkerRobotState::saveToFile()
   return true;
 }
 
-bool IMarkerRobotState::setPoseFromRobotState()
+void IMarkerRobotState::setIMarkerCallback(IMarkerCallback callback)
 {
-  imarker_pose_ = imarker_state_->getGlobalLinkTransform(ee_link_);
-  return true;
+  imarker_callback_ = callback;
 }
 
-void IMarkerRobotState::iMarkerCallback(const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback)
+moveit::core::RobotStatePtr IMarkerRobotState::getRobotState()
 {
-  if (feedback->event_type == visualization_msgs::InteractiveMarkerFeedback::MOUSE_UP)
-  {
-    // Save pose to file if its been long enough
-    double save_every_sec = 0.1;
-    if (time_since_last_save_ < ros::Time::now() - ros::Duration(save_every_sec))
-    {
-      saveToFile();
-      time_since_last_save_ = ros::Time::now();
-    }
-    return;
-  }
-
-  // Ignore if not pose update
-  if (feedback->event_type != visualization_msgs::InteractiveMarkerFeedback::POSE_UPDATE)
-    return;
-
-  // Only allow one feedback to be processed at a time
-  {
-    // boost::unique_lock<boost::mutex> scoped_lock(imarker_mutex_);
-    if (imarker_ready_to_process_ == false)
-    {
-      return;
-    }
-    imarker_ready_to_process_ = false;
-  }
-
-  // Convert
-  Eigen::Affine3d robot_ee_pose;
-  tf::poseMsgToEigen(feedback->pose, robot_ee_pose);
-
-  // Offset ee pose forward, because interactive marker is a special thing in front of hand
-  //robot_ee_pose = robot_ee_pose * imarker_offset_;
-
-  // Update robot
-  solveIK(robot_ee_pose);
-
-  // Redirect to base class
-  if (imarker_callback_)
-    imarker_callback_(feedback, robot_ee_pose);
-
-  // Allow next feedback to be processed
-  {
-    // boost::unique_lock<boost::mutex> scoped_lock(imarker_mutex_);
-    imarker_ready_to_process_ = true;
-  }
+  return imarker_state_;
 }
 
-void IMarkerRobotState::solveIK(Eigen::Affine3d &pose)
+bool IMarkerRobotState::setToRandomState()
 {
-  // Cartesian settings
-  const std::size_t attempts = 2;
-  const double timeout = 1.0 / 30.0;  // 30 fps
-
-  // Optionally collision check
-  moveit::core::GroupStateValidityCallbackFn constraint_fn;
-  if (use_collision_checking_)
+  ROS_ERROR_STREAM_NAMED(name_, "Not reimplemented yet");
+  /*
+  static const std::size_t MAX_ATTEMPTS = 1000;
+  for (std::size_t i = 0; i < MAX_ATTEMPTS; ++i)
   {
-    // TODO(davetcoleman): this is currently not working, the locking seems to cause segfaults
-    boost::scoped_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls;
-    ls.reset(new planning_scene_monitor::LockedPlanningSceneRO(planning_scene_monitor_));
-    constraint_fn = boost::bind(&isStateValid, static_cast<const planning_scene::PlanningSceneConstPtr &>(*ls).get(),
-                                collision_checking_verbose_, only_check_self_collision_, visual_tools_, _1, _2, _3);
-  }
-
-  // Attempt to set robot to new pose
-  if (imarker_state_->setFromIK(jmg_, pose, ee_link_->getName(), attempts, timeout, constraint_fn))
-  {
+    imarker_state_->setToRandomPositions(jmg_);
     imarker_state_->update();
-    //if (planning_scene_monitor_->getPlanningScene()->isStateValid(*imarker_state_))
-    //{
-    // ROS_INFO_STREAM_NAMED(name_, "Solved IK");
-    visual_tools_->publishRobotState(imarker_state_, color_);
-    //}
-    // else
-    // {
-    //   visual_tools_->publishRobotState(imarker_state_, rviz_visual_tools::RED);
-    //   std::cout << "invalid state returned " << std::endl;
-    //   exit(0);
-    // }
+
+    // Debug
+    const bool check_verbose = false;
+
+    // Get planning scene
+    boost::scoped_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls;
+    ls.reset(new planning_scene_monitor::LockedPlanningSceneRO(psm_));
+
+    // which planning group to collision check, "" is everything
+    static const std::string planning_group = jmg_->getName();
+    if (static_cast<const planning_scene::PlanningSceneConstPtr &>(*ls)
+            ->isStateValid(*imarker_state_, planning_group, check_verbose))
+    {
+      // ROS_DEBUG_STREAM_NAMED(name_, "Found valid random robot state after " << i << " attempts");
+
+      // Get pose from robot state
+      for (std::size_t i = 0; i < num_eefs_; ++i)
+        end_effectors_[i]->setPoseFromRobotState();
+
+      // Send to imarker
+      for (std::size_t i = 0; i < num_eefs_; ++i)
+        end_effectors_[i]->sendUpdatedIMarkerPose();
+
+      return true;
+    }
+
+    if (i == 100)
+      ROS_WARN_STREAM_NAMED(name_, "Taking long time to find valid random state");
   }
+
+  ROS_ERROR_STREAM_NAMED(name_, "Unable to find valid random robot state for imarker");
+  exit(-1);
+  */
+  return false;
 }
 
-void IMarkerRobotState::initializeInteractiveMarkers(const Eigen::Affine3d &pose)
+moveit_visual_tools::MoveItVisualToolsPtr IMarkerRobotState::getVisualTools()
 {
-  // Move marker to tip of fingers
-  imarker_pose_ = pose; // * imarker_offset_.inverse();
-
-  // Convert
-  geometry_msgs::Pose pose_msg;
-  tf::poseEigenToMsg(imarker_pose_, pose_msg);
-
-  // Server
-  imarker_server_.reset(new interactive_markers::InteractiveMarkerServer(imarker_topic_, "", false));
-
-  // marker
-  make6DofMarker(pose_msg);
-  imarker_server_->applyChanges();
-}
-
-void IMarkerRobotState::updateIMarkerPose(const Eigen::Affine3d &pose)
-{
-  // Move marker to tip of fingers
-  //imarker_pose_ = pose * imarker_offset_.inverse();
-  sendUpdatedIMarkerPose();
-}
-
-void IMarkerRobotState::sendUpdatedIMarkerPose()
-{
-  // Convert
-  geometry_msgs::Pose pose_msg;
-  tf::poseEigenToMsg(imarker_pose_, pose_msg);
-
-  imarker_server_->setPose(int_marker_.name, pose_msg);
-  imarker_server_->applyChanges();
-}
-
-void IMarkerRobotState::make6DofMarker(const geometry_msgs::Pose &pose)
-{
-  int_marker_.header.frame_id = "world";
-  int_marker_.pose = pose;
-  int_marker_.scale = 0.2;
-
-  int_marker_.name = "6dof_teleoperation";
-  int_marker_.description = name_;
-
-  // insert a box
-  //makeBoxControl(int_marker_);
-
-  // insert mesh of robot's end effector
-  // makeEEControl(int_marker_);
-  // int_marker_.controls[0].interaction_mode = InteractiveMarkerControl::MENU;
-
-  InteractiveMarkerControl control;
-  control.orientation.w = 1;
-  control.orientation.x = 1;
-  control.orientation.y = 0;
-  control.orientation.z = 0;
-  control.name = "rotate_x";
-  control.interaction_mode = InteractiveMarkerControl::ROTATE_AXIS;
-  int_marker_.controls.push_back(control);
-  control.name = "move_x";
-  control.interaction_mode = InteractiveMarkerControl::MOVE_AXIS;
-  int_marker_.controls.push_back(control);
-
-  control.orientation.w = 1;
-  control.orientation.x = 0;
-  control.orientation.y = 1;
-  control.orientation.z = 0;
-  control.name = "rotate_z";
-  control.interaction_mode = InteractiveMarkerControl::ROTATE_AXIS;
-  int_marker_.controls.push_back(control);
-  control.name = "move_z";
-  control.interaction_mode = InteractiveMarkerControl::MOVE_AXIS;
-  int_marker_.controls.push_back(control);
-
-  control.orientation.w = 1;
-  control.orientation.x = 0;
-  control.orientation.y = 0;
-  control.orientation.z = 1;
-  control.name = "rotate_y";
-  control.interaction_mode = InteractiveMarkerControl::ROTATE_AXIS;
-  int_marker_.controls.push_back(control);
-  control.name = "move_y";
-  control.interaction_mode = InteractiveMarkerControl::MOVE_AXIS;
-  int_marker_.controls.push_back(control);
-
-  imarker_server_->insert(int_marker_);
-  imarker_server_->setCallback(int_marker_.name, boost::bind(&IMarkerRobotState::iMarkerCallback, this, _1));
-  // menu_handler_.apply(*imarker_server_, int_marker_.name);
-}
-
-visualization_msgs::InteractiveMarkerControl &
-IMarkerRobotState::makeBoxControl(visualization_msgs::InteractiveMarker &msg)
-{
-  visualization_msgs::InteractiveMarkerControl control;
-  control.always_visible = true;
-
-  visualization_msgs::Marker marker;
-  marker.type = visualization_msgs::Marker::CUBE;
-  marker.scale.x = msg.scale * 0.3;   // x direction
-  marker.scale.y = msg.scale * 0.10;  // y direction
-  marker.scale.z = msg.scale * 0.10;  // height
-  marker.color.r = 0.5;
-  marker.color.g = 0.5;
-  marker.color.b = 0.5;
-  marker.color.a = 1.0;
-
-  control.markers.push_back(marker);
-  msg.controls.push_back(control);
-
-  return msg.controls.back();
+  // ROS_WARN_STREAM_NAMED(name_, "someone is getting visual tools from imarker");
+  return visual_tools_;
 }
 
 bool IMarkerRobotState::getFilePath(std::string &file_path, const std::string &file_name,
-                                    const std::string &subdirectory) const
+                                     const std::string &subdirectory) const
 
 {
   namespace fs = boost::filesystem;
@@ -383,55 +240,6 @@ bool IMarkerRobotState::getFilePath(std::string &file_path, const std::string &f
   // ROS_DEBUG_STREAM_NAMED(name_, "Config file: " << file_path);
 
   return true;
-}
-
-bool IMarkerRobotState::setToRandomState()
-{
-  static const std::size_t MAX_ATTEMPTS = 1000;
-  for (std::size_t i = 0; i < MAX_ATTEMPTS; ++i)
-  {
-    imarker_state_->setToRandomPositions(jmg_);
-    imarker_state_->update();
-
-    // Debug
-    const bool check_verbose = false;
-
-    // Get planning scene
-    boost::scoped_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls;
-    ls.reset(new planning_scene_monitor::LockedPlanningSceneRO(planning_scene_monitor_));
-
-    // which planning group to collision check, "" is everything
-    static const std::string planning_group = jmg_->getName();
-    if (static_cast<const planning_scene::PlanningSceneConstPtr &>(*ls)
-            ->isStateValid(*imarker_state_, planning_group, check_verbose))
-    {
-      // ROS_DEBUG_STREAM_NAMED(name_, "Found valid random robot state after " << i << " attempts");
-
-      // Get pose from robot state
-      setPoseFromRobotState();
-
-      // Send to imarker
-      sendUpdatedIMarkerPose();
-
-      // Show initial robot state loaded from file
-      visual_tools_->publishRobotState(imarker_state_, color_);
-
-      return true;
-    }
-
-    if (i == 100)
-      ROS_WARN_STREAM_NAMED(name_, "Taking long time to find valid random state");
-  }
-
-  ROS_ERROR_STREAM_NAMED(name_, "Unable to find valid random robot state for imarker");
-  exit(-1);
-  return false;
-}
-
-moveit_visual_tools::MoveItVisualToolsPtr IMarkerRobotState::getVisualTools()
-{
-  // ROS_WARN_STREAM_NAMED(name_, "someone is getting visual tools from imarker");
-  return visual_tools_;
 }
 
 }  // namespace moveit_visual_tools
