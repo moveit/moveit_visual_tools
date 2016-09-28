@@ -72,7 +72,8 @@ IMarkerEndEffector::IMarkerEndEffector(IMarkerRobotState* imarker_parent,
   initializeInteractiveMarkers();
 
   // Show initial robot state loaded from file
-  //visual_tools_->publishRobotState(imarker_state_, color_);
+  // TODO: this will be called for each end effector
+  visual_tools_->publishRobotState(imarker_state_, color_);
 
   ROS_INFO_STREAM_NAMED(name_, "IMarkerEndEffector '" << name_ << "' tracking ee link '" <<
                         ee_link_->getName() << "' ready.");
@@ -173,7 +174,6 @@ void IMarkerEndEffector::solveIK(Eigen::Affine3d &pose)
     // else
     // {
     //   visual_tools_->publishRobotState(imarker_state_, rviz_visual_tools::RED);
-    //   std::cout << "invalid state returned " << std::endl;
     //   exit(0);
     // }
   }
