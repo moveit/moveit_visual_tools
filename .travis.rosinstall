@@ -17,21 +17,8 @@
 - git:
     local-name: srdfdom
     uri: https://github.com/ros-planning/srdfdom.git
-    version: indigo-devel
+    version: kinetic-devel
 - git:
     local-name: geometric_shapes
     uri: https://github.com/ros-planning/geometric_shapes.git
     version: kinetic-devel
-# Temporary until released into kinetic
-- git:
-    local-name: warehouse_ros
-    uri: https://github.com/ros-planning/warehouse_ros.git
-    version: jade-devel
-- git:
-    local-name: household_objects_database_msgs
-    uri: https://github.com/ros-interactive-manipulation/household_objects_database_msgs.git
-    version: hydro-devel
-- git:
-    local-name: manipulation_msgs
-    uri: https://github.com/ros-interactive-manipulation/manipulation_msgs.git
-    version: hydro-devel
