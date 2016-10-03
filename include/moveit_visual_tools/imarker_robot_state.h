@@ -74,9 +74,10 @@ public:
   /**
    * \brief Constructor
    */
-  IMarkerRobotState(planning_scene_monitor::PlanningSceneMonitorPtr psm,
-                    const std::string &imarker_name, const moveit::core::JointModelGroup *jmg,
-                    moveit::core::LinkModel *ee_link, rviz_visual_tools::colors color, const std::string &package_path);
+  IMarkerRobotState(planning_scene_monitor::PlanningSceneMonitorPtr psm, const std::string &imarker_name,
+                    std::vector<const moveit::core::JointModelGroup *> jmgs,
+                    std::vector<moveit::core::LinkModel *> ee_links, rviz_visual_tools::colors color,
+                    const std::string &package_path);
 
   ~IMarkerRobotState()
   {
@@ -112,7 +113,8 @@ protected:
   moveit::core::RobotStatePtr imarker_state_;
 
   // End effectors
-  const std::size_t num_eefs_ = 2; // TODO: do not hard code
+  std::vector<const moveit::core::JointModelGroup *> arm_jmgs_;
+  std::vector<moveit::core::LinkModel *> ee_links_;
   std::vector<IMarkerEndEffectorPtr> end_effectors_;
 
   // Core MoveIt components
@@ -123,8 +125,6 @@ protected:
 
   // Settings
   std::size_t refresh_rate_ = 30;
-  const moveit::core::JointModelGroup *jmg_;
-  moveit::core::LinkModel *ee_link_;
   rviz_visual_tools::colors color_ = rviz_visual_tools::PURPLE;
 
   // Interactive markers
@@ -136,7 +136,7 @@ protected:
   // File saving
   std::string file_path_;
   std::ofstream output_file_;
-  std::string package_path_; // File location of this package
+  std::string package_path_;  // File location of this package
 
 };  // end class
 

@@ -54,23 +54,16 @@
 
 namespace moveit_visual_tools
 {
-
 IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonitorPtr psm,
-                                     const std::string &imarker_name, const moveit::core::JointModelGroup *jmg,
-                                     moveit::core::LinkModel *ee_link, rviz_visual_tools::colors color,
+                                     const std::string &imarker_name,
+                                     std::vector<const moveit::core::JointModelGroup *> arm_jmgs,
+                                     std::vector<moveit::core::LinkModel *> ee_links, rviz_visual_tools::colors color,
                                      const std::string &package_path)
-  : name_(imarker_name)
-  , nh_("~")
-  , psm_(psm)
-  , jmg_(jmg)
-  , ee_link_(ee_link)
-  , color_(color)
-  , package_path_(package_path)
+  : name_(imarker_name), nh_("~"), psm_(psm), arm_jmgs_(arm_jmgs), ee_links_(ee_links), color_(color), package_path_(package_path)
 {
   // Load Visual tools
   visual_tools_.reset(new moveit_visual_tools::MoveItVisualTools(
-      psm_->getRobotModel()->getModelFrame(), nh_.getNamespace() + "/" + imarker_name,
-      psm_->getRobotModel()));
+      psm_->getRobotModel()->getModelFrame(), nh_.getNamespace() + "/" + imarker_name, psm_->getRobotModel()));
   visual_tools_->setPlanningSceneMonitor(psm_);
   visual_tools_->loadRobotStatePub(nh_.getNamespace() + "/imarker_" + imarker_name + "_state");
   visual_tools_->enableBatchPublishing();
@@ -92,30 +85,20 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
     ROS_INFO_STREAM_NAMED(name_, "Unable to find state from file, setting to default");
 
   // Create each end effector
-  end_effectors_.resize(num_eefs_);
-  for (std::size_t i = 0; i < num_eefs_; ++i)
+  end_effectors_.resize(ee_links_.size());
+  for (std::size_t i = 0; i < ee_links_.size(); ++i)
   {
     std::string eef_name;
-    const moveit::core::LinkModel *eef_link;
-    const moveit::core::JointModelGroup *arm_jmg;
     if (i == 0)
-    {
-      eef_link = psm_->getRobotModel()->getLinkModel("right_gripper_tip");
-      arm_jmg = psm_->getRobotModel()->getJointModelGroup("right_arm");
       eef_name = imarker_name + "_right";
-    }
     else
-    {
-      eef_link = psm_->getRobotModel()->getLinkModel("left_gripper_tip");
-      arm_jmg = psm_->getRobotModel()->getJointModelGroup("left_arm");
       eef_name = imarker_name + "_left";
-    }
-    end_effectors_[i].reset(new IMarkerEndEffector(this, eef_name, arm_jmg, eef_link, color));
+
+    end_effectors_[i].reset(new IMarkerEndEffector(this, eef_name, arm_jmgs_[i], ee_links_[i], color));
   }
 
   // After both end effectors have been added, apply on server
   imarker_server_->applyChanges();
-
 
   ROS_INFO_STREAM_NAMED(name_, "IMarkerRobotState '" << name_ << "' Ready.");
 }
@@ -188,11 +171,11 @@ bool IMarkerRobotState::setToRandomState()
       // ROS_DEBUG_STREAM_NAMED(name_, "Found valid random robot state after " << i << " attempts");
 
       // Get pose from robot state
-      for (std::size_t i = 0; i < num_eefs_; ++i)
+      for (std::size_t i = 0; i < ee_links_.size(); ++i)
         end_effectors_[i]->setPoseFromRobotState();
 
       // Send to imarker
-      for (std::size_t i = 0; i < num_eefs_; ++i)
+      for (std::size_t i = 0; i < ee_links_.size(); ++i)
         end_effectors_[i]->sendUpdatedIMarkerPose();
 
       return true;
@@ -215,7 +198,7 @@ moveit_visual_tools::MoveItVisualToolsPtr IMarkerRobotState::getVisualTools()
 }
 
 bool IMarkerRobotState::getFilePath(std::string &file_path, const std::string &file_name,
-                                     const std::string &subdirectory) const
+                                    const std::string &subdirectory) const
 
 {
   namespace fs = boost::filesystem;
