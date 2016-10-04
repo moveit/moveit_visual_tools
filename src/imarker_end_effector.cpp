@@ -128,15 +128,12 @@ void IMarkerEndEffector::iMarkerCallback(const visualization_msgs::InteractiveMa
   Eigen::Affine3d robot_ee_pose;
   tf::poseMsgToEigen(feedback->pose, robot_ee_pose);
 
-  // Offset ee pose forward, because interactive marker is a special thing in front of hand
-  // robot_ee_pose = robot_ee_pose * imarker_offset_;
-
   // Update robot
   solveIK(robot_ee_pose);
 
   // Redirect to base class
-  // if (imarker_callback_)
-  //   imarker_callback_(feedback, robot_ee_pose);
+  if (imarker_callback_)
+    imarker_callback_(feedback, robot_ee_pose);
 
   // Allow next feedback to be processed
   {
@@ -214,7 +211,7 @@ void IMarkerEndEffector::make6DofMarker(const geometry_msgs::Pose &pose)
   int_marker_.pose = pose;
   int_marker_.scale = 0.2;
 
-  int_marker_.name = "imarker_"+name_;
+  int_marker_.name = name_;
   int_marker_.description = "imarker_"+name_;
 
   // insert a box

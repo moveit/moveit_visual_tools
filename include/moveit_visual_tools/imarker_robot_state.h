@@ -100,6 +100,11 @@ public:
 
   bool getFilePath(std::string &file_path, const std::string &file_name, const std::string &subdirectory) const;
 
+  IMarkerEndEffectorPtr getEEF(const std::string& name)
+  {
+    return name_to_eef_[name];
+  }
+
 protected:
   // --------------------------------------------------------
 
@@ -116,6 +121,7 @@ protected:
   std::vector<const moveit::core::JointModelGroup *> arm_jmgs_;
   std::vector<moveit::core::LinkModel *> ee_links_;
   std::vector<IMarkerEndEffectorPtr> end_effectors_;
+  std::map<std::string, IMarkerEndEffectorPtr> name_to_eef_;
 
   // Core MoveIt components
   planning_scene_monitor::PlanningSceneMonitorPtr psm_;
@@ -129,9 +135,6 @@ protected:
 
   // Interactive markers
   InteractiveMarkerServerPtr imarker_server_;
-
-  // Hook to parent class
-  IMarkerCallback imarker_callback_;
 
   // File saving
   std::string file_path_;

@@ -115,6 +115,16 @@ public:
     use_collision_checking_ = use_collision_checking;
   }
 
+  void setIMarkerCallback(IMarkerCallback callback)
+  {
+    imarker_callback_ = callback;
+  }
+
+  const moveit::core::LinkModel* getEELink()
+  {
+    return ee_link_;
+  }
+
 private:
   // --------------------------------------------------------
 
@@ -155,6 +165,8 @@ private:
   bool only_check_self_collision_ = false;
   bool use_collision_checking_ = false;
 
+  // Hook to parent class
+  IMarkerCallback imarker_callback_;
 };  // end class
 
 // Create std pointers for this class

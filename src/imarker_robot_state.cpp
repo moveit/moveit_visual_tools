@@ -95,6 +95,9 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
       eef_name = imarker_name + "_left";
 
     end_effectors_[i].reset(new IMarkerEndEffector(this, eef_name, arm_jmgs_[i], ee_links_[i], color));
+
+    // Create map from eef name to object
+    name_to_eef_[eef_name] = end_effectors_[i];
   }
 
   // After both end effectors have been added, apply on server
@@ -138,7 +141,8 @@ bool IMarkerRobotState::saveToFile()
 
 void IMarkerRobotState::setIMarkerCallback(IMarkerCallback callback)
 {
-  imarker_callback_ = callback;
+  for (const IMarkerEndEffectorPtr ee : end_effectors_)
+    ee->setIMarkerCallback(callback);
 }
 
 moveit::core::RobotStatePtr IMarkerRobotState::getRobotState()
@@ -193,7 +197,6 @@ bool IMarkerRobotState::setToRandomState()
 
 moveit_visual_tools::MoveItVisualToolsPtr IMarkerRobotState::getVisualTools()
 {
-  // ROS_WARN_STREAM_NAMED(name_, "someone is getting visual tools from imarker");
   return visual_tools_;
 }
 
