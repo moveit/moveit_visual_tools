@@ -66,6 +66,17 @@ class IMarkerEndEffector;
 typedef std::shared_ptr<IMarkerEndEffector> IMarkerEndEffectorPtr;
 typedef std::shared_ptr<const IMarkerEndEffector> IMarkerEndEffectorConstPtr;
 
+/** \brief I wish this struct wasn't necessary, but the SRDF does not seem to support choosing one particular link
+ *         as an end effector tip - instead it does so automatically.
+ */
+struct ArmData
+{
+  ArmData(moveit::core::JointModelGroup *jmg, moveit::core::LinkModel *ee_link) : jmg_(jmg), ee_link_(ee_link){};
+
+  moveit::core::JointModelGroup *jmg_;
+  moveit::core::LinkModel *ee_link_;
+};
+
 class IMarkerRobotState
 {
   friend class IMarkerEndEffector;
@@ -75,9 +86,7 @@ public:
    * \brief Constructor
    */
   IMarkerRobotState(planning_scene_monitor::PlanningSceneMonitorPtr psm, const std::string &imarker_name,
-                    std::vector<const moveit::core::JointModelGroup *> jmgs,
-                    std::vector<moveit::core::LinkModel *> ee_links, rviz_visual_tools::colors color,
-                    const std::string &package_path);
+                    std::vector<ArmData> arm_datas, rviz_visual_tools::colors color, const std::string &package_path);
 
   ~IMarkerRobotState()
   {
@@ -100,7 +109,7 @@ public:
 
   bool getFilePath(std::string &file_path, const std::string &file_name, const std::string &subdirectory) const;
 
-  IMarkerEndEffectorPtr getEEF(const std::string& name)
+  IMarkerEndEffectorPtr getEEF(const std::string &name)
   {
     return name_to_eef_[name];
   }
@@ -118,8 +127,7 @@ protected:
   moveit::core::RobotStatePtr imarker_state_;
 
   // End effectors
-  std::vector<const moveit::core::JointModelGroup *> arm_jmgs_;
-  std::vector<moveit::core::LinkModel *> ee_links_;
+  std::vector<ArmData> arm_datas_;
   std::vector<IMarkerEndEffectorPtr> end_effectors_;
   std::map<std::string, IMarkerEndEffectorPtr> name_to_eef_;
 

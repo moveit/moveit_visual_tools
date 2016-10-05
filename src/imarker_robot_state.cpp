@@ -55,11 +55,9 @@
 namespace moveit_visual_tools
 {
 IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonitorPtr psm,
-                                     const std::string &imarker_name,
-                                     std::vector<const moveit::core::JointModelGroup *> arm_jmgs,
-                                     std::vector<moveit::core::LinkModel *> ee_links, rviz_visual_tools::colors color,
-                                     const std::string &package_path)
-  : name_(imarker_name), nh_("~"), psm_(psm), arm_jmgs_(arm_jmgs), ee_links_(ee_links), color_(color), package_path_(package_path)
+                                     const std::string &imarker_name, std::vector<ArmData> arm_datas,
+                                     rviz_visual_tools::colors color, const std::string &package_path)
+  : name_(imarker_name), nh_("~"), psm_(psm), arm_datas_(arm_datas), color_(color), package_path_(package_path)
 {
   // Load Visual tools
   visual_tools_.reset(new moveit_visual_tools::MoveItVisualTools(
@@ -85,8 +83,8 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
     ROS_INFO_STREAM_NAMED(name_, "Unable to find state from file, setting to default");
 
   // Create each end effector
-  end_effectors_.resize(ee_links_.size());
-  for (std::size_t i = 0; i < ee_links_.size(); ++i)
+  end_effectors_.resize(arm_datas_.size());
+  for (std::size_t i = 0; i < arm_datas_.size(); ++i)
   {
     std::string eef_name;
     if (i == 0)
@@ -94,7 +92,7 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
     else
       eef_name = imarker_name + "_left";
 
-    end_effectors_[i].reset(new IMarkerEndEffector(this, eef_name, arm_jmgs_[i], ee_links_[i], color));
+    end_effectors_[i].reset(new IMarkerEndEffector(this, eef_name, arm_datas_[i], color));
 
     // Create map from eef name to object
     name_to_eef_[eef_name] = end_effectors_[i];
@@ -175,11 +173,11 @@ bool IMarkerRobotState::setToRandomState()
       // ROS_DEBUG_STREAM_NAMED(name_, "Found valid random robot state after " << i << " attempts");
 
       // Get pose from robot state
-      for (std::size_t i = 0; i < ee_links_.size(); ++i)
+      for (std::size_t i = 0; i < arm_datas_.size(); ++i)
         end_effectors_[i]->setPoseFromRobotState();
 
       // Send to imarker
-      for (std::size_t i = 0; i < ee_links_.size(); ++i)
+      for (std::size_t i = 0; i < arm_datas_.size(); ++i)
         end_effectors_[i]->sendUpdatedIMarkerPose();
 
       return true;

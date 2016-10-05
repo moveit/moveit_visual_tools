@@ -52,21 +52,19 @@
 
 namespace moveit_visual_tools
 {
-IMarkerEndEffector::IMarkerEndEffector(IMarkerRobotState* imarker_parent,
-                                       const std::string &imarker_name, const moveit::core::JointModelGroup *jmg,
-                                       const moveit::core::LinkModel *ee_link, rviz_visual_tools::colors color)
+IMarkerEndEffector::IMarkerEndEffector(IMarkerRobotState *imarker_parent, const std::string &imarker_name,
+                                       ArmData arm_data, rviz_visual_tools::colors color)
   : name_(imarker_name)
   , imarker_parent_(imarker_parent)
   , psm_(imarker_parent_->psm_)
-  , jmg_(jmg)
-  , ee_link_(ee_link)
+  , arm_data_(arm_data)
   , color_(color)
   , imarker_server_(imarker_parent_->imarker_server_)
   , imarker_state_(imarker_parent_->imarker_state_)
   , visual_tools_(imarker_parent_->visual_tools_)
 {
   // Get pose from robot state
-  imarker_pose_ = imarker_state_->getGlobalLinkTransform(ee_link_);
+  imarker_pose_ = imarker_state_->getGlobalLinkTransform(arm_data_.ee_link_);
 
   // Create imarker
   initializeInteractiveMarkers();
@@ -75,8 +73,8 @@ IMarkerEndEffector::IMarkerEndEffector(IMarkerRobotState* imarker_parent,
   // TODO: this will be called for each end effector
   visual_tools_->publishRobotState(imarker_state_, color_);
 
-  ROS_INFO_STREAM_NAMED(name_, "IMarkerEndEffector '" << name_ << "' tracking ee link '" <<
-                        ee_link_->getName() << "' ready.");
+  ROS_INFO_STREAM_NAMED(name_, "IMarkerEndEffector '" << name_ << "' tracking ee link '"
+                                                      << arm_data_.ee_link_->getName() << "' ready.");
 }
 
 void IMarkerEndEffector::getPose(Eigen::Affine3d &pose)
@@ -86,7 +84,7 @@ void IMarkerEndEffector::getPose(Eigen::Affine3d &pose)
 
 bool IMarkerEndEffector::setPoseFromRobotState()
 {
-  imarker_pose_ = imarker_state_->getGlobalLinkTransform(ee_link_);
+  imarker_pose_ = imarker_state_->getGlobalLinkTransform(arm_data_.ee_link_);
 
   sendUpdatedIMarkerPose();
 
@@ -160,7 +158,7 @@ void IMarkerEndEffector::solveIK(Eigen::Affine3d &pose)
   }
 
   // Attempt to set robot to new pose
-  if (imarker_state_->setFromIK(jmg_, pose, ee_link_->getName(), attempts, timeout, constraint_fn))
+  if (imarker_state_->setFromIK(arm_data_.jmg_, pose, arm_data_.ee_link_->getName(), attempts, timeout, constraint_fn))
   {
     imarker_state_->update();
     // if (psm_->getPlanningScene()->isStateValid(*imarker_state_))
@@ -212,7 +210,7 @@ void IMarkerEndEffector::make6DofMarker(const geometry_msgs::Pose &pose)
   int_marker_.scale = 0.2;
 
   int_marker_.name = name_;
-  int_marker_.description = "imarker_"+name_;
+  int_marker_.description = "imarker_" + name_;
 
   // insert a box
   // makeBoxControl(int_marker_);
