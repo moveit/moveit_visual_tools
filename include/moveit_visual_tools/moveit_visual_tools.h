@@ -415,7 +415,14 @@ public:
    * \param color to display the collision object with
    * \return true on sucess
    */
+  RVIZ_VISUAL_TOOLS_DEPRECATED
   bool publishCollisionTable(double x, double y, double angle, double width, double height, double depth,
+                             const std::string name, const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN)
+  {
+    return publishCollisionTable(x, y, 0, angle, width, height, depth, name, color);
+  }
+
+  bool publishCollisionTable(double x, double y, double z, double angle, double width, double height, double depth,
                              const std::string name, const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
 
   /**

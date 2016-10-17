@@ -892,18 +892,16 @@ bool MoveItVisualTools::publishCollisionWall(double x, double y, double z, doubl
   return processCollisionObjectMsg(collision_obj, color);
 }
 
-bool MoveItVisualTools::publishCollisionTable(double x, double y, double angle, double width, double height,
+bool MoveItVisualTools::publishCollisionTable(double x, double y, double z, double angle, double width, double height,
                                               double depth, const std::string name,
                                               const rviz_visual_tools::colors& color)
 {
-  double floor_to_base_height = 0;  // TODO(davetcoleman): set this to a better value
-
   geometry_msgs::Pose table_pose;
 
-  // Position
+  // Center of table
   table_pose.position.x = x;
   table_pose.position.y = y;
-  table_pose.position.z = height / 2 + floor_to_base_height;
+  table_pose.position.z = z + height / 2.0;
 
   // Orientation
   Eigen::Quaterniond quat(Eigen::AngleAxis<double>(static_cast<double>(angle), Eigen::Vector3d::UnitZ()));
