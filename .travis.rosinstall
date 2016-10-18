@@ -3,12 +3,8 @@
     uri: https://github.com/davetcoleman/rviz_visual_tools.git
     version: kinetic-devel
 - git:
-    local-name: moveit_core
-    uri: https://github.com/ros-planning/moveit_core.git
-    version: kinetic-devel
-- git:
-    local-name: moveit_ros
-    uri: https://github.com/ros-planning/moveit_ros.git
+    local-name: moveit
+    uri: https://github.com/ros-planning/moveit.git
     version: kinetic-devel
 - git:
     local-name: moveit_msgs
@@ -22,3 +18,7 @@
     local-name: geometric_shapes
     uri: https://github.com/ros-planning/geometric_shapes.git
     version: kinetic-devel
+- git:
+    local-name: moveit_resources
+    uri: https://github.com/ros-planning/moveit_resources.git
+    version: master
