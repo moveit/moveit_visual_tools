@@ -103,6 +103,9 @@ public:
   /** \brief Get a pointer to the current robot state */
   moveit::core::RobotStatePtr getRobotState();
 
+  /** \brief Set the robot state to current */
+  void setToCurrentState();
+
   bool setToRandomState();
 
   moveit_visual_tools::MoveItVisualToolsPtr getVisualTools();

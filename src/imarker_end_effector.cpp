@@ -203,7 +203,7 @@ void IMarkerEndEffector::sendUpdatedIMarkerPose()
 
 void IMarkerEndEffector::make6DofMarker(const geometry_msgs::Pose &pose)
 {
-  ROS_INFO_STREAM_NAMED(name_, "Making 6dof interactive marker named " << name_);
+  ROS_DEBUG_STREAM_NAMED(name_, "Making 6dof interactive marker named " << name_);
 
   int_marker_.header.frame_id = "world";
   int_marker_.pose = pose;

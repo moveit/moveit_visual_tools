@@ -101,7 +101,7 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
   // After both end effectors have been added, apply on server
   imarker_server_->applyChanges();
 
-  ROS_INFO_STREAM_NAMED(name_, "IMarkerRobotState '" << name_ << "' Ready.");
+  ROS_DEBUG_STREAM_NAMED(name_, "IMarkerRobotState '" << name_ << "' Ready.");
 }
 
 bool IMarkerRobotState::loadFromFile(const std::string &file_name)
@@ -146,6 +146,18 @@ void IMarkerRobotState::setIMarkerCallback(IMarkerCallback callback)
 moveit::core::RobotStatePtr IMarkerRobotState::getRobotState()
 {
   return imarker_state_;
+}
+
+void IMarkerRobotState::setToCurrentState()
+{
+  // Get the real current state
+  planning_scene_monitor::LockedPlanningSceneRO scene(psm_);  // Lock planning scene
+  (*imarker_state_) = scene->getCurrentState();
+
+  // TODO: move interactive markers and pose
+
+  // Show new state
+  visual_tools_->publishRobotState(imarker_state_, color_);
 }
 
 bool IMarkerRobotState::setToRandomState()
