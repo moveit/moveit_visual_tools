@@ -1199,6 +1199,27 @@ bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTraje
   return true;
 }
 
+bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTrajectory& robot_trajectory,
+                                              const robot_model::JointModelGroup* arm_jmg,
+                                              const rviz_visual_tools::colors& color)
+{
+  std::vector<const moveit::core::LinkModel*> tips;
+  if (!arm_jmg->getEndEffectorTips(tips))
+  {
+    ROS_ERROR_STREAM_NAMED(name_, "Unable to get end effector tips from jmg");
+    return false;
+  }
+
+  // For each end effector
+  for (const moveit::core::LinkModel* ee_parent_link : tips)
+  {
+    if (!publishTrajectoryLine(robot_trajectory, ee_parent_link, color))
+      return false;
+  }
+
+  return true;
+}
+
 bool MoveItVisualTools::publishTrajectoryPoints(const std::vector<robot_state::RobotStatePtr>& robot_state_trajectory,
                                                 const moveit::core::LinkModel* ee_parent_link,
                                                 const rviz_visual_tools::colors& color)

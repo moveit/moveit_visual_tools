@@ -498,6 +498,25 @@ public:
                              const moveit::core::LinkModel *ee_parent_link, const rviz_visual_tools::colors &color);
 
   /**
+   * \brief Display a line of the end effector(s) path(s) from a robot trajectory path
+   *        This version can visualize multiple end effectors
+   * \param trajectory_msg - the robot plan
+   * \param arm_jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_arm".
+   * \param color - display color of markers
+   * \return true on success
+   */
+  bool publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr robot_trajectory,
+                             const robot_model::JointModelGroup* arm_jmg,
+                             const rviz_visual_tools::colors& color)
+  {
+    return publishTrajectoryLine(*robot_trajectory, arm_jmg, color);
+  }
+
+  bool publishTrajectoryLine(const robot_trajectory::RobotTrajectory& robot_trajectory,
+                             const robot_model::JointModelGroup* arm_jmg,
+                             const rviz_visual_tools::colors& color);
+
+  /**
    * \brief Display trajectory as series of end effector position points
    * \param trajectory the actual plan
    * \param color - display color of markers
