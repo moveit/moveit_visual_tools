@@ -82,6 +82,9 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
   if (!loadFromFile(file_path_))
     ROS_INFO_STREAM_NAMED(name_, "Unable to find state from file, setting to default");
 
+    // Show initial robot state loaded from file
+  publishState();
+
   // Create each end effector
   end_effectors_.resize(arm_datas_.size());
   for (std::size_t i = 0; i < arm_datas_.size(); ++i)
@@ -203,6 +206,11 @@ bool IMarkerRobotState::setToRandomState()
   exit(-1);
   */
   return false;
+}
+
+void IMarkerRobotState::publishState()
+{
+  visual_tools_->publishRobotState(imarker_state_, color_);
 }
 
 moveit_visual_tools::MoveItVisualToolsPtr IMarkerRobotState::getVisualTools()

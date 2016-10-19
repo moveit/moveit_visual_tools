@@ -108,6 +108,9 @@ public:
 
   bool setToRandomState();
 
+  /** \brief Show current state in Rviz */
+  void publishState();
+
   moveit_visual_tools::MoveItVisualToolsPtr getVisualTools();
 
   bool getFilePath(std::string &file_path, const std::string &file_name, const std::string &subdirectory) const;

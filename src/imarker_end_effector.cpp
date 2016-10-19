@@ -69,10 +69,6 @@ IMarkerEndEffector::IMarkerEndEffector(IMarkerRobotState *imarker_parent, const 
   // Create imarker
   initializeInteractiveMarkers();
 
-  // Show initial robot state loaded from file
-  // TODO: this will be called for each end effector
-  visual_tools_->publishRobotState(imarker_state_, color_);
-
   ROS_INFO_STREAM_NAMED(name_, "IMarkerEndEffector '" << name_ << "' tracking ee link '"
                                                       << arm_data_.ee_link_->getName() << "' ready.");
 }
@@ -89,7 +85,7 @@ bool IMarkerEndEffector::setPoseFromRobotState()
   sendUpdatedIMarkerPose();
 
   // Show initial robot state loaded from file
-  visual_tools_->publishRobotState(imarker_state_, color_);
+  imarker_parent_->publishState();
 
   return true;
 }
@@ -164,7 +160,7 @@ void IMarkerEndEffector::solveIK(Eigen::Affine3d &pose)
     // if (psm_->getPlanningScene()->isStateValid(*imarker_state_))
     //{
     // ROS_INFO_STREAM_NAMED(name_, "Solved IK");
-    visual_tools_->publishRobotState(imarker_state_, color_);
+    imarker_parent_->publishState();
     //}
     // else
     // {
