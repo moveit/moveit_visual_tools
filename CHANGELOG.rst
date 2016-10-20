@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.2.0 (2016-10-20)
+------------------
 * Added publishState() to imarker_robot_state
 * New publishTrajectoryLine() function that automatically chooses end effectors to visualize
 * New collision table function that takes z input
