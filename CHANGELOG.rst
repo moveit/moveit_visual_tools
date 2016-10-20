@@ -2,6 +2,38 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Added publishState() to imarker_robot_state
+* New publishTrajectoryLine() function that automatically chooses end effectors to visualize
+* New collision table function that takes z input
+* Fixed callbacks for multiple EEFs
+* Allow for two end effectors
+* Ability to use two end effectors for interactive markers
+* Make ik solving at any end effector link, not just end of kinematic chain
+* Better debugging for collision
+* Only save when mouse up
+* Fix API for changes in rviz_visual_tools
+* Allow collision walls to have variable z location
+* Make applyVirtualJointTransform() static
+* Make checkForVirtualJoint() static
+* IMarkerRobotState remove offset capability
+* IMarkerRobotState remove imarker box control
+* Switched travis to MoveIt! CI
+* Added new IMarker Robot control method
+* Cleaned up code base: catkin lint, roslint
+* Fixed bug in planning scene triggering
+* Optimize planning scene updates to only update GEOMETRY
+* Fix xacro
+* Upgrade to Eigen3 per ROS Kinetic requirements
+* New publishRobotState() function
+* Fix Eigen bugs
+* Removed deprecated code
+* Converted to C++11
+* Optional blocking publisher calls
+* Added getter for getRobotRootState()
+* Contributors: Dave Coleman
+
 3.1.0 (2016-04-28)
 ------------------
 * Re-factored and fixed visual tools demo!

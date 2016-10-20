@@ -1,6 +1,6 @@
 # MoveIt! Visual Tools
 
-Helper functions for displaying and debugging MoveIt! data in Rviz via published markers, trajectories, and MoveIt! collision objects. It is sometimes hard to understand everything that is going on internally with MoveIt!, but using these quick convenience functions allows one to easily visualize their code.
+Helper functions for displaying and debugging MoveIt! data in Rviz via published markers, trajectories, and MoveIt! collision objects. It is sometimes hard to understand everything that is going on internally with MoveIt!, but using these quick convenience functions allows one to easily visualize their code. This package is built in top of [rviz_visual_tools](https://github.com/davetcoleman/rviz_visual_tools) and all those features are included via class inheritance.
 
 This package helps you visualize:
 
@@ -13,7 +13,9 @@ This package helps you visualize:
 
 Developed by [Dave Coleman](http://dav.ee) at the Correll Robotics Lab, University of Colorado Boulder with outside contributors.
 
- * [![Build Status](https://travis-ci.org/davetcoleman/moveit_visual_tools.svg)](https://travis-ci.org/davetcoleman/moveit_visual_tools) Travis CI
+* [![Build Status](https://travis-ci.org/davetcoleman/moveit_visual_tools.svg)](https://travis-ci.org/davetcoleman/moveit_visual_tools) Travis CI
+
+TODO: update these buttons for kinetic:
  * [![Build Status](http://build.ros.org/buildStatus/icon?job=Jsrc_uT__moveit_visual_tools__ubuntu_trusty__source)](http://build.ros.org/view/Jsrc_uT/job/Jsrc_uT__moveit_visual_tools__ubuntu_trusty__source/) ROS Buildfarm - Trusty Devel Source Build
  * [![Build Status](http://build.ros.org/buildStatus/icon?job=Jbin_uT64__moveit_visual_tools__ubuntu_trusty_amd64__binary)](http://build.ros.org/view/Jbin_uT64/job/Jbin_uT64__moveit_visual_tools__ubuntu_trusty_amd64__binary/) ROS Buildfarm - AMD64 Trusty Debian Build
 
@@ -26,13 +28,13 @@ Developed by [Dave Coleman](http://dav.ee) at the Correll Robotics Lab, Universi
 
 ### Ubuntu Debian
 
-    sudo apt-get install ros-jade-moveit-visual-tools
+    sudo apt-get install ros-kinetic-moveit-visual-tools
 
 ### Install From Source
 
 Clone this repository into a catkin workspace, then use the rosdep install tool to automatically download its dependencies. Depending on your current version of ROS, use:
 
-    rosdep install --from-paths src --ignore-src --rosdistro jade
+    rosdep install --from-paths src --ignore-src --rosdistro kinetic
 
 ## Quick Start Demo
 
@@ -44,11 +46,9 @@ Then run some demos displaying robot states and collision objects:
 
     roslaunch moveit_visual_tools demo.launch
 
-This package is built in top of ``rviz_visual_tools`` and all those features are included. Try running the rviz demo documented on [this README](https://github.com/davetcoleman/rviz_visual_tools).
-
 ## Code API
 
-See [VisualTools Class Reference](http://docs.ros.org/jade/api/moveit_visual_tools/html/classmoveit__visual__tools_1_1MoveItVisualTools.html)
+See [VisualTools Class Reference](http://docs.ros.org/kinetic/api/moveit_visual_tools/html/classmoveit__visual__tools_1_1MoveItVisualTools.html)
 
 ## Usage
 
@@ -99,7 +99,7 @@ Higher level robot and trajectory functions
 
 ## Show parts of a robot
 
-These functions are a little more complicated TODO document more
+These functions are a little more complicated
 
  - publishEEMarkers
 
