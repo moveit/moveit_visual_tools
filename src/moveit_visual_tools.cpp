@@ -1190,7 +1190,7 @@ bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTraje
     }
 
     path.push_back(tip_pose.translation());
-    publishSphere(tip_pose, color, rviz_visual_tools::LARGE);
+    publishSphere(tip_pose, color, rviz_visual_tools::MEDIUM);
   }
 
   const double radius = 0.005;

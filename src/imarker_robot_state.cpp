@@ -146,11 +146,6 @@ void IMarkerRobotState::setIMarkerCallback(IMarkerCallback callback)
     ee->setIMarkerCallback(callback);
 }
 
-moveit::core::RobotStatePtr IMarkerRobotState::getRobotState()
-{
-  return imarker_state_;
-}
-
 void IMarkerRobotState::setToCurrentState()
 {
   // Get the real current state

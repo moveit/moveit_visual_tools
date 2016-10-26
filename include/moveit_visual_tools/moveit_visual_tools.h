@@ -467,7 +467,7 @@ public:
                               const std::string &planning_group, double display_time = 0.1);
 
   /**
-   * \brief Animate trajectory in rviz
+   * \brief Animate trajectory in rviz. These functions do not need a trigger() called because use different publisher
    * \param trajectory the actual plan
    * \param blocking whether we need to wait for the animation to complete
    * \param robot_state - the base state to add the joint trajectory message to
