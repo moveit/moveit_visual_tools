@@ -82,7 +82,7 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
   if (!loadFromFile(file_path_))
     ROS_INFO_STREAM_NAMED(name_, "Unable to find state from file, setting to default");
 
-    // Show initial robot state loaded from file
+  // Show initial robot state loaded from file
   publishState();
 
   // Create each end effector
@@ -173,17 +173,7 @@ bool IMarkerRobotState::setToRandomState()
     imarker_state_->setToRandomPositions(jmg_);
     imarker_state_->update();
 
-    // Debug
-    const bool check_verbose = false;
-
-    // Get planning scene
-    boost::scoped_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls;
-    ls.reset(new planning_scene_monitor::LockedPlanningSceneRO(psm_));
-
-    // which planning group to collision check, "" is everything
-    static const std::string planning_group = jmg_->getName();
-    if (static_cast<const planning_scene::PlanningSceneConstPtr &>(*ls)
-            ->isStateValid(*imarker_state_, planning_group, check_verbose))
+    if (isStateValid())
     {
       // ROS_DEBUG_STREAM_NAMED(name_, "Found valid random robot state after " << i << " attempts");
 
@@ -205,6 +195,29 @@ bool IMarkerRobotState::setToRandomState()
   ROS_ERROR_STREAM_NAMED(name_, "Unable to find valid random robot state for imarker");
   exit(-1);
   */
+  return false;
+}
+
+bool IMarkerRobotState::isStateValid()
+{
+  // Debug
+  const bool check_verbose = false;
+
+  // Update transforms
+  imarker_state_->update();
+
+  // Lock planning scene
+  std::shared_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls =
+    std::make_shared<planning_scene_monitor::LockedPlanningSceneRO>(psm_);
+  const planning_scene::PlanningScene* planning_scene =
+    static_cast<const planning_scene::PlanningSceneConstPtr&>(*ls).get();
+
+  // which planning group to collision check, "" is everything
+  if (planning_scene->isStateValid(*imarker_state_, "", check_verbose))
+  {
+    return true;
+  }
+
   return false;
 }
 
