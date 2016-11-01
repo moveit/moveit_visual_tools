@@ -58,18 +58,18 @@ We'll assume you will be using these helper functions within a class.
 
 Add to your includes:
 ```
-#include <moveit_visual_tools/visual_tools.h>
+#include <moveit_visual_tools/moveit_visual_tools.h>
 ```
 
 Add to your class's member variables:
 ```
 // For visualizing things in rviz
-moveit_visual_tools::VisualToolsPtr visual_tools_;
+moveit_visual_tools::MoveItVisualToolsPtr visual_tools_;
 ```
 
 In your class' constructor add:
 ```
-visual_tools_.reset(new moveit_visual_tools::VisualTools("base_frame","/moveit_visual_markers"));
+visual_tools_.reset(new moveit_visual_tools::MoveItVisualTools("base_frame","/moveit_visual_markers"));
 ```
 
 ### Collision Object Functions
