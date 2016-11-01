@@ -203,9 +203,9 @@ bool IMarkerRobotState::isStateValid()
 
   // Lock planning scene
   std::shared_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls =
-    std::make_shared<planning_scene_monitor::LockedPlanningSceneRO>(psm_);
-  const planning_scene::PlanningScene* planning_scene =
-    static_cast<const planning_scene::PlanningSceneConstPtr&>(*ls).get();
+      std::make_shared<planning_scene_monitor::LockedPlanningSceneRO>(psm_);
+  const planning_scene::PlanningScene *planning_scene =
+      static_cast<const planning_scene::PlanningSceneConstPtr &>(*ls).get();
 
   // which planning group to collision check, "" is everything
   if (planning_scene->isStateValid(*imarker_state_, "", check_verbose))

@@ -382,8 +382,8 @@ public:
   /**
    * \brief Helper for publishCollisionWall
    */
-  void getCollisionWallMsg(double x, double y, double z, double angle, double width, double height, const std::string name,
-                           moveit_msgs::CollisionObject &collision_obj);
+  void getCollisionWallMsg(double x, double y, double z, double angle, double width, double height,
+                           const std::string name, moveit_msgs::CollisionObject &collision_obj);
 
   /**
    * \brief Publish a typical room wall
@@ -497,9 +497,11 @@ public:
                              const moveit::core::LinkModel *ee_parent_link, const robot_model::JointModelGroup *arm_jmg,
                              const rviz_visual_tools::colors &color = rviz_visual_tools::LIME_GREEN);
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr robot_trajectory,
-                             const moveit::core::LinkModel *ee_parent_link, const rviz_visual_tools::colors &color = rviz_visual_tools::LIME_GREEN);
+                             const moveit::core::LinkModel *ee_parent_link,
+                             const rviz_visual_tools::colors &color = rviz_visual_tools::LIME_GREEN);
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectory &robot_trajectory,
-                             const moveit::core::LinkModel *ee_parent_link, const rviz_visual_tools::colors &color = rviz_visual_tools::LIME_GREEN);
+                             const moveit::core::LinkModel *ee_parent_link,
+                             const rviz_visual_tools::colors &color = rviz_visual_tools::LIME_GREEN);
 
   /**
    * \brief Display a line of the end effector(s) path(s) from a robot trajectory path
@@ -510,14 +512,14 @@ public:
    * \return true on success
    */
   bool publishTrajectoryLine(const moveit_msgs::RobotTrajectory &trajectory_msg,
-                             const robot_model::JointModelGroup* arm_jmg,
-                             const rviz_visual_tools::colors& color = rviz_visual_tools::LIME_GREEN);
+                             const robot_model::JointModelGroup *arm_jmg,
+                             const rviz_visual_tools::colors &color = rviz_visual_tools::LIME_GREEN);
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr robot_trajectory,
-                             const robot_model::JointModelGroup* arm_jmg,
-                             const rviz_visual_tools::colors& color = rviz_visual_tools::LIME_GREEN);
-  bool publishTrajectoryLine(const robot_trajectory::RobotTrajectory& robot_trajectory,
-                             const robot_model::JointModelGroup* arm_jmg,
-                             const rviz_visual_tools::colors& color = rviz_visual_tools::LIME_GREEN);
+                             const robot_model::JointModelGroup *arm_jmg,
+                             const rviz_visual_tools::colors &color = rviz_visual_tools::LIME_GREEN);
+  bool publishTrajectoryLine(const robot_trajectory::RobotTrajectory &robot_trajectory,
+                             const robot_model::JointModelGroup *arm_jmg,
+                             const rviz_visual_tools::colors &color = rviz_visual_tools::LIME_GREEN);
 
   /**
    * \brief Display trajectory as series of end effector position points
@@ -640,7 +642,7 @@ protected:
 
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW  // http://eigen.tuxfamily.org/dox/group__TopicStructHavingEigenMembers.html
-};  // class
+};                                 // class
 
 typedef std::shared_ptr<MoveItVisualTools> MoveItVisualToolsPtr;
 typedef std::shared_ptr<const MoveItVisualTools> MoveItVisualToolsConstPtr;

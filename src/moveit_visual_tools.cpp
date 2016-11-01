@@ -1089,8 +1089,8 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
   return publishTrajectoryPath(trajectory_msg, *robot_state, blocking);
 }
 
-bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory &trajectory_msg,
-                                              const moveit::core::RobotState &robot_state, bool blocking)
+bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg,
+                                              const moveit::core::RobotState& robot_state, bool blocking)
 {
   // Convert the robot state to a ROS message
   moveit_msgs::RobotState robot_state_msg;
@@ -1098,8 +1098,8 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
   return publishTrajectoryPath(trajectory_msg, robot_state_msg, blocking);
 }
 
-bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory &trajectory_msg,
-                                              const moveit_msgs::RobotState &robot_state, bool blocking)
+bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg,
+                                              const moveit_msgs::RobotState& robot_state, bool blocking)
 {
   // Check if we have enough points
   if (!trajectory_msg.joint_trajectory.points.size())
@@ -1211,7 +1211,7 @@ bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTraje
   return true;
 }
 
-bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::RobotTrajectory &trajectory_msg,
+bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::RobotTrajectory& trajectory_msg,
                                               const robot_model::JointModelGroup* arm_jmg,
                                               const rviz_visual_tools::colors& color)
 {
@@ -1475,8 +1475,9 @@ bool MoveItVisualTools::checkForVirtualJoint(const moveit::core::RobotState& rob
   if (!robot_state.getRobotModel()->getJointModel(VJOINT_NAME)->hasVariable(VJOINT_NAME + "/trans_x"))
   {
     // Debug
-    ROS_WARN_STREAM_NAMED("moveit_visual_tools", "Variables for joint '" << VJOINT_NAME << "' do not exist. Try making this vjoint "
-                                                                           "floating");
+    ROS_WARN_STREAM_NAMED("moveit_visual_tools", "Variables for joint '" << VJOINT_NAME
+                                                                         << "' do not exist. Try making this vjoint "
+                                                                            "floating");
     ROS_WARN_STREAM_NAMED("moveit_visual_tools", "The only available joint variables are:");
     const std::vector<std::string>& var_names =
         robot_state.getRobotModel()->getJointModel(VJOINT_NAME)->getVariableNames();
@@ -1487,8 +1488,7 @@ bool MoveItVisualTools::checkForVirtualJoint(const moveit::core::RobotState& rob
   return true;
 }
 
-bool MoveItVisualTools::applyVirtualJointTransform(moveit::core::RobotState& robot_state,
-                                                   const Eigen::Affine3d& offset)
+bool MoveItVisualTools::applyVirtualJointTransform(moveit::core::RobotState& robot_state, const Eigen::Affine3d& offset)
 {
   static const std::string VJOINT_NAME = "virtual_joint";
 

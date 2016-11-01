@@ -162,8 +162,8 @@ public:
     double table_width = 3;
     double table_height = 1;
     double table_depth = 1;
-    visual_tools_->publishCollisionTable(table_x, table_y, table_z, common_angle, table_width, table_height, table_depth,
-                                         "Table", rvt::BLUE);
+    visual_tools_->publishCollisionTable(table_x, table_y, table_z, common_angle, table_width, table_height,
+                                         table_depth, "Table", rvt::BLUE);
 
     // Send ROS messages
     visual_tools_->triggerPlanningSceneUpdate();
