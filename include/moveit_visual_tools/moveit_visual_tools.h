@@ -480,6 +480,10 @@ public:
   bool publishTrajectoryPath(const robot_trajectory::RobotTrajectory &trajectory, bool blocking = false);
   bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory &trajectory_msg,
                              const moveit::core::RobotStateConstPtr robot_state, bool blocking = false);
+  bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory &trajectory_msg,
+                             const moveit::core::RobotState &robot_state, bool blocking = false);
+  bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory &trajectory_msg,
+                             const moveit_msgs::RobotState &robot_state, bool blocking = false);
 
   /**
    * \brief Display a line of the end effector path from a robot trajectory path
@@ -491,11 +495,11 @@ public:
    */
   bool publishTrajectoryLine(const moveit_msgs::RobotTrajectory &trajectory_msg,
                              const moveit::core::LinkModel *ee_parent_link, const robot_model::JointModelGroup *arm_jmg,
-                             const rviz_visual_tools::colors &color);
+                             const rviz_visual_tools::colors &color = rviz_visual_tools::LIME_GREEN);
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr robot_trajectory,
-                             const moveit::core::LinkModel *ee_parent_link, const rviz_visual_tools::colors &color);
+                             const moveit::core::LinkModel *ee_parent_link, const rviz_visual_tools::colors &color = rviz_visual_tools::LIME_GREEN);
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectory &robot_trajectory,
-                             const moveit::core::LinkModel *ee_parent_link, const rviz_visual_tools::colors &color);
+                             const moveit::core::LinkModel *ee_parent_link, const rviz_visual_tools::colors &color = rviz_visual_tools::LIME_GREEN);
 
   /**
    * \brief Display a line of the end effector(s) path(s) from a robot trajectory path
@@ -505,16 +509,15 @@ public:
    * \param color - display color of markers
    * \return true on success
    */
+  bool publishTrajectoryLine(const moveit_msgs::RobotTrajectory &trajectory_msg,
+                             const robot_model::JointModelGroup* arm_jmg,
+                             const rviz_visual_tools::colors& color = rviz_visual_tools::LIME_GREEN);
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr robot_trajectory,
                              const robot_model::JointModelGroup* arm_jmg,
-                             const rviz_visual_tools::colors& color)
-  {
-    return publishTrajectoryLine(*robot_trajectory, arm_jmg, color);
-  }
-
+                             const rviz_visual_tools::colors& color = rviz_visual_tools::LIME_GREEN);
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectory& robot_trajectory,
                              const robot_model::JointModelGroup* arm_jmg,
-                             const rviz_visual_tools::colors& color);
+                             const rviz_visual_tools::colors& color = rviz_visual_tools::LIME_GREEN);
 
   /**
    * \brief Display trajectory as series of end effector position points
