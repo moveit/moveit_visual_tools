@@ -2,6 +2,15 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* New publishTrajectoryPath() functions
+* New publishTrajectoryLine() functions
+* getRobotState() return by reference
+* Trajectory path has smaller vertices
+* IMarkerRobotState: added isStateValid()
+* Contributors: Dave Coleman
+
 3.2.0 (2016-10-20)
 ------------------
 * Added publishState() to imarker_robot_state
