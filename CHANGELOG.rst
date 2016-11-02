@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.2.1 (2016-11-02)
+------------------
 * New publishTrajectoryPath() functions
 * New publishTrajectoryLine() functions
 * getRobotState() return by reference
