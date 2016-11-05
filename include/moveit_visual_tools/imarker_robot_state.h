@@ -112,7 +112,7 @@ public:
   bool setToRandomState();
 
   /** \brief Return true if the currently solved IK solution is valid */
-  bool isStateValid();
+  bool isStateValid(bool verbose);
 
   /** \brief Show current state in Rviz */
   void publishState();

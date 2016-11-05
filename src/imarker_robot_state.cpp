@@ -193,11 +193,8 @@ bool IMarkerRobotState::setToRandomState()
   return false;
 }
 
-bool IMarkerRobotState::isStateValid()
+bool IMarkerRobotState::isStateValid(bool verbose)
 {
-  // Debug
-  const bool check_verbose = false;
-
   // Update transforms
   imarker_state_->update();
 
@@ -208,7 +205,7 @@ bool IMarkerRobotState::isStateValid()
       static_cast<const planning_scene::PlanningSceneConstPtr &>(*ls).get();
 
   // which planning group to collision check, "" is everything
-  if (planning_scene->isStateValid(*imarker_state_, "", check_verbose))
+  if (planning_scene->isStateValid(*imarker_state_, "", verbose))
   {
     return true;
   }
