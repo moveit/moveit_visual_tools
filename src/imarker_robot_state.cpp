@@ -60,9 +60,9 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
   : name_(imarker_name), nh_("~"), psm_(psm), arm_datas_(arm_datas), color_(color), package_path_(package_path)
 {
   // Load Visual tools
-  visual_tools_.reset(new moveit_visual_tools::MoveItVisualTools(
-      psm_->getRobotModel()->getModelFrame(), nh_.getNamespace() + "/" + imarker_name, psm_->getRobotModel()));
-  visual_tools_->setPlanningSceneMonitor(psm_);
+  visual_tools_ = std::make_shared<moveit_visual_tools::MoveItVisualTools>(
+                                                                           psm_->getRobotModel()->getModelFrame(), nh_.getNamespace() + "/" + imarker_name, psm_);
+  // visual_tools_->setPlanningSceneMonitor(psm_);
   visual_tools_->loadRobotStatePub(nh_.getNamespace() + "/imarker_" + imarker_name + "_state");
   visual_tools_->enableBatchPublishing();
 
@@ -83,7 +83,7 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
     ROS_INFO_STREAM_NAMED(name_, "Unable to find state from file, setting to default");
 
   // Show initial robot state loaded from file
-  publishState();
+  publishRobotState();
 
   // Create each end effector
   end_effectors_.resize(arm_datas_.size());
@@ -198,11 +198,7 @@ bool IMarkerRobotState::isStateValid(bool verbose)
   // Update transforms
   imarker_state_->update();
 
-  // Lock planning scene
-  std::shared_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls =
-      std::make_shared<planning_scene_monitor::LockedPlanningSceneRO>(psm_);
-  const planning_scene::PlanningScene *planning_scene =
-      static_cast<const planning_scene::PlanningSceneConstPtr &>(*ls).get();
+  planning_scene_monitor::LockedPlanningSceneRO planning_scene(psm_);  // Read only lock
 
   // which planning group to collision check, "" is everything
   if (planning_scene->isStateValid(*imarker_state_, "", verbose))
@@ -213,7 +209,7 @@ bool IMarkerRobotState::isStateValid(bool verbose)
   return false;
 }
 
-void IMarkerRobotState::publishState()
+void IMarkerRobotState::publishRobotState()
 {
   visual_tools_->publishRobotState(imarker_state_, color_);
 }

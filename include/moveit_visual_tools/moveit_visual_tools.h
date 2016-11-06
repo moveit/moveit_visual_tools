@@ -82,7 +82,7 @@ public:
    *        avoid having to re-load the URDF, kinematic solvers, etc
    */
   MoveItVisualTools(const std::string &base_frame, const std::string &marker_topic,
-                    planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor);
+                    planning_scene_monitor::PlanningSceneMonitorPtr psm);
 
   /**
    * \brief Constructor
@@ -185,9 +185,9 @@ public:
    * \brief Allow a pre-configured planning scene monitor to be set for publishing collision objects, etc
    * \param a pointer to a load planning scen
    */
-  void setPlanningSceneMonitor(planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
+  void setPlanningSceneMonitor(planning_scene_monitor::PlanningSceneMonitorPtr psm)
   {
-    planning_scene_monitor_ = planning_scene_monitor;
+    psm_ = psm;
   }
 
   /**
@@ -599,7 +599,7 @@ private:
 
 protected:
   // Pointer to a Planning Scene Monitor
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+  planning_scene_monitor::PlanningSceneMonitorPtr psm_;
 
   // Prevent the planning scene from always auto-pushing, but rather do it manually
   bool mannual_trigger_update_ = false;

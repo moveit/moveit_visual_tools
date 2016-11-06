@@ -85,7 +85,7 @@ bool IMarkerEndEffector::setPoseFromRobotState()
   sendUpdatedIMarkerPose();
 
   // Show initial robot state loaded from file
-  imarker_parent_->publishState();
+  imarker_parent_->publishRobotState();
 
   return true;
 }
@@ -160,7 +160,7 @@ void IMarkerEndEffector::solveIK(Eigen::Affine3d &pose)
     // if (psm_->getPlanningScene()->isStateValid(*imarker_state_))
     //{
     // ROS_INFO_STREAM_NAMED(name_, "Solved IK");
-    imarker_parent_->publishState();
+    imarker_parent_->publishRobotState();
     //}
     // else
     // {

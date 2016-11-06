@@ -101,12 +101,23 @@ public:
   void setIMarkerCallback(IMarkerCallback callback);
 
   /** \brief Get a pointer to the current robot state */
-  moveit::core::RobotStatePtr &getRobotState()
+  moveit::core::RobotStateConstPtr getRobotState()
+  {
+    return imarker_state_;
+  }
+  moveit::core::RobotStatePtr getRobotStateNonConst()
   {
     return imarker_state_;
   }
 
-  /** \brief Set the robot state to current */
+  /** \brief Set the robot state */
+  void setRobotState(moveit::core::RobotStatePtr state)
+  {
+    // Do a copy
+    *imarker_state_ = *state;
+  }
+
+  /** \brief Set the robot state to current in planning scene monitor */
   void setToCurrentState();
 
   bool setToRandomState();
@@ -115,7 +126,7 @@ public:
   bool isStateValid(bool verbose);
 
   /** \brief Show current state in Rviz */
-  void publishState();
+  void publishRobotState();
 
   moveit_visual_tools::MoveItVisualToolsPtr getVisualTools();
 
