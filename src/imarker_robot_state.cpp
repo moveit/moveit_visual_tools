@@ -126,7 +126,6 @@ bool IMarkerRobotState::loadFromFile(const std::string &file_name)
 
   // Get robot state from file
   moveit::core::streamToRobotState(*imarker_state_, line);
-  // imarker_state_->printStatePositions();
 
   return true;
 }
@@ -247,11 +246,58 @@ bool IMarkerRobotState::getFilePath(std::string &file_path, const std::string &f
   return true;
 }
 
+bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Affine3d poses, const moveit::core::JointModelGroup *group)
+{
+  std::vector<std::string> tips;
+  for (std::size_t i = 0; i < arm_datas_.size(); ++i)
+    tips.push_back(arm_datas_[i].ee_link_->getName());
+
+  std::cout << "First pose should be for joint model group: " << arm_datas_[0].ee_link_->getName() << std::endl;
+
+  const std::size_t attempts = 10;
+  const double timeout = 1.0 / 30.0;  // 30 fps
+
+  // Optionally collision check
+  moveit::core::GroupStateValidityCallbackFn constraint_fn;
+  if (true)
+  {
+    bool collision_checking_verbose_ = false;
+    bool only_check_self_collision_ = false;
+
+    // TODO(davetcoleman): this is currently not working, the locking seems to cause segfaults
+    boost::scoped_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls;
+    ls.reset(new planning_scene_monitor::LockedPlanningSceneRO(psm_));
+    constraint_fn = boost::bind(&isIKStateValid, static_cast<const planning_scene::PlanningSceneConstPtr &>(*ls).get(),
+                                collision_checking_verbose_, only_check_self_collision_, visual_tools_, _1, _2, _3);
+  }
+
+  // Solve
+  std::size_t outer_attempts = 20;
+  for (std::size_t i = 0; i < outer_attempts; ++i)
+  {
+    if (!imarker_state_->setFromIK(group, poses, tips, attempts, timeout, constraint_fn))
+    {
+      ROS_DEBUG_STREAM_NAMED(name_, "Failed to find dual arm pose, trying again");
+
+      // Re-seed
+      imarker_state_->setToRandomPositions(group);
+    }
+    else
+    {
+      ROS_INFO_STREAM_NAMED(name_, "Found solution");
+      return true;
+    }
+  }
+
+  ROS_ERROR_STREAM_NAMED(name_, "Failed to find dual arm pose");
+  return false;
+}
+
 }  // namespace moveit_visual_tools
 
 namespace
 {
-bool isStateValid(const planning_scene::PlanningScene *planning_scene, bool verbose, bool only_check_self_collision,
+bool isIKStateValid(const planning_scene::PlanningScene *planning_scene, bool verbose, bool only_check_self_collision,
                   moveit_visual_tools::MoveItVisualToolsPtr visual_tools, moveit::core::RobotState *robot_state,
                   const moveit::core::JointModelGroup *group, const double *ik_solution)
 {
