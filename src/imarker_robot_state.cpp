@@ -145,6 +145,16 @@ void IMarkerRobotState::setIMarkerCallback(IMarkerCallback callback)
     ee->setIMarkerCallback(callback);
 }
 
+void IMarkerRobotState::setRobotState(moveit::core::RobotStatePtr state)
+{
+  // Do a copy
+  *imarker_state_ = *state;
+
+  // Update the imarkers
+  for (IMarkerEndEffectorPtr ee : end_effectors_)
+    ee->setPoseFromRobotState();
+}
+
 void IMarkerRobotState::setToCurrentState()
 {
   // Get the real current state
@@ -285,6 +295,14 @@ bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Affine3d poses, cons
     else
     {
       ROS_INFO_STREAM_NAMED(name_, "Found solution");
+
+      // Visualize robot
+      publishRobotState();
+
+      // Update the imarkers
+      for (IMarkerEndEffectorPtr ee : end_effectors_)
+        ee->setPoseFromRobotState();
+
       return true;
     }
   }

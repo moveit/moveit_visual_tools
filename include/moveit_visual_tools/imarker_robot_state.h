@@ -111,11 +111,7 @@ public:
   }
 
   /** \brief Set the robot state */
-  void setRobotState(moveit::core::RobotStatePtr state)
-  {
-    // Do a copy
-    *imarker_state_ = *state;
-  }
+  void setRobotState(moveit::core::RobotStatePtr state);
 
   /** \brief Set the robot state to current in planning scene monitor */
   void setToCurrentState();
