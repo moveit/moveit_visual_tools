@@ -329,9 +329,9 @@ bool isIKStateValid(const planning_scene::PlanningScene *planning_scene, bool ve
     const std::size_t num_collision_objects = planning_scene->getCollisionWorld()->getWorld()->size();
     if (num_collision_objects == 0)
     {
-      ROS_ERROR_STREAM_NAMED("cart_path_planner", "No collision objects exist in world, you need at least a table "
+      ROS_ERROR_STREAM_NAMED("imarker_robot_state", "No collision objects exist in world, you need at least a table "
                                                   "modeled for the controller to work");
-      ROS_ERROR_STREAM_NAMED("cart_path_planner", "To fix this, relaunch the teleop/head tracking/whatever MoveIt! "
+      ROS_ERROR_STREAM_NAMED("imarker_robot_state", "To fix this, relaunch the teleop/head tracking/whatever MoveIt! "
                                                   "node to publish the collision objects");
       return false;
     }
@@ -339,7 +339,7 @@ bool isIKStateValid(const planning_scene::PlanningScene *planning_scene, bool ve
 
   if (!planning_scene)
   {
-    ROS_ERROR_STREAM_NAMED("cart_path_planner", "No planning scene provided");
+    ROS_ERROR_STREAM_NAMED("imarker_robot_state", "No planning scene provided");
     return false;
   }
   if (only_check_self_collision)
@@ -363,8 +363,9 @@ bool isIKStateValid(const planning_scene::PlanningScene *planning_scene, bool ve
     visual_tools->publishRobotState(*robot_state, rviz_visual_tools::RED);
     planning_scene->isStateColliding(*robot_state, group->getName(), true);
     visual_tools->publishContactPoints(*robot_state, planning_scene);
+    ROS_WARN_STREAM_THROTTLE_NAMED(2.0, "imarker_robot_state", "Collision in IK CC callback");
   }
-  ROS_WARN_STREAM_THROTTLE_NAMED(2.0, "cart_path_planner", "Collision");
+
   return false;
 }
 

@@ -135,6 +135,15 @@ public:
   bool processAttachedCollisionObjectMsg(const moveit_msgs::AttachedCollisionObject &msg);
 
   /**
+   * \brief Move an already published collision object to a new locaiton in space
+   * \param pose - location of center of object
+   * \param name - semantic name of MoveIt collision object
+   * \return true on success
+   */
+  bool moveCollisionObject(const Eigen::Affine3d& pose, const std::string& name, const rviz_visual_tools::colors& color);
+  bool moveCollisionObject(const geometry_msgs::Pose& pose, const std::string& name, const rviz_visual_tools::colors& color);
+
+  /**
    * \brief When mannual_trigger_update_ is true, use this to tell the planning scene to send
    *        an update out. Do not use otherwise
    */

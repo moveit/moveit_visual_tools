@@ -161,6 +161,27 @@ bool MoveItVisualTools::processAttachedCollisionObjectMsg(const moveit_msgs::Att
   return true;
 }
 
+bool MoveItVisualTools::moveCollisionObject(const Eigen::Affine3d& pose, const std::string& name, const rviz_visual_tools::colors& color)
+{
+  return moveCollisionObject(convertPose(pose), name, color);
+}
+
+bool MoveItVisualTools::moveCollisionObject(const geometry_msgs::Pose& pose, const std::string& name, const rviz_visual_tools::colors& color)
+{
+  moveit_msgs::CollisionObject collision_obj;
+  collision_obj.header.stamp = ros::Time::now();
+  collision_obj.header.frame_id = base_frame_;
+  collision_obj.id = name;
+  collision_obj.operation = moveit_msgs::CollisionObject::MOVE;
+
+  collision_obj.primitive_poses.resize(1);
+  collision_obj.primitive_poses[0] = pose;
+
+  // ROS_INFO_STREAM_NAMED(name_,"CollisionObject: \n " << collision_obj);
+  // ROS_DEBUG_STREAM_NAMED(name_,"Published collision object " << name);
+  return processCollisionObjectMsg(collision_obj, color);
+}
+
 bool MoveItVisualTools::triggerPlanningSceneUpdate()
 {
   // TODO(davetcoleman): perhaps switch to using the service call?
