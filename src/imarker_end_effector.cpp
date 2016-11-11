@@ -206,7 +206,7 @@ void IMarkerEndEffector::make6DofMarker(const geometry_msgs::Pose &pose)
   int_marker_.scale = 0.2;
 
   int_marker_.name = name_;
-  int_marker_.description = "imarker_" + name_;
+  //int_marker_.description = "imarker_" + name_; // TODO: unsure, but I think this causes a caption in Rviz that I don't want
 
   // insert a box
   // makeBoxControl(int_marker_);
