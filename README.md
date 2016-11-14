@@ -9,16 +9,13 @@ This package helps you visualize:
  - MoveIt! and ROS trajectories
  - Robot states
  - End effectors
- - Experimental: use interactive markers to move robot arm using IK
+ - Interactive markers to move robot arms using IK from remote applications
 
 Developed by [Dave Coleman](http://dav.ee) at the Correll Robotics Lab, University of Colorado Boulder with outside contributors.
 
-* [![Build Status](https://travis-ci.org/davetcoleman/moveit_visual_tools.svg)](https://travis-ci.org/davetcoleman/moveit_visual_tools) Travis CI
-
-TODO: update these buttons for kinetic:
- * [![Build Status](http://build.ros.org/buildStatus/icon?job=Jsrc_uT__moveit_visual_tools__ubuntu_trusty__source)](http://build.ros.org/view/Jsrc_uT/job/Jsrc_uT__moveit_visual_tools__ubuntu_trusty__source/) ROS Buildfarm - Trusty Devel Source Build
- * [![Build Status](http://build.ros.org/buildStatus/icon?job=Jbin_uT64__moveit_visual_tools__ubuntu_trusty_amd64__binary)](http://build.ros.org/view/Jbin_uT64/job/Jbin_uT64__moveit_visual_tools__ubuntu_trusty_amd64__binary/) ROS Buildfarm - AMD64 Trusty Debian Build
-
+* [![Build Status](https://travis-ci.org/ros-planning/moveit_visual_tools.svg)](https://travis-ci.org/ros-planning/moveit_visual_tools) Travis CI
+* [![Build Status](http://build.ros.org/buildStatus/icon?job=Kbin_uX64__moveit_visual_tools__ubuntu_xenial_amd64__binary)](http://build.ros.org/view/Kbin_uX64/job/Kbin_uX64__moveit_visual_tools__ubuntu_xenial_amd64__binary/) ROS Buildfarm - AMD64 Xenial Debian Build
+* [![Build Status](http://build.ros.org/buildStatus/icon?job=Kdev__moveit_visual_tools__ubuntu_xenial_amd64)](http://build.ros.org/view/Kdev/job/Kdev__moveit_visual_tools__ubuntu_xenial_amd64/) ROS Buildfarm - AMD64 Xenial Devel Build
 
 ![](resources/screenshot.png)
 
