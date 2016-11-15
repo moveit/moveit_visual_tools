@@ -262,7 +262,7 @@ bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Affine3d poses, cons
   for (std::size_t i = 0; i < arm_datas_.size(); ++i)
     tips.push_back(arm_datas_[i].ee_link_->getName());
 
-  std::cout << "First pose should be for joint model group: " << arm_datas_[0].ee_link_->getName() << std::endl;
+  //ROS_DEBUG_STREAM_NAMED(name_, "First pose should be for joint model group: " << arm_datas_[0].ee_link_->getName());
 
   const std::size_t attempts = 10;
   const double timeout = 1.0 / 30.0;  // 30 fps
@@ -294,7 +294,7 @@ bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Affine3d poses, cons
     }
     else
     {
-      ROS_INFO_STREAM_NAMED(name_, "Found solution");
+      ROS_DEBUG_STREAM_NAMED(name_, "Found IK solution");
 
       // Visualize robot
       publishRobotState();
