@@ -61,18 +61,19 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
 {
   // Load Visual tools
   visual_tools_ = std::make_shared<moveit_visual_tools::MoveItVisualTools>(
-                                                                           psm_->getRobotModel()->getModelFrame(), nh_.getNamespace() + "/" + imarker_name, psm_);
+      psm_->getRobotModel()->getModelFrame(), nh_.getNamespace() + "/" + imarker_name, psm_);
+
   // visual_tools_->setPlanningSceneMonitor(psm_);
   visual_tools_->loadRobotStatePub(nh_.getNamespace() + "/imarker_" + imarker_name + "_state");
   visual_tools_->enableBatchPublishing();
 
   // Load robot state
-  imarker_state_.reset(new moveit::core::RobotState(psm_->getRobotModel()));
+  imarker_state_ = std::make_shared<moveit::core::RobotState>(psm_->getRobotModel());
   imarker_state_->setToDefaultValues();
 
   // Create Marker Server
   const std::string imarker_topic = nh_.getNamespace() + "/" + imarker_name + "_imarker";
-  imarker_server_.reset(new interactive_markers::InteractiveMarkerServer(imarker_topic, "", false));
+  imarker_server_ = std::make_shared<interactive_markers::InteractiveMarkerServer>(imarker_topic, "", false);
 
   // Get file name
   if (!getFilePath(file_path_, "imarker_" + name_ + ".csv", "config/imarkers"))
@@ -95,7 +96,7 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
     else
       eef_name = imarker_name + "_left";
 
-    end_effectors_[i].reset(new IMarkerEndEffector(this, eef_name, arm_datas_[i], color));
+    end_effectors_[i] = std::make_shared<IMarkerEndEffector>(this, eef_name, arm_datas_[i], color);
 
     // Create map from eef name to object
     name_to_eef_[eef_name] = end_effectors_[i];
@@ -169,17 +170,20 @@ void IMarkerRobotState::setToCurrentState()
 
 bool IMarkerRobotState::setToRandomState()
 {
-  ROS_ERROR_STREAM_NAMED(name_, "Not reimplemented yet");
-  /*
   static const std::size_t MAX_ATTEMPTS = 1000;
-  for (std::size_t i = 0; i < MAX_ATTEMPTS; ++i)
+  for (std::size_t attempt = 0; attempt < MAX_ATTEMPTS; ++attempt)
   {
-    imarker_state_->setToRandomPositions(jmg_);
+    // Set each planning group to random
+    for (std::size_t i = 0; i < arm_datas_.size(); ++i)
+      imarker_state_->setToRandomPositions(arm_datas_[i].jmg_);
+
+    // Update transforms
     imarker_state_->update();
 
+    // Collision check
     if (isStateValid())
     {
-      // ROS_DEBUG_STREAM_NAMED(name_, "Found valid random robot state after " << i << " attempts");
+      ROS_DEBUG_STREAM_NAMED(name_, "Found valid random robot state after " << attempt << " attempts");
 
       // Get pose from robot state
       for (std::size_t i = 0; i < arm_datas_.size(); ++i)
@@ -192,13 +196,13 @@ bool IMarkerRobotState::setToRandomState()
       return true;
     }
 
-    if (i == 100)
+    if (attempt == 100)
       ROS_WARN_STREAM_NAMED(name_, "Taking long time to find valid random state");
   }
 
-  ROS_ERROR_STREAM_NAMED(name_, "Unable to find valid random robot state for imarker");
-  exit(-1);
-  */
+  ROS_ERROR_STREAM_NAMED(name_, "Unable to find valid random robot state for imarker after " << MAX_ATTEMPTS << " attem"
+                                                                                                                "pts");
+
   return false;
 }
 
@@ -262,7 +266,7 @@ bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Affine3d poses, cons
   for (std::size_t i = 0; i < arm_datas_.size(); ++i)
     tips.push_back(arm_datas_[i].ee_link_->getName());
 
-  //ROS_DEBUG_STREAM_NAMED(name_, "First pose should be for joint model group: " << arm_datas_[0].ee_link_->getName());
+  // ROS_DEBUG_STREAM_NAMED(name_, "First pose should be for joint model group: " << arm_datas_[0].ee_link_->getName());
 
   const std::size_t attempts = 10;
   const double timeout = 1.0 / 30.0;  // 30 fps
@@ -275,6 +279,7 @@ bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Affine3d poses, cons
     bool only_check_self_collision_ = false;
 
     // TODO(davetcoleman): this is currently not working, the locking seems to cause segfaults
+    // TODO(davetcoleman): change to std shared_ptr
     boost::scoped_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls;
     ls.reset(new planning_scene_monitor::LockedPlanningSceneRO(psm_));
     constraint_fn = boost::bind(&isIKStateValid, static_cast<const planning_scene::PlanningSceneConstPtr &>(*ls).get(),
@@ -316,8 +321,8 @@ bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Affine3d poses, cons
 namespace
 {
 bool isIKStateValid(const planning_scene::PlanningScene *planning_scene, bool verbose, bool only_check_self_collision,
-                  moveit_visual_tools::MoveItVisualToolsPtr visual_tools, moveit::core::RobotState *robot_state,
-                  const moveit::core::JointModelGroup *group, const double *ik_solution)
+                    moveit_visual_tools::MoveItVisualToolsPtr visual_tools, moveit::core::RobotState *robot_state,
+                    const moveit::core::JointModelGroup *group, const double *ik_solution)
 {
   // Apply IK solution to robot state
   robot_state->setJointGroupPositions(group, ik_solution);
@@ -330,9 +335,9 @@ bool isIKStateValid(const planning_scene::PlanningScene *planning_scene, bool ve
     if (num_collision_objects == 0)
     {
       ROS_ERROR_STREAM_NAMED("imarker_robot_state", "No collision objects exist in world, you need at least a table "
-                                                  "modeled for the controller to work");
+                                                    "modeled for the controller to work");
       ROS_ERROR_STREAM_NAMED("imarker_robot_state", "To fix this, relaunch the teleop/head tracking/whatever MoveIt! "
-                                                  "node to publish the collision objects");
+                                                    "node to publish the collision objects");
       return false;
     }
   }
