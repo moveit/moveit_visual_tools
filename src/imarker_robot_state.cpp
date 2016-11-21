@@ -40,10 +40,6 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/transforms/transforms.h>
 
-// Conversions
-// #include <eigen_conversions/eigen_msg.h>
-// #include <tf_conversions/tf_eigen.h>
-
 // this package
 #include <moveit_visual_tools/imarker_robot_state.h>
 #include <moveit_visual_tools/imarker_end_effector.h>
@@ -65,7 +61,6 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
 
   // visual_tools_->setPlanningSceneMonitor(psm_);
   visual_tools_->loadRobotStatePub(nh_.getNamespace() + "/imarker_" + imarker_name + "_state");
-  visual_tools_->enableBatchPublishing();
 
   // Load robot state
   imarker_state_ = std::make_shared<moveit::core::RobotState>(psm_->getRobotModel());
@@ -162,7 +157,9 @@ void IMarkerRobotState::setToCurrentState()
   planning_scene_monitor::LockedPlanningSceneRO scene(psm_);  // Lock planning scene
   (*imarker_state_) = scene->getCurrentState();
 
-  // TODO: move interactive markers and pose
+  // Set updated pose from robot state
+  for (std::size_t i = 0; i < arm_datas_.size(); ++i)
+    end_effectors_[i]->setPoseFromRobotState();
 
   // Show new state
   visual_tools_->publishRobotState(imarker_state_, color_);
@@ -175,7 +172,9 @@ bool IMarkerRobotState::setToRandomState()
   {
     // Set each planning group to random
     for (std::size_t i = 0; i < arm_datas_.size(); ++i)
+    {
       imarker_state_->setToRandomPositions(arm_datas_[i].jmg_);
+    }
 
     // Update transforms
     imarker_state_->update();
@@ -183,9 +182,9 @@ bool IMarkerRobotState::setToRandomState()
     // Collision check
     if (isStateValid())
     {
-      ROS_DEBUG_STREAM_NAMED(name_, "Found valid random robot state after " << attempt << " attempts");
+      ROS_INFO_STREAM_NAMED(name_, "Found valid random robot state after " << attempt << " attempts");
 
-      // Get pose from robot state
+      // Set updated pose from robot state
       for (std::size_t i = 0; i < arm_datas_.size(); ++i)
         end_effectors_[i]->setPoseFromRobotState();
 
