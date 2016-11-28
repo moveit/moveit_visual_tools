@@ -165,7 +165,7 @@ void IMarkerRobotState::setToCurrentState()
   visual_tools_->publishRobotState(imarker_state_, color_);
 }
 
-bool IMarkerRobotState::setToRandomState()
+bool IMarkerRobotState::setToRandomState(double clearance)
 {
   static const std::size_t MAX_ATTEMPTS = 1000;
   for (std::size_t attempt = 0; attempt < MAX_ATTEMPTS; ++attempt)
@@ -178,10 +178,23 @@ bool IMarkerRobotState::setToRandomState()
 
     // Update transforms
     imarker_state_->update();
+    planning_scene_monitor::LockedPlanningSceneRO planning_scene(psm_);  // Read only lock
 
     // Collision check
-    if (isStateValid())
+    // which planning group to collision check, "" is everything
+    static const bool verbose = false;
+    if (planning_scene->isStateValid(*imarker_state_, "", verbose))
     {
+      // Check clearance
+      if (clearance > 0)
+      {
+        // which planning group to collision check, "" is everything
+        if (planning_scene->distanceToCollision(*imarker_state_) > clearance)
+        {
+          continue; // clearance is not enough
+        }
+      }
+
       ROS_INFO_STREAM_NAMED(name_, "Found valid random robot state after " << attempt << " attempts");
 
       // Set updated pose from robot state

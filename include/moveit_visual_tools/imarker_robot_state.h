@@ -116,7 +116,12 @@ public:
   /** \brief Set the robot state to current in planning scene monitor */
   void setToCurrentState();
 
-  bool setToRandomState();
+  /**
+   * \brief Set the robot to a random position
+   * \param clearance - optional value to ensure random state is not too close to obstacles. 0 is disable
+   * \return true on success
+   */
+  bool setToRandomState(double clearance = 0);
 
   /** \brief Return true if the currently solved IK solution is valid */
   bool isStateValid(bool verbose = false);
