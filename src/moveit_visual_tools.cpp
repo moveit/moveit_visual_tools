@@ -1517,7 +1517,7 @@ bool MoveItVisualTools::applyVirtualJointTransform(moveit::core::RobotState& rob
   // Error check
   if (!checkForVirtualJoint(robot_state))
   {
-    ROS_ERROR_STREAM_NAMED("moveit_visual_tools", "Unable to apply virtual joint transform");
+    ROS_WARN_STREAM_NAMED("moveit_visual_tools", "Unable to apply virtual joint transform, hideRobot() functionality is disabled");
     return false;
   }
 
