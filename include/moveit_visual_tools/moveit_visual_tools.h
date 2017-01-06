@@ -311,7 +311,7 @@ public:
    * \param color to display the collision object with
    * \return true on sucess
    **/
-  bool publishCollisionBlock(const geometry_msgs::Pose &block_pose, const std::string &block_name, double block_size,
+  bool publishCollisionBlock(const geometry_msgs::Pose &block_pose, const std::string &block_name = "block", double block_size = 0.1,
                              const rviz_visual_tools::colors &color = rviz_visual_tools::GREEN);
 
   /**
@@ -593,12 +593,13 @@ public:
    */
   void showJointLimits(moveit::core::RobotStatePtr robot_state);
 
-private:
   /**
    * @brief Get the planning scene monitor that this class is using
    * @return a ptr to a planning scene
    */
   planning_scene_monitor::PlanningSceneMonitorPtr getPlanningSceneMonitor();
+
+private:
 
   /**
    * \brief Error check that the robot's SRDF was properly setup with a virtual joint that was named a certain way
