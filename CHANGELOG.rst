@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.3.0 (2017-06-20)
+------------------
 * Change error message to warning
 * Make planning scene monitor publicly exposed
 * Remove label from imarkers
