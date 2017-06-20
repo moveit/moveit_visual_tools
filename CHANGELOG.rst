@@ -2,6 +2,19 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Change error message to warning
+* Make planning scene monitor publicly exposed
+* Remove label from imarkers
+* Ability to move a collision object without removing it first
+* IMarkerRobotState: update imarkers location when setting robot state
+* IMarkerRobotState: Added setRobotState()
+* IMarkerRobotState: Renamed function publishRobotState()
+* MoveItVisualTools: renamed variable to psm\_
+* Expose verbose collision checking
+* Contributors: Dave Coleman
+
 3.2.1 (2016-11-02)
 ------------------
 * New publishTrajectoryPath() functions
