@@ -189,7 +189,7 @@ bool IMarkerRobotState::setToRandomState(double clearance)
       if (clearance > 0)
       {
         // which planning group to collision check, "" is everything
-        if (planning_scene->distanceToCollision(*imarker_state_) > clearance)
+        if (planning_scene->distanceToCollision(*imarker_state_) < clearance)
         {
           continue; // clearance is not enough
         }
