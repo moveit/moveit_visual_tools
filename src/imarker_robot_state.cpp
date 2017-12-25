@@ -51,8 +51,8 @@
 namespace moveit_visual_tools
 {
 IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonitorPtr psm,
-                                     const std::string &imarker_name, std::vector<ArmData> arm_datas,
-                                     rviz_visual_tools::colors color, const std::string &package_path)
+                                     const std::string& imarker_name, std::vector<ArmData> arm_datas,
+                                     rviz_visual_tools::colors color, const std::string& package_path)
   : name_(imarker_name), nh_("~"), psm_(psm), arm_datas_(arm_datas), color_(color), package_path_(package_path)
 {
   // Load Visual tools
@@ -103,7 +103,7 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
   ROS_DEBUG_STREAM_NAMED(name_, "IMarkerRobotState '" << name_ << "' Ready.");
 }
 
-bool IMarkerRobotState::loadFromFile(const std::string &file_name)
+bool IMarkerRobotState::loadFromFile(const std::string& file_name)
 {
   if (!boost::filesystem::exists(file_name))
   {
@@ -191,7 +191,7 @@ bool IMarkerRobotState::setToRandomState(double clearance)
         // which planning group to collision check, "" is everything
         if (planning_scene->distanceToCollision(*imarker_state_) < clearance)
         {
-          continue; // clearance is not enough
+          continue;  // clearance is not enough
         }
       }
 
@@ -244,8 +244,8 @@ moveit_visual_tools::MoveItVisualToolsPtr IMarkerRobotState::getVisualTools()
   return visual_tools_;
 }
 
-bool IMarkerRobotState::getFilePath(std::string &file_path, const std::string &file_name,
-                                    const std::string &subdirectory) const
+bool IMarkerRobotState::getFilePath(std::string& file_path, const std::string& file_name,
+                                    const std::string& subdirectory) const
 
 {
   namespace fs = boost::filesystem;
@@ -272,7 +272,7 @@ bool IMarkerRobotState::getFilePath(std::string &file_path, const std::string &f
   return true;
 }
 
-bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Affine3d poses, const moveit::core::JointModelGroup *group)
+bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Affine3d poses, const moveit::core::JointModelGroup* group)
 {
   std::vector<std::string> tips;
   for (std::size_t i = 0; i < arm_datas_.size(); ++i)
@@ -294,7 +294,7 @@ bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Affine3d poses, cons
     // TODO(davetcoleman): change to std shared_ptr
     boost::scoped_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls;
     ls.reset(new planning_scene_monitor::LockedPlanningSceneRO(psm_));
-    constraint_fn = boost::bind(&isIKStateValid, static_cast<const planning_scene::PlanningSceneConstPtr &>(*ls).get(),
+    constraint_fn = boost::bind(&isIKStateValid, static_cast<const planning_scene::PlanningSceneConstPtr&>(*ls).get(),
                                 collision_checking_verbose_, only_check_self_collision_, visual_tools_, _1, _2, _3);
   }
 
@@ -332,9 +332,9 @@ bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Affine3d poses, cons
 
 namespace
 {
-bool isIKStateValid(const planning_scene::PlanningScene *planning_scene, bool verbose, bool only_check_self_collision,
-                    moveit_visual_tools::MoveItVisualToolsPtr visual_tools, moveit::core::RobotState *robot_state,
-                    const moveit::core::JointModelGroup *group, const double *ik_solution)
+bool isIKStateValid(const planning_scene::PlanningScene* planning_scene, bool verbose, bool only_check_self_collision,
+                    moveit_visual_tools::MoveItVisualToolsPtr visual_tools, moveit::core::RobotState* robot_state,
+                    const moveit::core::JointModelGroup* group, const double* ik_solution)
 {
   // Apply IK solution to robot state
   robot_state->setJointGroupPositions(group, ik_solution);
