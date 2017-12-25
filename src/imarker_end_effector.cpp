@@ -84,9 +84,6 @@ bool IMarkerEndEffector::setPoseFromRobotState()
 
   sendUpdatedIMarkerPose();
 
-  // Show initial robot state loaded from file
-  imarker_parent_->publishRobotState();
-
   return true;
 }
 
