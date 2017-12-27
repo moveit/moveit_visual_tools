@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.4.0 (2017-12-27)
+------------------
 * Apply current MoveIt clang-format
 * Various improvements needed while finishing planning thesis
 * Fix greater than/less than issue in clearance check
