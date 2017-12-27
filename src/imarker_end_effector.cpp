@@ -52,7 +52,7 @@
 
 namespace moveit_visual_tools
 {
-IMarkerEndEffector::IMarkerEndEffector(IMarkerRobotState *imarker_parent, const std::string &imarker_name,
+IMarkerEndEffector::IMarkerEndEffector(IMarkerRobotState* imarker_parent, const std::string& imarker_name,
                                        ArmData arm_data, rviz_visual_tools::colors color)
   : name_(imarker_name)
   , imarker_parent_(imarker_parent)
@@ -73,7 +73,7 @@ IMarkerEndEffector::IMarkerEndEffector(IMarkerRobotState *imarker_parent, const 
                                                       << arm_data_.ee_link_->getName() << "' ready.");
 }
 
-void IMarkerEndEffector::getPose(Eigen::Affine3d &pose)
+void IMarkerEndEffector::getPose(Eigen::Affine3d& pose)
 {
   pose = imarker_pose_;
 }
@@ -87,7 +87,7 @@ bool IMarkerEndEffector::setPoseFromRobotState()
   return true;
 }
 
-void IMarkerEndEffector::iMarkerCallback(const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback)
+void IMarkerEndEffector::iMarkerCallback(const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback)
 {
   if (feedback->event_type == visualization_msgs::InteractiveMarkerFeedback::MOUSE_UP)
   {
@@ -133,7 +133,7 @@ void IMarkerEndEffector::iMarkerCallback(const visualization_msgs::InteractiveMa
   }
 }
 
-void IMarkerEndEffector::solveIK(Eigen::Affine3d &pose)
+void IMarkerEndEffector::solveIK(Eigen::Affine3d& pose)
 {
   // Cartesian settings
   const std::size_t attempts = 2;
@@ -146,7 +146,7 @@ void IMarkerEndEffector::solveIK(Eigen::Affine3d &pose)
     // TODO(davetcoleman): this is currently not working, the locking seems to cause segfaults
     boost::scoped_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls;
     ls.reset(new planning_scene_monitor::LockedPlanningSceneRO(psm_));
-    constraint_fn = boost::bind(&isStateValid, static_cast<const planning_scene::PlanningSceneConstPtr &>(*ls).get(),
+    constraint_fn = boost::bind(&isStateValid, static_cast<const planning_scene::PlanningSceneConstPtr&>(*ls).get(),
                                 collision_checking_verbose_, only_check_self_collision_, visual_tools_, _1, _2, _3);
   }
 
@@ -177,7 +177,7 @@ void IMarkerEndEffector::initializeInteractiveMarkers()
   make6DofMarker(pose_msg);
 }
 
-void IMarkerEndEffector::updateIMarkerPose(const Eigen::Affine3d &pose)
+void IMarkerEndEffector::updateIMarkerPose(const Eigen::Affine3d& pose)
 {
   // Move marker to tip of fingers
   // imarker_pose_ = pose * imarker_offset_.inverse();
@@ -194,7 +194,7 @@ void IMarkerEndEffector::sendUpdatedIMarkerPose()
   imarker_server_->applyChanges();
 }
 
-void IMarkerEndEffector::make6DofMarker(const geometry_msgs::Pose &pose)
+void IMarkerEndEffector::make6DofMarker(const geometry_msgs::Pose& pose)
 {
   ROS_DEBUG_STREAM_NAMED(name_, "Making 6dof interactive marker named " << name_);
 
@@ -203,7 +203,8 @@ void IMarkerEndEffector::make6DofMarker(const geometry_msgs::Pose &pose)
   int_marker_.scale = 0.2;
 
   int_marker_.name = name_;
-  //int_marker_.description = "imarker_" + name_; // TODO: unsure, but I think this causes a caption in Rviz that I don't want
+  // int_marker_.description = "imarker_" + name_; // TODO: unsure, but I think this causes a caption in Rviz that I
+  // don't want
 
   // insert a box
   // makeBoxControl(int_marker_);
@@ -249,8 +250,8 @@ void IMarkerEndEffector::make6DofMarker(const geometry_msgs::Pose &pose)
   // menu_handler_.apply(*imarker_server_, int_marker_.name);
 }
 
-visualization_msgs::InteractiveMarkerControl &
-IMarkerEndEffector::makeBoxControl(visualization_msgs::InteractiveMarker &msg)
+visualization_msgs::InteractiveMarkerControl&
+IMarkerEndEffector::makeBoxControl(visualization_msgs::InteractiveMarker& msg)
 {
   visualization_msgs::InteractiveMarkerControl control;
   control.always_visible = true;
@@ -275,9 +276,9 @@ IMarkerEndEffector::makeBoxControl(visualization_msgs::InteractiveMarker &msg)
 
 namespace
 {
-bool isStateValid(const planning_scene::PlanningScene *planning_scene, bool verbose, bool only_check_self_collision,
-                  moveit_visual_tools::MoveItVisualToolsPtr visual_tools, moveit::core::RobotState *robot_state,
-                  const moveit::core::JointModelGroup *group, const double *ik_solution)
+bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verbose, bool only_check_self_collision,
+                  moveit_visual_tools::MoveItVisualToolsPtr visual_tools, moveit::core::RobotState* robot_state,
+                  const moveit::core::JointModelGroup* group, const double* ik_solution)
 {
   // Apply IK solution to robot state
   robot_state->setJointGroupPositions(group, ik_solution);

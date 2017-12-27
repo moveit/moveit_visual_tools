@@ -111,7 +111,6 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
                                        planning_scene_topic_);
     ROS_DEBUG_STREAM_NAMED(name_, "Publishing planning scene on " << planning_scene_topic_);
 
-
     planning_scene_monitor::LockedPlanningSceneRW planning_scene(psm_);
     planning_scene->setName("visual_tools_scene");
   }
@@ -161,12 +160,14 @@ bool MoveItVisualTools::processAttachedCollisionObjectMsg(const moveit_msgs::Att
   return true;
 }
 
-bool MoveItVisualTools::moveCollisionObject(const Eigen::Affine3d& pose, const std::string& name, const rviz_visual_tools::colors& color)
+bool MoveItVisualTools::moveCollisionObject(const Eigen::Affine3d& pose, const std::string& name,
+                                            const rviz_visual_tools::colors& color)
 {
   return moveCollisionObject(convertPose(pose), name, color);
 }
 
-bool MoveItVisualTools::moveCollisionObject(const geometry_msgs::Pose& pose, const std::string& name, const rviz_visual_tools::colors& color)
+bool MoveItVisualTools::moveCollisionObject(const geometry_msgs::Pose& pose, const std::string& name,
+                                            const rviz_visual_tools::colors& color)
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
@@ -186,7 +187,7 @@ bool MoveItVisualTools::triggerPlanningSceneUpdate()
 {
   // TODO(davetcoleman): perhaps switch to using the service call?
   getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
-  //getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_GEOMETRY);
+  // getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_GEOMETRY);
 
   ros::spinOnce();
   return true;
@@ -1474,7 +1475,7 @@ planning_scene_monitor::PlanningSceneMonitorPtr MoveItVisualTools::getPlanningSc
     ROS_INFO_STREAM_NAMED(name_, "No planning scene passed into moveit_visual_tools, creating one.");
     loadPlanningSceneMonitor();
     ros::spinOnce();
-    ros::Duration(1).sleep(); // TODO: is this necessary?
+    ros::Duration(1).sleep();  // TODO: is this necessary?
   }
   return psm_;
 }
@@ -1518,7 +1519,8 @@ bool MoveItVisualTools::applyVirtualJointTransform(moveit::core::RobotState& rob
   // Error check
   if (!checkForVirtualJoint(robot_state))
   {
-    ROS_WARN_STREAM_NAMED("moveit_visual_tools", "Unable to apply virtual joint transform, hideRobot() functionality is disabled");
+    ROS_WARN_STREAM_NAMED("moveit_visual_tools", "Unable to apply virtual joint transform, hideRobot() functionality "
+                                                 "is disabled");
     return false;
   }
 

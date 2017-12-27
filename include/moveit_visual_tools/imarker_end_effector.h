@@ -62,7 +62,7 @@ namespace moveit_visual_tools
 using visualization_msgs::InteractiveMarkerFeedback;
 using visualization_msgs::InteractiveMarkerControl;
 
-typedef std::function<void(const visualization_msgs::InteractiveMarkerFeedbackConstPtr &, const Eigen::Affine3d &)>
+typedef std::function<void(const visualization_msgs::InteractiveMarkerFeedbackConstPtr&, const Eigen::Affine3d&)>
     IMarkerCallback;
 
 class IMarkerRobotState;
@@ -73,7 +73,7 @@ public:
   /**
    * \brief Constructor
    */
-  IMarkerEndEffector(IMarkerRobotState *imarker_parent, const std::string &imarker_name, ArmData arm_data,
+  IMarkerEndEffector(IMarkerRobotState* imarker_parent, const std::string& imarker_name, ArmData arm_data,
                      rviz_visual_tools::colors color);
 
   ~IMarkerEndEffector()
@@ -81,23 +81,23 @@ public:
   }
 
   /** \brief Get the current end effector pose */
-  void getPose(Eigen::Affine3d &pose);
+  void getPose(Eigen::Affine3d& pose);
 
   bool setPoseFromRobotState();
 
-  void iMarkerCallback(const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback);
+  void iMarkerCallback(const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback);
 
-  void solveIK(Eigen::Affine3d &pose);
+  void solveIK(Eigen::Affine3d& pose);
 
   void initializeInteractiveMarkers();
 
-  void updateIMarkerPose(const Eigen::Affine3d &pose);
+  void updateIMarkerPose(const Eigen::Affine3d& pose);
 
   void sendUpdatedIMarkerPose();
 
-  void make6DofMarker(const geometry_msgs::Pose &pose);
+  void make6DofMarker(const geometry_msgs::Pose& pose);
 
-  visualization_msgs::InteractiveMarkerControl &makeBoxControl(visualization_msgs::InteractiveMarker &msg);
+  visualization_msgs::InteractiveMarkerControl& makeBoxControl(visualization_msgs::InteractiveMarker& msg);
 
   void setCollisionCheckingVerbose(bool collision_checking_verbose)
   {
@@ -119,7 +119,7 @@ public:
     imarker_callback_ = callback;
   }
 
-  const moveit::core::LinkModel *getEELink()
+  const moveit::core::LinkModel* getEELink()
   {
     return arm_data_.ee_link_;
   }
@@ -131,7 +131,7 @@ private:
   std::string name_;
 
   // Pointer to parent
-  IMarkerRobotState *imarker_parent_;
+  IMarkerRobotState* imarker_parent_;
 
   // State
   moveit::core::RobotStatePtr imarker_state_;
@@ -175,9 +175,9 @@ typedef std::shared_ptr<const IMarkerEndEffector> IMarkerEndEffectorConstPtr;
 namespace
 {
 /** \brief Collision checking handle for IK solvers */
-bool isStateValid(const planning_scene::PlanningScene *planning_scene, bool verbose, bool only_check_self_collision,
-                  moveit_visual_tools::MoveItVisualToolsPtr visual_tools_, robot_state::RobotState *state,
-                  const robot_state::JointModelGroup *group, const double *ik_solution);
+bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verbose, bool only_check_self_collision,
+                  moveit_visual_tools::MoveItVisualToolsPtr visual_tools_, robot_state::RobotState* state,
+                  const robot_state::JointModelGroup* group, const double* ik_solution);
 }
 
 #endif  // MOVEIT_VISUAL_TOOLS_IMARKER_END_EFFECTOR_H
