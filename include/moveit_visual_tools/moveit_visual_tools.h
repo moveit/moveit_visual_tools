@@ -179,11 +179,12 @@ public:
   moveit::core::RobotModelConstPtr getRobotModel();
 
   /**
-   * \brief Call this once at begining to load the robot marker
-   * \param ee_jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_arm"
+   * \brief Call this once at begining to load the end effector markers and then whenever a joint changes
+   * \param ee_jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_gripper"
+   * \param ee_joint_pos - the values of all active joints in this planning group
    * \return true if it is successful
    */
-  bool loadEEMarker(const robot_model::JointModelGroup* ee_jmg);
+  bool loadEEMarker(const robot_model::JointModelGroup* ee_jmg, const std::vector<double>& ee_joint_pos);
 
   /**
    * \brief Load publishers as needed
@@ -214,16 +215,31 @@ public:
    * \brief Publish an end effector to rviz
    * \param pose - the location to publish the marker with respect to the base frame
    * \param ee_jmg - joint model group of the end effector, e.g. "left_hand"
+   * \param ee_joint_pos - position of all active joints in the end effector
    * \param color to display the collision object with
    * \return true on success
    */
   bool publishEEMarkers(const Eigen::Affine3d& pose, const robot_model::JointModelGroup* ee_jmg,
+                        const std::vector<double>& ee_joint_pos,
                         const rviz_visual_tools::colors& color = rviz_visual_tools::CLEAR,
                         const std::string& ns = "end_effector")
   {
-    return publishEEMarkers(convertPose(pose), ee_jmg, color, ns);
+    return publishEEMarkers(convertPose(pose), ee_jmg, ee_joint_pos, color, ns);
+  }
+  bool publishEEMarkers(const Eigen::Affine3d& pose, const robot_model::JointModelGroup* ee_jmg,
+                        const rviz_visual_tools::colors& color = rviz_visual_tools::CLEAR,
+                        const std::string& ns = "end_effector")
+  {
+    return publishEEMarkers(convertPose(pose), ee_jmg, {}, color, ns);
   }
   bool publishEEMarkers(const geometry_msgs::Pose& pose, const robot_model::JointModelGroup* ee_jmg,
+                        const rviz_visual_tools::colors& color = rviz_visual_tools::CLEAR,
+                        const std::string& ns = "end_effector")
+  {
+    return publishEEMarkers(pose, ee_jmg, {}, color, ns);
+  }
+  bool publishEEMarkers(const geometry_msgs::Pose& pose, const robot_model::JointModelGroup* ee_jmg,
+                        const std::vector<double>& ee_joint_pos,
                         const rviz_visual_tools::colors& color = rviz_visual_tools::CLEAR,
                         const std::string& ns = "end_effector");
 
@@ -629,6 +645,7 @@ protected:
   // End Effector Markers
   std::map<const robot_model::JointModelGroup*, visualization_msgs::MarkerArray> ee_markers_map_;
   std::map<const robot_model::JointModelGroup*, EigenSTL::vector_Affine3d> ee_poses_map_;
+  std::map<const robot_model::JointModelGroup*, std::vector<double> > ee_joint_pos_map_;
 
   // Cached robot state marker - cache the colored links.
   // Note: Only allows colors provided in rviz_visual_tools to prevent too many robot state messages from being loaded
