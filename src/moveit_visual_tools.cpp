@@ -47,8 +47,10 @@
 #include <moveit/macros/console_colors.h>
 
 // Conversions
-#include <tf_conversions/tf_eigen.h>
-#include <eigen_conversions/eigen_msg.h>
+#include <tf2_eigen/tf2_eigen.h>
+
+// Transforms
+#include <tf2_ros/transform_listener.h>
 
 // Shape tools
 #include <geometric_shapes/solid_primitive_dims.h>
@@ -90,11 +92,12 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
   }
   ROS_DEBUG_STREAM_NAMED(name_, "Loading planning scene monitor");
 
-  // Create tf transformer
-  boost::shared_ptr<tf::TransformListener> tf;
+  // Create tf transform buffer and listener
+  boost::shared_ptr<tf2_ros::Buffer> tf_buffer = boost::make_shared<tf2_ros::Buffer>();
+  boost::shared_ptr<tf2_ros::TransformListener> tf_listener = boost::make_shared<tf2_ros::TransformListener>(*tf_buffer);
 
   // Regular version b/c the other one causes problems with recognizing end effectors
-  psm_.reset(new planning_scene_monitor::PlanningSceneMonitor(ROBOT_DESCRIPTION, tf, "visual_tools_scene"));
+  psm_.reset(new planning_scene_monitor::PlanningSceneMonitor(ROBOT_DESCRIPTION, tf_buffer, "visual_tools_scene"));
 
   ros::spinOnce();
   ros::Duration(0.1).sleep();
@@ -441,7 +444,7 @@ bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp& grasp,
   }
 
   Eigen::Affine3d grasp_pose_eigen;
-  tf::poseMsgToEigen(grasp_pose, grasp_pose_eigen);
+  tf2::fromMsg(grasp_pose, grasp_pose_eigen);
 
   // Pre-grasp pose variables
   geometry_msgs::Pose pre_grasp_pose;
@@ -494,7 +497,7 @@ bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp& grasp,
     pre_grasp_pose_eigen.translation() += pre_grasp_approach_direction_local;
 
     // Convert eigen pre-grasp position back to regular message
-    tf::poseEigenToMsg(pre_grasp_pose_eigen, pre_grasp_pose);
+    pre_grasp_pose = tf2::toMsg(pre_grasp_pose_eigen);
 
     // publishArrow(pre_grasp_pose, moveit_visual_tools::BLUE);
     publishEEMarkers(pre_grasp_pose, ee_jmg);
