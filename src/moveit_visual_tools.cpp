@@ -93,8 +93,8 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
   ROS_DEBUG_STREAM_NAMED(name_, "Loading planning scene monitor");
 
   // Create tf transform buffer and listener
-  boost::shared_ptr<tf2_ros::Buffer> tf_buffer = boost::make_shared<tf2_ros::Buffer>();
-  boost::shared_ptr<tf2_ros::TransformListener> tf_listener = boost::make_shared<tf2_ros::TransformListener>(*tf_buffer);
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>();
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener = std::make_shared<tf2_ros::TransformListener>(*tf_buffer);
 
   // Regular version b/c the other one causes problems with recognizing end effectors
   psm_.reset(new planning_scene_monitor::PlanningSceneMonitor(ROBOT_DESCRIPTION, tf_buffer, "visual_tools_scene"));
