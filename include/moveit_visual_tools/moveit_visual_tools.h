@@ -184,7 +184,7 @@ public:
    * \param ee_joint_pos - the values of all active joints in this planning group
    * \return true if it is successful
    */
-  bool loadEEMarker(const robot_model::JointModelGroup* ee_jmg, const std::vector<double>& ee_joint_pos);
+  bool loadEEMarker(const robot_model::JointModelGroup* ee_jmg, const std::vector<double>& ee_joint_pos = {});
 
   /**
    * \brief Load publishers as needed
