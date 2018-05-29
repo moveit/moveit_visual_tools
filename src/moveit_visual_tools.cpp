@@ -235,7 +235,7 @@ moveit::core::RobotModelConstPtr MoveItVisualTools::getRobotModel()
   return shared_robot_state_->getRobotModel();
 }
 
-bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg)
+bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg, const std::vector<double>& ee_joint_pos)
 {
   // Get joint state group
   if (ee_jmg == NULL)  // make sure EE_GROUP exists
@@ -249,9 +249,23 @@ bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg)
   shared_robot_state_->setToDefaultValues();
   shared_robot_state_->update();
 
+  if (ee_joint_pos.size() > 0)
+  {
+    if (ee_joint_pos.size() != ee_jmg->getActiveJointModels().size())
+    {
+      ROS_ERROR_STREAM_NAMED(name_, "The number of joint positions given (" << ee_joint_pos.size() << ") does not match the number of active joints in " << ee_jmg->getName() << "(" << ee_jmg->getActiveJointModels().size() << ")");
+      return false;
+    }
+    shared_robot_state_->setJointGroupPositions(ee_jmg, ee_joint_pos);
+    shared_robot_state_->update(true);
+  }
+
   // Clear old EE markers and EE poses
   ee_markers_map_[ee_jmg].markers.clear();
   ee_poses_map_[ee_jmg].clear();
+
+  // Remember joint state
+  ee_joint_pos_map_[ee_jmg] = ee_joint_pos;
 
   // Keep track of how many unique markers we have between different EEs
   static std::size_t marker_id_offset = 0;
@@ -337,12 +351,13 @@ void MoveItVisualTools::loadRobotStatePub(const std::string& robot_state_topic, 
 }
 
 bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose& pose, const robot_model::JointModelGroup* ee_jmg,
+                                         const std::vector<double>& ee_joint_pos,
                                          const rviz_visual_tools::colors& color, const std::string& ns)
 {
   // Check if we have not loaded the EE markers
-  if (ee_markers_map_[ee_jmg].markers.empty() || ee_poses_map_[ee_jmg].empty())
+  if (ee_markers_map_[ee_jmg].markers.empty() || ee_poses_map_[ee_jmg].empty() || ee_joint_pos_map_[ee_jmg] != ee_joint_pos)
   {
-    if (!loadEEMarker(ee_jmg))
+    if (!loadEEMarker(ee_jmg, ee_joint_pos))
     {
       ROS_ERROR_STREAM_NAMED(name_, "Unable to publish EE marker, unable to load EE markers");
       return false;
