@@ -24,6 +24,11 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED system)
 
+# Qt5
+if(NOT rviz_QT_VERSION VERSION_LESS "5")
+  find_package(Qt5 ${rviz_QT_VERSION} REQUIRED Core Widgets)
+endif()
+
 # Catkin
 catkin_package(
   LIBRARIES
@@ -67,6 +72,9 @@ target_link_libraries(${PROJECT_NAME}_demo
   ${catkin_LIBRARIES} ${PROJECT_NAME}
 )
 
+if(NOT rviz_QT_VERSION VERSION_LESS "5")
+  qt5_use_modules(${PROJECT_NAME}_demo Widgets)
+endif()
 
 #############
 ## Testing ##
