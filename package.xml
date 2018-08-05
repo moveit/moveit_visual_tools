@@ -4,22 +4,22 @@
   <version>3.4.0</version>
   <description>Helper functions for displaying and debugging MoveIt! data in Rviz via published markers</description>
 
-  <maintainer email="davetcoleman@gmail.com">Dave Coleman</maintainer>
+  <maintainer email="dave@picknik.ai">Dave Coleman</maintainer>
 
   <license>BSD</license>
 
-  <url type="website">https://github.com/davetcoleman/moveit_visual_tools</url>
-  <url type="butracker">https://github.com/davetcoleman/moveit_visual_tools/issues</url>
-  <url type="repository">https://github.com/davetcoleman/moveit_visual_tools/</url>
+  <url type="website">https://github.com/ros-planning/moveit_visual_tools</url>
+  <url type="butracker">https://github.com/ros-planning/moveit_visual_tools/issues</url>
+  <url type="repository">https://github.com/ros-planning/moveit_visual_tools/</url>
 
-  <author email="davetcoleman@gmail.com">Dave Coleman</author>
+  <author email="dave@picknik.ai">Dave Coleman</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
   <depend>rviz_visual_tools</depend>
   <depend>eigen_conversions</depend>
   <depend>geometry_msgs</depend>
-  <depend>moveit_ros_robot_interaction</depend>
+  <depend>moveit_ros_planning</depend>
   <depend>moveit_core</depend>
   <depend>roscpp</depend>
   <depend>tf_conversions</depend>
