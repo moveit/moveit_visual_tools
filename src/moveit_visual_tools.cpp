@@ -235,7 +235,8 @@ moveit::core::RobotModelConstPtr MoveItVisualTools::getRobotModel()
   return shared_robot_state_->getRobotModel();
 }
 
-bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg, const std::vector<double>& ee_joint_pos)
+bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg,
+                                     const std::vector<double>& ee_joint_pos)
 {
   // Get joint state group
   if (ee_jmg == NULL)  // make sure EE_GROUP exists
@@ -253,7 +254,9 @@ bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg,
   {
     if (ee_joint_pos.size() != ee_jmg->getActiveJointModels().size())
     {
-      ROS_ERROR_STREAM_NAMED(name_, "The number of joint positions given (" << ee_joint_pos.size() << ") does not match the number of active joints in " << ee_jmg->getName() << "(" << ee_jmg->getActiveJointModels().size() << ")");
+      ROS_ERROR_STREAM_NAMED(name_, "The number of joint positions given ("
+                                        << ee_joint_pos.size() << ") does not match the number of active joints in "
+                                        << ee_jmg->getName() << "(" << ee_jmg->getActiveJointModels().size() << ")");
       return false;
     }
     shared_robot_state_->setJointGroupPositions(ee_jmg, ee_joint_pos);
@@ -355,7 +358,8 @@ bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose& pose, const 
                                          const rviz_visual_tools::colors& color, const std::string& ns)
 {
   // Check if we have not loaded the EE markers
-  if (ee_markers_map_[ee_jmg].markers.empty() || ee_poses_map_[ee_jmg].empty() || ee_joint_pos_map_[ee_jmg] != ee_joint_pos)
+  if (ee_markers_map_[ee_jmg].markers.empty() || ee_poses_map_[ee_jmg].empty() ||
+      ee_joint_pos_map_[ee_jmg] != ee_joint_pos)
   {
     if (!loadEEMarker(ee_jmg, ee_joint_pos))
     {
@@ -670,6 +674,48 @@ bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::Point& point
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = fabs(point1.x - point2.x);
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = fabs(point1.y - point2.y);
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = fabs(point1.z - point2.z);
+
+  // Prevent scale from being zero
+  if (!collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X])
+    collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = rviz_visual_tools::SMALL_SCALE;
+  if (!collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y])
+    collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = rviz_visual_tools::SMALL_SCALE;
+  if (!collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z])
+    collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = rviz_visual_tools::SMALL_SCALE;
+
+  // ROS_INFO_STREAM_NAMED(name_,"CollisionObject: \n " << collision_obj);
+  return processCollisionObjectMsg(collision_obj, color);
+}
+
+bool MoveItVisualTools::publishCollisionCuboid(const Eigen::Affine3d& pose, double x, double y, double z,
+                                               const std::string& name, const rviz_visual_tools::colors& color)
+{
+  geometry_msgs::Pose pose_msg;
+  tf::poseEigenToMsg(pose, pose_msg);
+  return publishCollisionCuboid(pose_msg, x, y, z, name, color);
+}
+
+bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::Pose& pose, double x, double y, double z,
+                                               const std::string& name, const rviz_visual_tools::colors& color)
+{
+  moveit_msgs::CollisionObject collision_obj;
+  collision_obj.header.stamp = ros::Time::now();
+  collision_obj.header.frame_id = base_frame_;
+  collision_obj.id = name;
+  collision_obj.operation = moveit_msgs::CollisionObject::ADD;
+
+  // Calculate center pose
+  collision_obj.primitive_poses.resize(1);
+  collision_obj.primitive_poses[0] = pose;
+
+  // Calculate scale
+  collision_obj.primitives.resize(1);
+  collision_obj.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
+  collision_obj.primitives[0].dimensions.resize(
+      geometric_shapes::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>::value);
+  collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = x;
+  collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = y;
+  collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = z;
 
   // Prevent scale from being zero
   if (!collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X])

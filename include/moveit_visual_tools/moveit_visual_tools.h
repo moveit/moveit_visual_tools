@@ -347,6 +347,12 @@ public:
                               const std::string& name,
                               const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
 
+  bool publishCollisionCuboid(const Eigen::Affine3d& pose, double x, double y, double z, const std::string& name,
+                              const rviz_visual_tools::colors& color);
+
+  bool publishCollisionCuboid(const geometry_msgs::Pose& pose, double x, double y, double z, const std::string& name,
+                              const rviz_visual_tools::colors& color);
+
   /**
    * \brief Create a MoveIt Collision cylinder between two points
    * \param point a - x,y,z in space of a point
