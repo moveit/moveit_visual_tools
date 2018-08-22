@@ -185,11 +185,11 @@ bool MoveItVisualTools::moveCollisionObject(const geometry_msgs::Pose& pose, con
 
 bool MoveItVisualTools::triggerPlanningSceneUpdate()
 {
-  // TODO(davetcoleman): perhaps switch to using the service call?
+  // Note in ROS Melodic we've switched to only UPDATE_GEOMETRY
+  // see https://github.com/ros-planning/moveit_visual_tools/pull/29
   getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
   // getPlanningSceneMonitor()->triggerSceneUpdateEvent(planning_scene_monitor::PlanningSceneMonitor::UPDATE_GEOMETRY);
 
-  ros::spinOnce();
   return true;
 }
 
