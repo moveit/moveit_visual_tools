@@ -725,7 +725,6 @@ bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::Pose& pose, 
   if (!collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z])
     collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = rviz_visual_tools::SMALL_SCALE;
 
-  // ROS_INFO_STREAM_NAMED(name_,"CollisionObject: \n " << collision_obj);
   return processCollisionObjectMsg(collision_obj, color);
 }
 
