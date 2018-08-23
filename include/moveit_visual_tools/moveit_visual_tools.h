@@ -350,14 +350,14 @@ public:
   /**
    * \brief Create a MoveIt collision rectangular cuboid at the given pose
    * \param pose - position of the centroid of the cube
-   * \param x - width
-   * \param y - depth
-   * \param z - height
+   * \param width - width of the object in its local frame
+   * \param depth - depth of the object in its local frame
+   * \param height - height of the object in its local frame
    * \param name - semantic name of MoveIt collision object
    * \param color to display the collision object with
    * \return true on sucess
    **/
-  bool publishCollisionCuboid(const Eigen::Affine3d& pose, double x, double y, double z, const std::string& name,
+  bool publishCollisionCuboid(const Eigen::Affine3d& pose, double width, double depth, double height, const std::string& name,
                               const rviz_visual_tools::colors& color);
 
   bool publishCollisionCuboid(const geometry_msgs::Pose& pose, double x, double y, double z, const std::string& name,

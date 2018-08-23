@@ -695,7 +695,7 @@ bool MoveItVisualTools::publishCollisionCuboid(const Eigen::Affine3d& pose, doub
   return publishCollisionCuboid(pose_msg, x, y, z, name, color);
 }
 
-bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::Pose& pose, double x, double y, double z,
+bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::Pose& pose, double width, double depth, double height,
                                                const std::string& name, const rviz_visual_tools::colors& color)
 {
   moveit_msgs::CollisionObject collision_obj;
@@ -713,9 +713,9 @@ bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::Pose& pose, 
   collision_obj.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
   collision_obj.primitives[0].dimensions.resize(
       geometric_shapes::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>::value);
-  collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = x;
-  collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = y;
-  collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = z;
+  collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = width;
+  collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = depth;
+  collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = height;
 
   // Prevent scale from being zero
   if (!collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X])
