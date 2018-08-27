@@ -688,16 +688,16 @@ bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::Point& point
   return processCollisionObjectMsg(collision_obj, color);
 }
 
-bool MoveItVisualTools::publishCollisionCuboid(const Eigen::Affine3d& pose, double x, double y, double z,
+bool MoveItVisualTools::publishCollisionCuboid(const Eigen::Affine3d& pose, double width, double depth, double height,
                                                const std::string& name, const rviz_visual_tools::colors& color)
 {
-  geometry_msgs::Pose pose_msg;
-  tf::poseEigenToMsg(pose, pose_msg);
-  return publishCollisionCuboid(pose_msg, x, y, z, name, color);
+  geometry_msgs::Pose pose_msg = tf2::toMsg(pose);
+  return publishCollisionCuboid(pose_msg, width, depth, height, name, color);
 }
 
-bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::Pose& pose, double width, double depth, double height,
-                                               const std::string& name, const rviz_visual_tools::colors& color)
+bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::Pose& pose, double width, double depth,
+                                               double height, const std::string& name,
+                                               const rviz_visual_tools::colors& color)
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
