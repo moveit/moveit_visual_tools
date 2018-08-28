@@ -357,11 +357,11 @@ public:
    * \param color to display the collision object with
    * \return true on sucess
    **/
-  bool publishCollisionCuboid(const Eigen::Affine3d& pose, double width, double depth, double height, const std::string& name,
-                              const rviz_visual_tools::colors& color);
+  bool publishCollisionCuboid(const Eigen::Affine3d& pose, double width, double depth, double height,
+                              const std::string& name, const rviz_visual_tools::colors& color);
 
-  bool publishCollisionCuboid(const geometry_msgs::Pose& pose, double x, double y, double z, const std::string& name,
-                              const rviz_visual_tools::colors& color);
+  bool publishCollisionCuboid(const geometry_msgs::Pose& pose, double width, double depth, double height,
+                              const std::string& name, const rviz_visual_tools::colors& color);
 
   /**
    * \brief Create a MoveIt Collision cylinder between two points
