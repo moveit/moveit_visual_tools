@@ -14,8 +14,10 @@ This package helps you visualize:
 Developed by [Dave Coleman](http://dav.ee) at the Correll Robotics Lab, University of Colorado Boulder with outside contributors.
 
 * [![Build Status](https://travis-ci.org/ros-planning/moveit_visual_tools.svg)](https://travis-ci.org/ros-planning/moveit_visual_tools) Travis CI
-* [![Build Status](http://build.ros.org/buildStatus/icon?job=Kbin_uX64__moveit_visual_tools__ubuntu_xenial_amd64__binary)](http://build.ros.org/view/Kbin_uX64/job/Kbin_uX64__moveit_visual_tools__ubuntu_xenial_amd64__binary/) ROS Buildfarm - AMD64 Xenial Debian Build
-* [![Build Status](http://build.ros.org/buildStatus/icon?job=Kdev__moveit_visual_tools__ubuntu_xenial_amd64)](http://build.ros.org/view/Kdev/job/Kdev__moveit_visual_tools__ubuntu_xenial_amd64/) ROS Buildfarm - AMD64 Xenial Devel Build
+* [![Build Status](http://build.ros.org/buildStatus/icon?job=Kbin_uX64__moveit_visual_tools__ubuntu_xenial_amd64__binary)](http://build.ros.org/view/Kbin_uX64/job/Kbin_uX64__moveit_visual_tools__ubuntu_xenial_amd64__binary/) ROS Buildfarm - AMD64 Xenial Debian Build - Ubuntu 16.04 LTS
+* [![Build Status](http://build.ros.org/buildStatus/icon?job=Kdev__moveit_visual_tools__ubuntu_xenial_amd64)](http://build.ros.org/view/Kdev/job/Kdev__moveit_visual_tools__ubuntu_xenial_amd64/) ROS Buildfarm - AMD64 Xenial Devel Build - Ubuntu 16.04 LTS
+* [![Build Status](http://build.ros.org/buildStatus/icon?job=Msrc_uB__moveit_visual_tools__ubuntu_bionic__source)](http://build.ros.org/job/Msrc_uB__moveit_visual_tools__ubuntu_bionic__source/) ROS Buildfarm - AMD64 Bionic Source Build - Ubuntu 18.04 LTS
+* [![Build Status](http://build.ros.org/buildStatus/icon?job=Mdev__moveit_visual_tools__ubuntu_bionic_amd64)](http://build.ros.org/job/Mdev__moveit_visual_tools__ubuntu_bionic_amd64/) ROS Buildfarm - AMD64 Bionic Devel Build - Ubuntu 18.04 LTS
 
 ![](resources/screenshot.png)
 
