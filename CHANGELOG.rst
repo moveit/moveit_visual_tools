@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.5.0 (2018-09-05)
+------------------
 * Add Markdown ROS Buildfarm badges for Melodic
 * Fixing melodic branch with tf2 updates (`#34 <https://github.com/ros-planning/moveit_visual_tools/issues/34>`_)
 * Additional visualization (`#31 <https://github.com/ros-planning/moveit_visual_tools/issues/31>`_)
