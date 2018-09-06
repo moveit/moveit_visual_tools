@@ -2,6 +2,30 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add Markdown ROS Buildfarm badges for Melodic
+* Fixing melodic branch with tf2 updates (`#34 <https://github.com/ros-planning/moveit_visual_tools/issues/34>`_)
+* Additional visualization (`#31 <https://github.com/ros-planning/moveit_visual_tools/issues/31>`_)
+  * adding a visualization for publishing a box with width, height, and depth
+  * adding additional publishCollisionCuboid method overloads
+  * changing x,y,z to width, depth, height
+* Fixup CMakeLists and package.xml (`#30 <https://github.com/ros-planning/moveit_visual_tools/issues/30>`_)
+* Triggering UPDATE_GEOMETRY is sufficient, dont spinOnce
+  - triggering UPDATE_SCENE leads to sending a full planning scene including all meshes. For all use-cases in this lib UPDATE_GEOMETRY is sufficient and sends only diffs
+  - calling ros::spinOnce() in random places messes up the event queue (e.g. joint state updates being processed in gui thread instead of the async spinner thread)
+* Fix API compatibility by providing a default empty list of end-effector joints
+* Allow setting joint values for end-effector marker
+  currently end-effector markers are based on the default robot state (ie all zero),
+  this allows passing a vector of doubles for all active joint in the end-effector group
+  Passing a new set of joint values will invalidate the cache but for our use-case this is
+  neglectible and could be optimized later
+* Moved boost::shared_ptr to std for tf2
+* Converted to use tf2 moveit interfaces
+* Fix broken CI for Melodic
+* Fix Continuous Integration
+* Contributors: Dave Coleman, Ian McMahon, Mike Lautman, Simon Schmeisser
+
 3.4.0 (2017-12-27)
 ------------------
 * Apply current MoveIt clang-format
