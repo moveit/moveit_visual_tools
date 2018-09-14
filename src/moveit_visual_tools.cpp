@@ -438,8 +438,7 @@ bool MoveItVisualTools::publishAnimatedGrasps(const std::vector<moveit_msgs::Gra
       break;
 
     publishAnimatedGrasp(possible_grasps[i], ee_jmg, animate_speed);
-
-    ros::Duration(0.1).sleep();
+    ros::Duration(animate_speed).sleep();
   }
 
   return true;
@@ -517,7 +516,8 @@ bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp& grasp,
 
     // publishArrow(pre_grasp_pose, moveit_visual_tools::BLUE);
     publishEEMarkers(pre_grasp_pose, ee_jmg);
-
+    if (batch_publishing_enabled_)
+      trigger();
     ros::Duration(animate_speed).sleep();
 
     // Pause more at initial pose for debugging purposes
