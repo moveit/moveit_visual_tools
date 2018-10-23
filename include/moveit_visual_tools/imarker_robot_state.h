@@ -57,7 +57,7 @@ namespace moveit_visual_tools
 using visualization_msgs::InteractiveMarkerFeedback;
 using visualization_msgs::InteractiveMarkerControl;
 
-typedef std::function<void(const visualization_msgs::InteractiveMarkerFeedbackConstPtr&, const Eigen::Affine3d&)>
+typedef std::function<void(const visualization_msgs::InteractiveMarkerFeedbackConstPtr&, const Eigen::Isometry3d&)>
     IMarkerCallback;
 
 typedef std::shared_ptr<interactive_markers::InteractiveMarkerServer> InteractiveMarkerServerPtr;
@@ -138,7 +138,7 @@ public:
     return name_to_eef_[name];
   }
 
-  bool setFromPoses(const EigenSTL::vector_Affine3d poses, const moveit::core::JointModelGroup* group);
+  bool setFromPoses(const EigenSTL::vector_Isometry3d poses, const moveit::core::JointModelGroup* group);
 
 protected:
   // --------------------------------------------------------

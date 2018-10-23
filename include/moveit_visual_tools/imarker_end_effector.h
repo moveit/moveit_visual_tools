@@ -62,7 +62,7 @@ namespace moveit_visual_tools
 using visualization_msgs::InteractiveMarkerFeedback;
 using visualization_msgs::InteractiveMarkerControl;
 
-typedef std::function<void(const visualization_msgs::InteractiveMarkerFeedbackConstPtr&, const Eigen::Affine3d&)>
+typedef std::function<void(const visualization_msgs::InteractiveMarkerFeedbackConstPtr&, const Eigen::Isometry3d&)>
     IMarkerCallback;
 
 class IMarkerRobotState;
@@ -81,17 +81,17 @@ public:
   }
 
   /** \brief Get the current end effector pose */
-  void getPose(Eigen::Affine3d& pose);
+  void getPose(Eigen::Isometry3d& pose);
 
   bool setPoseFromRobotState();
 
   void iMarkerCallback(const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback);
 
-  void solveIK(Eigen::Affine3d& pose);
+  void solveIK(Eigen::Isometry3d& pose);
 
   void initializeInteractiveMarkers();
 
-  void updateIMarkerPose(const Eigen::Affine3d& pose);
+  void updateIMarkerPose(const Eigen::Isometry3d& pose);
 
   void sendUpdatedIMarkerPose();
 
@@ -135,7 +135,7 @@ private:
 
   // State
   moveit::core::RobotStatePtr imarker_state_;
-  Eigen::Affine3d imarker_pose_;
+  Eigen::Isometry3d imarker_pose_;
 
   // Core MoveIt components
   planning_scene_monitor::PlanningSceneMonitorPtr psm_;

@@ -84,7 +84,7 @@ public:
     ros::Duration(0.1).sleep();
 
     // Show message
-    Eigen::Affine3d text_pose = Eigen::Affine3d::Identity();
+    Eigen::Isometry3d text_pose = Eigen::Isometry3d::Identity();
     text_pose.translation().z() = 4;
     visual_tools_->publishText(text_pose, "MoveIt! Visual Tools", rvt::WHITE, rvt::XLARGE, /*static_id*/ false);
 
@@ -95,9 +95,9 @@ public:
     runCollisionObjectTests();
   }
 
-  void publishLabelHelper(const Eigen::Affine3d& pose, const std::string& label)
+  void publishLabelHelper(const Eigen::Isometry3d& pose, const std::string& label)
   {
-    Eigen::Affine3d pose_copy = pose;
+    Eigen::Isometry3d pose_copy = pose;
     pose_copy.translation().x() -= 0.2;
     visual_tools_->publishText(pose_copy, label, rvt::WHITE, rvt::LARGE, false);
   }
@@ -136,7 +136,7 @@ public:
 
     // --------------------------------------------------------------------
     ROS_INFO_STREAM_NAMED("visual_tools", "Moving robot");
-    Eigen::Affine3d robot_pose = Eigen::Affine3d::Identity();
+    Eigen::Isometry3d robot_pose = Eigen::Isometry3d::Identity();
     robot_pose = robot_pose * Eigen::AngleAxisd(common_angle, Eigen::Vector3d::UnitZ());
     robot_pose.translation().x() = x_offset;
     visual_tools_->applyVirtualJointTransform(*robot_state_, robot_pose);
@@ -180,8 +180,8 @@ public:
   void runCollisionObjectTests()
   {
     // Create pose
-    Eigen::Affine3d pose1 = Eigen::Affine3d::Identity();
-    Eigen::Affine3d pose2 = Eigen::Affine3d::Identity();
+    Eigen::Isometry3d pose1 = Eigen::Isometry3d::Identity();
+    Eigen::Isometry3d pose2 = Eigen::Isometry3d::Identity();
     // geometry_msgs::Pose pose1;
     // geometry_msgs::Pose pose2;
 
@@ -208,7 +208,7 @@ public:
 
     // --------------------------------------------------------------------
     ROS_INFO_STREAM_NAMED("visual_tools", "Publishing Collision Block");
-    pose1 = Eigen::Affine3d::Identity();
+    pose1 = Eigen::Isometry3d::Identity();
     y += space_between_rows * 2.0;
     pose1.translation().y() = y;
     for (double i = 0; i <= 1.0; i += 0.1)
@@ -227,8 +227,8 @@ public:
     ROS_INFO_STREAM_NAMED("visual_tools", "Publishing Collision Rectanglular Cuboid");
     double cuboid_min_size = 0.05;
     double cuboid_max_size = 0.2;
-    pose1 = Eigen::Affine3d::Identity();
-    pose2 = Eigen::Affine3d::Identity();
+    pose1 = Eigen::Isometry3d::Identity();
+    pose2 = Eigen::Isometry3d::Identity();
     y += space_between_rows * 2.0;
     pose1.translation().y() = y;
     pose2.translation().y() = y;
@@ -250,8 +250,8 @@ public:
     ROS_INFO_STREAM_NAMED("visual_tools", "Publishing Collision Cylinder");
     double cylinder_min_size = 0.01;
     double cylinder_max_size = 0.3;
-    pose1 = Eigen::Affine3d::Identity();
-    pose2 = Eigen::Affine3d::Identity();
+    pose1 = Eigen::Isometry3d::Identity();
+    pose2 = Eigen::Isometry3d::Identity();
     y += space_between_rows * 2.0;
     pose1.translation().y() = y;
     pose2.translation().y() = y;
