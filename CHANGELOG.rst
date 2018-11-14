@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.5.1 (2018-11-14)
+------------------
 * Adding trigger call to animations when batch_publishing_enabled\_ is enabled (`#36 <https://github.com/ros-planning/moveit_visual_tools/issues/36>`_)
 * Contributors: Mike Lautman
 
