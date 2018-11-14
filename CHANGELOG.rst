@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.4.1 (2018-11-14)
+------------------
 * Adding trigger call to animations when batch_publishing_enabled\_ is enabled (`#36 <https://github.com/ros-planning/moveit_visual_tools/issues/36>`_)
 * Changing variable names for consistency and clang (`#33 <https://github.com/ros-planning/moveit_visual_tools/issues/33>`_)
 * Additional visualization (`#31 <https://github.com/ros-planning/moveit_visual_tools/issues/31>`_)
