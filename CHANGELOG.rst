@@ -2,6 +2,26 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Adding trigger call to animations when batch_publishing_enabled\_ is enabled (`#36 <https://github.com/ros-planning/moveit_visual_tools/issues/36>`_)
+* Changing variable names for consistency and clang (`#33 <https://github.com/ros-planning/moveit_visual_tools/issues/33>`_)
+* Additional visualization (`#31 <https://github.com/ros-planning/moveit_visual_tools/issues/31>`_)
+  * adding a visualization for publishing a box with width, height, and depth
+  * adding additional publishCollisionCuboid method overloads
+  * changing x,y,z to width, depth, height
+* Fixup CMakeLists and package.xml (`#30 <https://github.com/ros-planning/moveit_visual_tools/issues/30>`_)
+* No spinOnce when triggering (`#32 <https://github.com/ros-planning/moveit_visual_tools/issues/32>`_)
+* Allow setting joint values for end-effector marker
+* Fix API compatibility by providing a default empty list of end-effector joints
+* Fix Continuous Integration
+* Allow setting joint values for end-effector marker
+  currently end-effector markers are based on the default robot state (ie all zero),
+  this allows passing a vector of doubles for all active joint in the end-effector group
+  Passing a new set of joint values will invalidate the cache but for our use-case this is
+  neglectible and could be optimized later
+* Contributors: Dave Coleman, Mike Lautman, Simon Schmeisser
+
 3.4.0 (2017-12-27)
 ------------------
 * Apply current MoveIt clang-format
