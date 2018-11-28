@@ -163,7 +163,7 @@ bool MoveItVisualTools::processAttachedCollisionObjectMsg(const moveit_msgs::Att
   return true;
 }
 
-bool MoveItVisualTools::moveCollisionObject(const Eigen::Affine3d& pose, const std::string& name,
+bool MoveItVisualTools::moveCollisionObject(const Eigen::Isometry3d& pose, const std::string& name,
                                             const rviz_visual_tools::colors& color)
 {
   return moveCollisionObject(convertPose(pose), name, color);
@@ -294,8 +294,8 @@ bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg,
   // ROS_DEBUG_STREAM_NAMED(name_,"EE Parent link: " << ee_parent_link_name);
   const moveit::core::LinkModel* ee_parent_link = robot_model_->getLinkModel(ee_parent_link_name);
 
-  Eigen::Affine3d ee_marker_global_transform = shared_robot_state_->getGlobalLinkTransform(ee_parent_link);
-  Eigen::Affine3d ee_marker_pose;
+  Eigen::Isometry3d ee_marker_global_transform = shared_robot_state_->getGlobalLinkTransform(ee_parent_link);
+  Eigen::Isometry3d ee_marker_pose;
 
   // Process each link of the end effector
   for (std::size_t i = 0; i < ee_markers_map_[ee_jmg].markers.size(); ++i)
@@ -369,8 +369,8 @@ bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose& pose, const 
     }
   }
 
-  Eigen::Affine3d eigen_goal_ee_pose = convertPose(pose);
-  Eigen::Affine3d eigen_this_marker;
+  Eigen::Isometry3d eigen_goal_ee_pose = convertPose(pose);
+  Eigen::Isometry3d eigen_this_marker;
 
   // publishArrow( pose, rviz_visual_tools::RED, rviz_visual_tools::LARGE );
 
@@ -459,12 +459,12 @@ bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp& grasp,
     ros::Duration(0.5).sleep();
   }
 
-  Eigen::Affine3d grasp_pose_eigen;
+  Eigen::Isometry3d grasp_pose_eigen;
   tf2::fromMsg(grasp_pose, grasp_pose_eigen);
 
   // Pre-grasp pose variables
   geometry_msgs::Pose pre_grasp_pose;
-  Eigen::Affine3d pre_grasp_pose_eigen;
+  Eigen::Isometry3d pre_grasp_pose_eigen;
 
   // Approach direction variables
   Eigen::Vector3d pre_grasp_approach_direction_local;
@@ -688,7 +688,7 @@ bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::Point& point
   return processCollisionObjectMsg(collision_obj, color);
 }
 
-bool MoveItVisualTools::publishCollisionCuboid(const Eigen::Affine3d& pose, double width, double depth, double height,
+bool MoveItVisualTools::publishCollisionCuboid(const Eigen::Isometry3d& pose, double width, double depth, double height,
                                                const std::string& name, const rviz_visual_tools::colors& color)
 {
   geometry_msgs::Pose pose_msg = tf2::toMsg(pose);
@@ -765,18 +765,18 @@ bool MoveItVisualTools::publishCollisionCylinder(const Eigen::Vector3d& a, const
   Eigen::Vector3d pt_center = getCenterPoint(a, b);
 
   // Create vector
-  Eigen::Affine3d pose;
+  Eigen::Isometry3d pose;
   pose = getVectorBetweenPoints(pt_center, b);
 
   // Convert pose to be normal to cylindar axis
-  Eigen::Affine3d rotation;
+  Eigen::Isometry3d rotation;
   rotation = Eigen::AngleAxisd(0.5 * M_PI, Eigen::Vector3d::UnitY());
   pose = pose * rotation;
 
   return publishCollisionCylinder(pose, object_name, radius, height, color);
 }
 
-bool MoveItVisualTools::publishCollisionCylinder(const Eigen::Affine3d& object_pose, const std::string& object_name,
+bool MoveItVisualTools::publishCollisionCylinder(const Eigen::Isometry3d& object_pose, const std::string& object_name,
                                                  double radius, double height, const rviz_visual_tools::colors& color)
 {
   return publishCollisionCylinder(convertPose(object_pose), object_name, radius, height, color);
@@ -803,7 +803,7 @@ bool MoveItVisualTools::publishCollisionCylinder(const geometry_msgs::Pose& obje
   return processCollisionObjectMsg(collision_obj, color);
 }
 
-bool MoveItVisualTools::publishCollisionMesh(const Eigen::Affine3d& object_pose, const std::string& object_name,
+bool MoveItVisualTools::publishCollisionMesh(const Eigen::Isometry3d& object_pose, const std::string& object_name,
                                              const std::string& mesh_path, const rviz_visual_tools::colors& color)
 {
   return publishCollisionMesh(convertPose(object_pose), object_name, mesh_path, color);
@@ -827,7 +827,7 @@ bool MoveItVisualTools::publishCollisionMesh(const geometry_msgs::Pose& object_p
   return true;
 }
 
-bool MoveItVisualTools::publishCollisionMesh(const Eigen::Affine3d& object_pose, const std::string& object_name,
+bool MoveItVisualTools::publishCollisionMesh(const Eigen::Isometry3d& object_pose, const std::string& object_name,
                                              const shape_msgs::Mesh& mesh_msg, const rviz_visual_tools::colors& color)
 {
   return publishCollisionMesh(convertPose(object_pose), object_name, mesh_msg, color);
@@ -894,11 +894,11 @@ bool MoveItVisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph& g
         Eigen::Vector3d pt_center = getCenterPoint(a, b);
 
         // Create vector
-        Eigen::Affine3d pose;
+        Eigen::Isometry3d pose;
         pose = getVectorBetweenPoints(pt_center, b);
 
         // Convert pose to be normal to cylindar axis
-        Eigen::Affine3d rotation;
+        Eigen::Isometry3d rotation;
         rotation = Eigen::AngleAxisd(0.5 * M_PI, Eigen::Vector3d::UnitY());
         pose = pose * rotation;
 
@@ -1017,10 +1017,10 @@ bool MoveItVisualTools::publishCollisionTable(double x, double y, double z, doub
 
 bool MoveItVisualTools::loadCollisionSceneFromFile(const std::string& path)
 {
-  return loadCollisionSceneFromFile(path, Eigen::Affine3d::Identity());
+  return loadCollisionSceneFromFile(path, Eigen::Isometry3d::Identity());
 }
 
-bool MoveItVisualTools::loadCollisionSceneFromFile(const std::string& path, const Eigen::Affine3d& offset)
+bool MoveItVisualTools::loadCollisionSceneFromFile(const std::string& path, const Eigen::Isometry3d& offset)
 {
   // Open file
   std::ifstream fin(path.c_str());
@@ -1277,7 +1277,7 @@ bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTraje
   // Visualize end effector position of cartesian path
   for (std::size_t i = 0; i < robot_trajectory.getWayPointCount(); ++i)
   {
-    const Eigen::Affine3d& tip_pose = robot_trajectory.getWayPoint(i).getGlobalLinkTransform(ee_parent_link);
+    const Eigen::Isometry3d& tip_pose = robot_trajectory.getWayPoint(i).getGlobalLinkTransform(ee_parent_link);
 
     // Error Check
     if (tip_pose.translation().x() != tip_pose.translation().x())
@@ -1352,14 +1352,14 @@ bool MoveItVisualTools::publishTrajectoryPoints(const std::vector<robot_state::R
   // Visualize end effector position of cartesian path
   for (std::size_t i = 0; i < robot_state_trajectory.size(); ++i)
   {
-    const Eigen::Affine3d& tip_pose = robot_state_trajectory[i]->getGlobalLinkTransform(ee_parent_link);
+    const Eigen::Isometry3d& tip_pose = robot_state_trajectory[i]->getGlobalLinkTransform(ee_parent_link);
 
     publishSphere(tip_pose, color);
   }
   return true;
 }
 
-void MoveItVisualTools::enableRobotStateRootOffet(const Eigen::Affine3d& offset)
+void MoveItVisualTools::enableRobotStateRootOffet(const Eigen::Isometry3d& offset)
 {
   robot_state_root_offset_enabled_ = true;
   robot_state_root_offset_ = offset;
@@ -1462,7 +1462,7 @@ bool MoveItVisualTools::hideRobot()
   loadSharedRobotState();
 
   // Apply transform
-  Eigen::Affine3d offset;
+  Eigen::Isometry3d offset;
   offset.translation().x() = rviz_visual_tools::LARGE_SCALE;
   offset.translation().y() = rviz_visual_tools::LARGE_SCALE;
   offset.translation().z() = rviz_visual_tools::LARGE_SCALE;
@@ -1573,7 +1573,7 @@ bool MoveItVisualTools::checkForVirtualJoint(const moveit::core::RobotState& rob
   return true;
 }
 
-bool MoveItVisualTools::applyVirtualJointTransform(moveit::core::RobotState& robot_state, const Eigen::Affine3d& offset)
+bool MoveItVisualTools::applyVirtualJointTransform(moveit::core::RobotState& robot_state, const Eigen::Isometry3d& offset)
 {
   static const std::string VJOINT_NAME = "virtual_joint";
 

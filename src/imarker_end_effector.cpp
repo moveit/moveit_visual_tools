@@ -73,7 +73,7 @@ IMarkerEndEffector::IMarkerEndEffector(IMarkerRobotState* imarker_parent, const 
                                                       << arm_data_.ee_link_->getName() << "' ready.");
 }
 
-void IMarkerEndEffector::getPose(Eigen::Affine3d& pose)
+void IMarkerEndEffector::getPose(Eigen::Isometry3d& pose)
 {
   pose = imarker_pose_;
 }
@@ -116,7 +116,7 @@ void IMarkerEndEffector::iMarkerCallback(const visualization_msgs::InteractiveMa
   }
 
   // Convert
-  Eigen::Affine3d robot_ee_pose;
+  Eigen::Isometry3d robot_ee_pose;
   tf::poseMsgToEigen(feedback->pose, robot_ee_pose);
 
   // Update robot
@@ -133,7 +133,7 @@ void IMarkerEndEffector::iMarkerCallback(const visualization_msgs::InteractiveMa
   }
 }
 
-void IMarkerEndEffector::solveIK(Eigen::Affine3d& pose)
+void IMarkerEndEffector::solveIK(Eigen::Isometry3d& pose)
 {
   // Cartesian settings
   const std::size_t attempts = 2;
@@ -177,7 +177,7 @@ void IMarkerEndEffector::initializeInteractiveMarkers()
   make6DofMarker(pose_msg);
 }
 
-void IMarkerEndEffector::updateIMarkerPose(const Eigen::Affine3d& pose)
+void IMarkerEndEffector::updateIMarkerPose(const Eigen::Isometry3d& pose)
 {
   // Move marker to tip of fingers
   // imarker_pose_ = pose * imarker_offset_.inverse();

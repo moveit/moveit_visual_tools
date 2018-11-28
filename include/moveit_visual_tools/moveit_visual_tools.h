@@ -140,7 +140,7 @@ public:
    * \param name - semantic name of MoveIt collision object
    * \return true on success
    */
-  bool moveCollisionObject(const Eigen::Affine3d& pose, const std::string& name,
+  bool moveCollisionObject(const Eigen::Isometry3d& pose, const std::string& name,
                            const rviz_visual_tools::colors& color);
   bool moveCollisionObject(const geometry_msgs::Pose& pose, const std::string& name,
                            const rviz_visual_tools::colors& color);
@@ -219,14 +219,14 @@ public:
    * \param color to display the collision object with
    * \return true on success
    */
-  bool publishEEMarkers(const Eigen::Affine3d& pose, const robot_model::JointModelGroup* ee_jmg,
+  bool publishEEMarkers(const Eigen::Isometry3d& pose, const robot_model::JointModelGroup* ee_jmg,
                         const std::vector<double>& ee_joint_pos,
                         const rviz_visual_tools::colors& color = rviz_visual_tools::CLEAR,
                         const std::string& ns = "end_effector")
   {
     return publishEEMarkers(convertPose(pose), ee_jmg, ee_joint_pos, color, ns);
   }
-  bool publishEEMarkers(const Eigen::Affine3d& pose, const robot_model::JointModelGroup* ee_jmg,
+  bool publishEEMarkers(const Eigen::Isometry3d& pose, const robot_model::JointModelGroup* ee_jmg,
                         const rviz_visual_tools::colors& color = rviz_visual_tools::CLEAR,
                         const std::string& ns = "end_effector")
   {
@@ -357,7 +357,7 @@ public:
    * \param color to display the collision object with
    * \return true on sucess
    **/
-  bool publishCollisionCuboid(const Eigen::Affine3d& pose, double width, double depth, double height,
+  bool publishCollisionCuboid(const Eigen::Isometry3d& pose, double width, double depth, double height,
                               const std::string& name, const rviz_visual_tools::colors& color);
 
   bool publishCollisionCuboid(const geometry_msgs::Pose& pose, double width, double depth, double height,
@@ -387,7 +387,7 @@ public:
    * \param color to display the collision object with
    * \return true on sucess
    */
-  bool publishCollisionCylinder(const Eigen::Affine3d& object_pose, const std::string& object_name, double radius,
+  bool publishCollisionCylinder(const Eigen::Isometry3d& object_pose, const std::string& object_name, double radius,
                                 double height, const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
   bool publishCollisionCylinder(const geometry_msgs::Pose& object_pose, const std::string& object_name, double radius,
                                 double height, const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
@@ -403,10 +403,10 @@ public:
   bool publishCollisionMesh(const geometry_msgs::Pose& object_pose, const std::string& object_name,
                             const std::string& mesh_path,
                             const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
-  bool publishCollisionMesh(const Eigen::Affine3d& object_pose, const std::string& object_name,
+  bool publishCollisionMesh(const Eigen::Isometry3d& object_pose, const std::string& object_name,
                             const std::string& mesh_path,
                             const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
-  bool publishCollisionMesh(const Eigen::Affine3d& object_pose, const std::string& object_name,
+  bool publishCollisionMesh(const Eigen::Isometry3d& object_pose, const std::string& object_name,
                             const shape_msgs::Mesh& mesh_msg,
                             const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
   bool publishCollisionMesh(const geometry_msgs::Pose& object_pose, const std::string& object_name,
@@ -476,7 +476,7 @@ public:
    * \return true on success
    */
   bool loadCollisionSceneFromFile(const std::string& path);
-  bool loadCollisionSceneFromFile(const std::string& path, const Eigen::Affine3d& offset);
+  bool loadCollisionSceneFromFile(const std::string& path, const Eigen::Isometry3d& offset);
 
   /**
    * \brief Display size of workspace used for planning with OMPL, etc. Important for virtual joints
@@ -576,7 +576,7 @@ public:
                                const rviz_visual_tools::colors& color = rviz_visual_tools::YELLOW);
 
   /** \brief All published robot states will have their virtual joint moved by offset */
-  void enableRobotStateRootOffet(const Eigen::Affine3d& offset);
+  void enableRobotStateRootOffet(const Eigen::Isometry3d& offset);
 
   /** \brief Turn off the root offset feature */
   void disableRobotStateRootOffet();
@@ -620,7 +620,7 @@ public:
   bool hideRobot();
 
   /** \brief Before publishing a robot state, optionally change its root transform */
-  static bool applyVirtualJointTransform(moveit::core::RobotState& robot_state, const Eigen::Affine3d& offset);
+  static bool applyVirtualJointTransform(moveit::core::RobotState& robot_state, const Eigen::Isometry3d& offset);
 
   /**
    * \brief Print to console the current robot state's joint values within its limits visually
@@ -660,7 +660,7 @@ protected:
 
   // End Effector Markers
   std::map<const robot_model::JointModelGroup*, visualization_msgs::MarkerArray> ee_markers_map_;
-  std::map<const robot_model::JointModelGroup*, EigenSTL::vector_Affine3d> ee_poses_map_;
+  std::map<const robot_model::JointModelGroup*, EigenSTL::vector_Isometry3d> ee_poses_map_;
   std::map<const robot_model::JointModelGroup*, std::vector<double> > ee_joint_pos_map_;
 
   // Cached robot state marker - cache the colored links.
@@ -683,7 +683,7 @@ protected:
 
   // Optional offset that can be applied to all outgoing/published robot states
   bool robot_state_root_offset_enabled_ = false;
-  Eigen::Affine3d robot_state_root_offset_;
+  Eigen::Isometry3d robot_state_root_offset_;
 
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW  // http://eigen.tuxfamily.org/dox/group__TopicStructHavingEigenMembers.html
