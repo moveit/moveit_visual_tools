@@ -272,7 +272,8 @@ bool IMarkerRobotState::getFilePath(std::string& file_path, const std::string& f
   return true;
 }
 
-bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Isometry3d poses, const moveit::core::JointModelGroup* group)
+bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Isometry3d poses,
+                                     const moveit::core::JointModelGroup* group)
 {
   std::vector<std::string> tips;
   for (std::size_t i = 0; i < arm_datas_.size(); ++i)
