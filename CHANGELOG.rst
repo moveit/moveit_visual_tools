@@ -2,6 +2,12 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.5.2 (2018-12-10)
+------------------
+* Use LOGNAME for named logging (`#42 <https://github.com/ros-planning/moveit_visual_tools/issues/42>`_)
+* Eigen::Affine3d -> Eigen::Isometry3d (`#39 <https://github.com/ros-planning/moveit_visual_tools/issues/39>`_)
+* Contributors: Dave Coleman
+
 3.5.1 (2018-11-14)
 ------------------
 * Adding trigger call to animations when batch_publishing_enabled\_ is enabled (`#36 <https://github.com/ros-planning/moveit_visual_tools/issues/36>`_)
