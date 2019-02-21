@@ -136,7 +136,6 @@ void IMarkerEndEffector::iMarkerCallback(const visualization_msgs::InteractiveMa
 void IMarkerEndEffector::solveIK(Eigen::Isometry3d& pose)
 {
   // Cartesian settings
-  const std::size_t attempts = 2;
   const double timeout = 1.0 / 30.0;  // 30 fps
 
   // Optionally collision check
@@ -151,7 +150,7 @@ void IMarkerEndEffector::solveIK(Eigen::Isometry3d& pose)
   }
 
   // Attempt to set robot to new pose
-  if (imarker_state_->setFromIK(arm_data_.jmg_, pose, arm_data_.ee_link_->getName(), attempts, timeout, constraint_fn))
+  if (imarker_state_->setFromIK(arm_data_.jmg_, pose, arm_data_.ee_link_->getName(), timeout, constraint_fn))
   {
     imarker_state_->update();
     // if (psm_->getPlanningScene()->isStateValid(*imarker_state_))

@@ -281,7 +281,6 @@ bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Isometry3d poses,
 
   // ROS_DEBUG_STREAM_NAMED(name_, "First pose should be for joint model group: " << arm_datas_[0].ee_link_->getName());
 
-  const std::size_t attempts = 10;
   const double timeout = 1.0 / 30.0;  // 30 fps
 
   // Optionally collision check
@@ -303,7 +302,7 @@ bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Isometry3d poses,
   std::size_t outer_attempts = 20;
   for (std::size_t i = 0; i < outer_attempts; ++i)
   {
-    if (!imarker_state_->setFromIK(group, poses, tips, attempts, timeout, constraint_fn))
+    if (!imarker_state_->setFromIK(group, poses, tips, timeout, constraint_fn))
     {
       ROS_DEBUG_STREAM_NAMED(name_, "Failed to find dual arm pose, trying again");
 
