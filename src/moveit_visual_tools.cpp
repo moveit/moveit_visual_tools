@@ -1395,17 +1395,24 @@ bool MoveItVisualTools::publishRobotState(const std::vector<double> joint_positi
 }
 
 bool MoveItVisualTools::publishRobotState(const robot_state::RobotStatePtr& robot_state,
-                                          const rviz_visual_tools::colors& color)
+                                          const rviz_visual_tools::colors& color,
+                                          const std::vector<std::string>& highlight_links)
 {
-  return publishRobotState(*robot_state.get(), color);
+  return publishRobotState(*robot_state.get(), color, highlight_links);
 }
 
 bool MoveItVisualTools::publishRobotState(const robot_state::RobotState& robot_state,
-                                          const rviz_visual_tools::colors& color)
+                                          const rviz_visual_tools::colors& color,
+                                          const std::vector<std::string>& highlight_links)
 {
+  // when only a subset of links should be colored, the default message is used
+  rviz_visual_tools::colors base_color = color;
+  if (!highlight_links.empty())
+    base_color = rviz_visual_tools::DEFAULT;
+
   // Reference to the correctly colored version of message (they are cached)
   // May not exist yet but this will create it
-  moveit_msgs::DisplayRobotState& display_robot_msg = display_robot_msgs_[color];
+  moveit_msgs::DisplayRobotState& display_robot_msg = display_robot_msgs_[base_color];
 
   // Check if a robot state message already exists for this color
   if (display_robot_msg.highlight_links.size() == 0)  // has not been colored yet, lets create that
@@ -1413,8 +1420,9 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState& robot_s
     if (color != rviz_visual_tools::DEFAULT)  // ignore color highlights when set to default
     {
       // Get links names
-      const std::vector<const moveit::core::LinkModel*>& link_names =
-          robot_state.getRobotModel()->getLinkModelsWithCollisionGeometry();
+      const std::vector<std::string>& link_names =
+          highlight_links.empty() ? robot_state.getRobotModel()->getLinkModelNamesWithCollisionGeometry() :
+                                    highlight_links;
       display_robot_msg.highlight_links.resize(link_names.size());
 
       // Get color
@@ -1423,7 +1431,7 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState& robot_s
       // Color every link
       for (std::size_t i = 0; i < link_names.size(); ++i)
       {
-        display_robot_msg.highlight_links[i].id = link_names[i]->getName();
+        display_robot_msg.highlight_links[i].id = link_names[i];
         display_robot_msg.highlight_links[i].color = color_rgba;
       }
     }
@@ -1452,6 +1460,10 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState& robot_s
   loadRobotStatePub();
   pub_robot_state_.publish(display_robot_msg);
   ros::spinOnce();
+
+  // remove highlight links from default message
+  if (!highlight_links.empty())
+    display_robot_msg.highlight_links.clear();
 
   return true;
 }

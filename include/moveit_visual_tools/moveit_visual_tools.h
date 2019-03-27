@@ -607,11 +607,14 @@ public:
    *        To use, add a RobotState marker to Rviz and subscribe to the DISPLAY_ROBOT_STATE_TOPIC, above
    * \param robot_state - joint values of robot
    * \param color - how to highlight the robot (solid-ly) if desired, default keeps color as specified in URDF
+   * \param highlight_inks - names of robot link to highlight, by default (empty) all links are highlighted
    */
   bool publishRobotState(const moveit::core::RobotState& robot_state,
-                         const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT);
+                         const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT,
+                         const std::vector<std::string>& highlight_links = {});
   bool publishRobotState(const moveit::core::RobotStatePtr& robot_state,
-                         const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT);
+                         const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT,
+                         const std::vector<std::string>& highlight_links = {});
 
   /**
    * \brief Fake removing a Robot State display in Rviz by simply moving it very far away
