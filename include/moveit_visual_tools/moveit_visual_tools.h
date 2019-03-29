@@ -486,6 +486,21 @@ public:
   bool publishWorkspaceParameters(const moveit_msgs::WorkspaceParameters& params);
 
   /**
+   * \brief Check if the robot state is in collision inside the planning scene and visualize the result.
+   * If the state is not colliding only the robot state is published. If there is a collision the colliding
+   * links are ghlighted and the contact points are visualized with markers.
+   * \param robot_state - The robot state to check for collisions
+   * \param planning_scene - The planning scene to use for collision checks
+   * \param highlight_link_color - The color to use for highligting colliding links
+   * \param contact_point_color - The color to use for contact point markers
+   * \result - True if there is a collision
+   */
+  bool checkAndPublishCollision(const moveit::core::RobotState& robot_state,
+                                const planning_scene::PlanningScene* planning_scene,
+                                const rviz_visual_tools::colors& highlight_link_color = rviz_visual_tools::RED,
+                                const rviz_visual_tools::colors& contact_point_color = rviz_visual_tools::PURPLE);
+
+  /**
    * \brief Given a planning scene and robot state, publish any collisions
    * \param robot_state
    * \param planning_scene
@@ -493,6 +508,17 @@ public:
    * \return true on success
    */
   bool publishContactPoints(const moveit::core::RobotState& robot_state,
+                            const planning_scene::PlanningScene* planning_scene,
+                            const rviz_visual_tools::colors& color = rviz_visual_tools::RED);
+
+  /**
+   * \brief Given a contact map and planning scene, publish the contact points
+   * \param contacts - The populated contacts to visualize
+   * \param planning_scene
+   * \param color - display color of markers
+   * \return true on success
+   */
+  bool publishContactPoints(const collision_detection::CollisionResult::ContactMap& contacts,
                             const planning_scene::PlanningScene* planning_scene,
                             const rviz_visual_tools::colors& color = rviz_visual_tools::RED);
 

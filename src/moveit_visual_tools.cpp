@@ -1057,6 +1057,33 @@ bool MoveItVisualTools::publishWorkspaceParameters(const moveit_msgs::WorkspaceP
                        "Planning_Workspace", 1);
 }
 
+bool MoveItVisualTools::checkAndPublishCollision(const moveit::core::RobotState& robot_state,
+                                                 const planning_scene::PlanningScene* planning_scene,
+                                                 const rviz_visual_tools::colors& highlight_link_color,
+                                                 const rviz_visual_tools::colors& contact_point_color)
+{
+  // Compute the contacts if any
+  collision_detection::CollisionRequest c_req;
+  collision_detection::CollisionResult c_res;
+  c_req.contacts = true;
+  c_req.max_contacts = 10;
+  c_req.max_contacts_per_pair = 3;
+  c_req.verbose = true;
+
+  // Check for collisions
+  planning_scene->checkCollision(c_req, c_res, robot_state);
+  std::vector<std::string> highlight_links;
+  for (const auto& contact : c_res.contacts)
+  {
+    highlight_links.push_back(contact.first.first);
+    highlight_links.push_back(contact.first.second);
+  }
+
+  publishRobotState(robot_state, highlight_link_color, highlight_links);
+  publishContactPoints(c_res.contacts, planning_scene, contact_point_color);
+  return c_res.collision;
+}
+
 bool MoveItVisualTools::publishContactPoints(const moveit::core::RobotState& robot_state,
                                              const planning_scene::PlanningScene* planning_scene,
                                              const rviz_visual_tools::colors& color)
@@ -1071,12 +1098,18 @@ bool MoveItVisualTools::publishContactPoints(const moveit::core::RobotState& rob
 
   // Check for collisions
   planning_scene->checkCollision(c_req, c_res, robot_state);
+  return publishContactPoints(c_res.contacts, planning_scene, color);
+}
 
+bool MoveItVisualTools::publishContactPoints(const collision_detection::CollisionResult::ContactMap& contacts,
+                                             const planning_scene::PlanningScene* planning_scene,
+                                             const rviz_visual_tools::colors& color)
+{
   // Display
-  if (c_res.contact_count > 0)
+  if (!contacts.empty())
   {
     visualization_msgs::MarkerArray arr;
-    collision_detection::getCollisionMarkersFromContacts(arr, planning_scene->getPlanningFrame(), c_res.contacts);
+    collision_detection::getCollisionMarkersFromContacts(arr, planning_scene->getPlanningFrame(), contacts);
     ROS_INFO_STREAM_NAMED(LOGNAME, "Completed listing of explanations for invalid states.");
 
     // Check for markers
@@ -1087,6 +1120,7 @@ bool MoveItVisualTools::publishContactPoints(const moveit::core::RobotState& rob
     for (std::size_t i = 0; i < arr.markers.size(); ++i)
     {
       arr.markers[i].ns = "Collision";
+      arr.markers[i].id = i;
       arr.markers[i].scale.x = 0.04;
       arr.markers[i].scale.y = 0.04;
       arr.markers[i].scale.z = 0.04;
