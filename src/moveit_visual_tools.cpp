@@ -1405,7 +1405,7 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState& robot_s
                                           const rviz_visual_tools::colors& color,
                                           const std::vector<std::string>& highlight_links)
 {
-  // when only a subset of links should be colored, the default message is used
+  // when only a subset of links should be colored, the default message is used rather than the cached solid robot messages
   rviz_visual_tools::colors base_color = color;
   if (!highlight_links.empty())
     base_color = rviz_visual_tools::DEFAULT;

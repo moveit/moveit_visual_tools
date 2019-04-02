@@ -607,7 +607,7 @@ public:
    *        To use, add a RobotState marker to Rviz and subscribe to the DISPLAY_ROBOT_STATE_TOPIC, above
    * \param robot_state - joint values of robot
    * \param color - how to highlight the robot (solid-ly) if desired, default keeps color as specified in URDF
-   * \param highlight_inks - names of robot link to highlight, by default (empty) all links are highlighted
+   * \param highlight_links - if the |color| is not |DEFAULT|, allows selective robot links to be highlighted. by default (empty) all links are highlighted 
    */
   bool publishRobotState(const moveit::core::RobotState& robot_state,
                          const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT,
