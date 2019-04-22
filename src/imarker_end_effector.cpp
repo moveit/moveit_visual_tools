@@ -291,7 +291,7 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verb
     {
       ROS_ERROR_STREAM_NAMED("cart_path_planner", "No collision objects exist in world, you need at least a table "
                                                   "modeled for the controller to work");
-      ROS_ERROR_STREAM_NAMED("cart_path_planner", "To fix this, relaunch the teleop/head tracking/whatever MoveIt! "
+      ROS_ERROR_STREAM_NAMED("cart_path_planner", "To fix this, relaunch the teleop/head tracking/whatever MoveIt "
                                                   "node to publish the collision objects");
       return false;
     }

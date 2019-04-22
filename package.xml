@@ -2,7 +2,7 @@
 <package format="2">
   <name>moveit_visual_tools</name>
   <version>3.5.2</version>
-  <description>Helper functions for displaying and debugging MoveIt! data in Rviz via published markers</description>
+  <description>Helper functions for displaying and debugging MoveIt data in Rviz via published markers</description>
 
   <maintainer email="dave@picknik.ai">Dave Coleman</maintainer>
 

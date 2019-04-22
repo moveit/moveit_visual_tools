@@ -1,12 +1,12 @@
-# MoveIt! Visual Tools
+# MoveIt Visual Tools
 
-Helper functions for displaying and debugging MoveIt! data in Rviz via published markers, trajectories, and MoveIt! collision objects. It is sometimes hard to understand everything that is going on internally with MoveIt!, but using these quick convenience functions allows one to easily visualize their code. This package is built in top of [rviz_visual_tools](https://github.com/davetcoleman/rviz_visual_tools) and all those features are included via class inheritance.
+Helper functions for displaying and debugging MoveIt data in Rviz via published markers, trajectories, and MoveIt collision objects. It is sometimes hard to understand everything that is going on internally with MoveIt, but using these quick convenience functions allows one to easily visualize their code. This package is built in top of [rviz_visual_tools](https://github.com/davetcoleman/rviz_visual_tools) and all those features are included via class inheritance.
 
 This package helps you visualize:
 
  - Basic Rviz geometric shapes
- - MoveIt! collision objects
- - MoveIt! and ROS trajectories
+ - MoveIt collision objects
+ - MoveIt and ROS trajectories
  - Robot states
  - End effectors
  - Interactive markers to move robot arms using IK from remote applications
@@ -73,7 +73,7 @@ visual_tools_.reset(new moveit_visual_tools::MoveItVisualTools("base_frame","/mo
 
 ### Collision Object Functions
 
-Helpers for adding and removing objects from the MoveIt! planning scene. CO stands for Collision Object and ACO stands for Active Collision Object.
+Helpers for adding and removing objects from the MoveIt planning scene. CO stands for Collision Object and ACO stands for Active Collision Object.
 
  - cleanupCO
  - cleanupACO

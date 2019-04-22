@@ -1,6 +1,6 @@
 # Migration Notes
 
-API changes in MoveIt! Visual Tools releases
+API changes in MoveIt Visual Tools releases
 
 ## ROS Melodic
 

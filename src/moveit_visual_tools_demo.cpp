@@ -86,7 +86,7 @@ public:
     // Show message
     Eigen::Isometry3d text_pose = Eigen::Isometry3d::Identity();
     text_pose.translation().z() = 4;
-    visual_tools_->publishText(text_pose, "MoveIt! Visual Tools", rvt::WHITE, rvt::XLARGE, /*static_id*/ false);
+    visual_tools_->publishText(text_pose, "MoveIt Visual Tools", rvt::WHITE, rvt::XLARGE, /*static_id*/ false);
 
     runRobotStateTests();
 
