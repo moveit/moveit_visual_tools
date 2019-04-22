@@ -348,7 +348,7 @@ bool isIKStateValid(const planning_scene::PlanningScene* planning_scene, bool ve
     {
       ROS_ERROR_STREAM_NAMED("imarker_robot_state", "No collision objects exist in world, you need at least a table "
                                                     "modeled for the controller to work");
-      ROS_ERROR_STREAM_NAMED("imarker_robot_state", "To fix this, relaunch the teleop/head tracking/whatever MoveIt! "
+      ROS_ERROR_STREAM_NAMED("imarker_robot_state", "To fix this, relaunch the teleop/head tracking/whatever MoveIt "
                                                     "node to publish the collision objects");
       return false;
     }

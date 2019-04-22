@@ -33,8 +33,8 @@
  *********************************************************************/
 
 /* \author  Dave Coleman
- * \desc    Helper functions for displaying and debugging MoveIt! data in Rviz via published markers
- *          and MoveIt! collision objects. Very useful for debugging complex software
+ * \desc    Helper functions for displaying and debugging MoveIt data in Rviz via published markers
+ *          and MoveIt collision objects. Very useful for debugging complex software
  */
 
 #ifndef MOVEIT_VISUAL_TOOLS_MOVEIT_VISUAL_TOOLS_H
@@ -180,7 +180,7 @@ public:
 
   /**
    * \brief Call this once at begining to load the end effector markers and then whenever a joint changes
-   * \param ee_jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_gripper"
+   * \param ee_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_gripper"
    * \param ee_joint_pos - the values of all active joints in this planning group
    * \return true if it is successful
    */
@@ -246,7 +246,7 @@ public:
   /**
    * \brief Show grasps generated from moveit_simple_grasps or other MoveIt Grasp message sources
    * \param possible_grasps - a set of grasp positions to visualize
-   * \param ee_jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_arm"
+   * \param ee_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
    * \param animate_speed - how fast the gripper approach is animated, optional
    */
   bool publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps, const robot_model::JointModelGroup* ee_jmg,
@@ -255,7 +255,7 @@ public:
   /**
    * \brief Display an animated vector of grasps including its approach movement in Rviz
    * \param possible_grasps - a set of grasp positions to visualize
-   * \param ee_jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_arm"
+   * \param ee_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
    * \param animate_speed - how fast the gripper approach is animated, optional
    */
   bool publishAnimatedGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
@@ -264,7 +264,7 @@ public:
   /**
    * \brief Animate a single grasp in its movement direction
    * \param grasp
-   * \param ee_jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_arm"
+   * \param ee_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
    * \param animate_speed - how fast the gripper approach is animated
    * \return true on sucess
    */
@@ -275,14 +275,14 @@ public:
    * \brief Display an vector of inverse kinematic solutions for the IK service in Rviz
    * Note: this is published to the 'Planned Path' section of the 'MotionPlanning' display in Rviz
    * \param ik_solutions - a set of corresponding arm positions to achieve each grasp
-   * \param arm_jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_arm"
+   * \param arm_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
    * \param display_time - amount of time to sleep between sending trajectories, optional
    */
   bool publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint>& ik_solutions,
                           const robot_model::JointModelGroup* arm_jmg, double display_time = 0.4);
 
   /**
-   * \brief Remove all collision objects that this class has added to the MoveIt! planning scene
+   * \brief Remove all collision objects that this class has added to the MoveIt planning scene
    *        Communicates directly to a planning scene monitor e.g. if this is the move_group node
    * \param  the scene to directly clear the collision objects from
    * \return true on sucess
@@ -541,7 +541,7 @@ public:
    * \param trajectory the actual plan
    * \param blocking whether we need to wait for the animation to complete
    * \param robot_state - the base state to add the joint trajectory message to
-   * \param ee_jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_arm"
+   * \param ee_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
    * \return true on success
    */
   bool publishTrajectoryPath(const std::vector<moveit::core::RobotStatePtr>& trajectory,
@@ -559,7 +559,7 @@ public:
    * \brief Display a line of the end effector path from a robot trajectory path
    * \param trajectory_msg - the robot plan
    * \param ee_parent_link - the link that we should trace a path of, e.g. the gripper link
-   * \param arm_jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_arm"
+   * \param arm_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
    * \param color - display color of markers
    * \return true on success
    */
@@ -577,7 +577,7 @@ public:
    * \brief Display a line of the end effector(s) path(s) from a robot trajectory path
    *        This version can visualize multiple end effectors
    * \param trajectory_msg - the robot plan
-   * \param arm_jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_arm".
+   * \param arm_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm".
    * \param color - display color of markers
    * \return true on success
    */
@@ -610,7 +610,7 @@ public:
   /**
    * \brief Publish a MoveIt robot state to a topic that the Rviz "RobotState" display can show
    * \param trajectory_pt of joint positions
-   * \param jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_arm"
+   * \param jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
    * \param color - how to highlight the robot (solid-ly) if desired, default keeps color as specified in URDF
    * \return true on success
    */
@@ -621,7 +621,7 @@ public:
   /**
    * \brief Publish a MoveIt robot state to a topic that the Rviz "RobotState" display can show
    * \param joint_positions - a vector of doubles corresponding 1-to-1 to the kinematic chain named in "jmg"
-   * \param jmg - the set of joints to use, e.g. the MoveIt! planning group, e.g. "left_arm"
+   * \param jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
    * \param color - how to highlight the robot (solid-ly) if desired, default keeps color as specified in URDF
    * \return true on success
    */

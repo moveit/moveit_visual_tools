@@ -331,7 +331,7 @@ void MoveItVisualTools::loadTrajectoryPub(const std::string& display_planned_pat
 
   // Trajectory paths
   pub_display_path_ = nh_.advertise<moveit_msgs::DisplayTrajectory>(display_planned_path_topic, 10, false);
-  ROS_DEBUG_STREAM_NAMED(LOGNAME, "Publishing MoveIt! trajectory on topic " << pub_display_path_.getTopic());
+  ROS_DEBUG_STREAM_NAMED(LOGNAME, "Publishing MoveIt trajectory on topic " << pub_display_path_.getTopic());
 
   // Wait for topic to be ready
   if (blocking)
@@ -349,7 +349,7 @@ void MoveItVisualTools::loadRobotStatePub(const std::string& robot_state_topic, 
 
   // RobotState Message
   pub_robot_state_ = nh_.advertise<moveit_msgs::DisplayRobotState>(robot_state_topic_, 1);
-  ROS_DEBUG_STREAM_NAMED(LOGNAME, "Publishing MoveIt! robot state on topic " << pub_robot_state_.getTopic());
+  ROS_DEBUG_STREAM_NAMED(LOGNAME, "Publishing MoveIt robot state on topic " << pub_robot_state_.getTopic());
 
   // Wait for topic to be ready
   if (blocking)

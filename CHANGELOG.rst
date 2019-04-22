@@ -88,7 +88,7 @@ Changelog for package moveit_visual_tools
 * Make checkForVirtualJoint() static
 * IMarkerRobotState remove offset capability
 * IMarkerRobotState remove imarker box control
-* Switched travis to MoveIt! CI
+* Switched travis to MoveIt CI
 * Added new IMarker Robot control method
 * Cleaned up code base: catkin lint, roslint
 * Fixed bug in planning scene triggering
