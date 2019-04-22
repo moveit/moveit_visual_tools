@@ -1057,6 +1057,33 @@ bool MoveItVisualTools::publishWorkspaceParameters(const moveit_msgs::WorkspaceP
                        "Planning_Workspace", 1);
 }
 
+bool MoveItVisualTools::checkAndPublishCollision(const moveit::core::RobotState& robot_state,
+                                                 const planning_scene::PlanningScene* planning_scene,
+                                                 const rviz_visual_tools::colors& highlight_link_color,
+                                                 const rviz_visual_tools::colors& contact_point_color)
+{
+  // Compute the contacts if any
+  collision_detection::CollisionRequest c_req;
+  collision_detection::CollisionResult c_res;
+  c_req.contacts = true;
+  c_req.max_contacts = 10;
+  c_req.max_contacts_per_pair = 3;
+  c_req.verbose = true;
+
+  // Check for collisions
+  planning_scene->checkCollision(c_req, c_res, robot_state);
+  std::vector<std::string> highlight_links;
+  for (const auto& contact : c_res.contacts)
+  {
+    highlight_links.push_back(contact.first.first);
+    highlight_links.push_back(contact.first.second);
+  }
+
+  publishRobotState(robot_state, highlight_link_color, highlight_links);
+  publishContactPoints(c_res.contacts, planning_scene, contact_point_color);
+  return c_res.collision;
+}
+
 bool MoveItVisualTools::publishContactPoints(const moveit::core::RobotState& robot_state,
                                              const planning_scene::PlanningScene* planning_scene,
                                              const rviz_visual_tools::colors& color)
@@ -1071,12 +1098,18 @@ bool MoveItVisualTools::publishContactPoints(const moveit::core::RobotState& rob
 
   // Check for collisions
   planning_scene->checkCollision(c_req, c_res, robot_state);
+  return publishContactPoints(c_res.contacts, planning_scene, color);
+}
 
+bool MoveItVisualTools::publishContactPoints(const collision_detection::CollisionResult::ContactMap& contacts,
+                                             const planning_scene::PlanningScene* planning_scene,
+                                             const rviz_visual_tools::colors& color)
+{
   // Display
-  if (c_res.contact_count > 0)
+  if (!contacts.empty())
   {
     visualization_msgs::MarkerArray arr;
-    collision_detection::getCollisionMarkersFromContacts(arr, planning_scene->getPlanningFrame(), c_res.contacts);
+    collision_detection::getCollisionMarkersFromContacts(arr, planning_scene->getPlanningFrame(), contacts);
     ROS_INFO_STREAM_NAMED(LOGNAME, "Completed listing of explanations for invalid states.");
 
     // Check for markers
@@ -1087,6 +1120,7 @@ bool MoveItVisualTools::publishContactPoints(const moveit::core::RobotState& rob
     for (std::size_t i = 0; i < arr.markers.size(); ++i)
     {
       arr.markers[i].ns = "Collision";
+      arr.markers[i].id = i;
       arr.markers[i].scale.x = 0.04;
       arr.markers[i].scale.y = 0.04;
       arr.markers[i].scale.z = 0.04;
@@ -1395,17 +1429,24 @@ bool MoveItVisualTools::publishRobotState(const std::vector<double> joint_positi
 }
 
 bool MoveItVisualTools::publishRobotState(const robot_state::RobotStatePtr& robot_state,
-                                          const rviz_visual_tools::colors& color)
+                                          const rviz_visual_tools::colors& color,
+                                          const std::vector<std::string>& highlight_links)
 {
-  return publishRobotState(*robot_state.get(), color);
+  return publishRobotState(*robot_state.get(), color, highlight_links);
 }
 
 bool MoveItVisualTools::publishRobotState(const robot_state::RobotState& robot_state,
-                                          const rviz_visual_tools::colors& color)
+                                          const rviz_visual_tools::colors& color,
+                                          const std::vector<std::string>& highlight_links)
 {
+  // when only a subset of links should be colored, the default message is used rather than the cached solid robot messages
+  rviz_visual_tools::colors base_color = color;
+  if (!highlight_links.empty())
+    base_color = rviz_visual_tools::DEFAULT;
+
   // Reference to the correctly colored version of message (they are cached)
   // May not exist yet but this will create it
-  moveit_msgs::DisplayRobotState& display_robot_msg = display_robot_msgs_[color];
+  moveit_msgs::DisplayRobotState& display_robot_msg = display_robot_msgs_[base_color];
 
   // Check if a robot state message already exists for this color
   if (display_robot_msg.highlight_links.size() == 0)  // has not been colored yet, lets create that
@@ -1413,8 +1454,9 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState& robot_s
     if (color != rviz_visual_tools::DEFAULT)  // ignore color highlights when set to default
     {
       // Get links names
-      const std::vector<const moveit::core::LinkModel*>& link_names =
-          robot_state.getRobotModel()->getLinkModelsWithCollisionGeometry();
+      const std::vector<std::string>& link_names =
+          highlight_links.empty() ? robot_state.getRobotModel()->getLinkModelNamesWithCollisionGeometry() :
+                                    highlight_links;
       display_robot_msg.highlight_links.resize(link_names.size());
 
       // Get color
@@ -1423,7 +1465,7 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState& robot_s
       // Color every link
       for (std::size_t i = 0; i < link_names.size(); ++i)
       {
-        display_robot_msg.highlight_links[i].id = link_names[i]->getName();
+        display_robot_msg.highlight_links[i].id = link_names[i];
         display_robot_msg.highlight_links[i].color = color_rgba;
       }
     }
@@ -1452,6 +1494,10 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState& robot_s
   loadRobotStatePub();
   pub_robot_state_.publish(display_robot_msg);
   ros::spinOnce();
+
+  // remove highlight links from default message
+  if (!highlight_links.empty())
+    display_robot_msg.highlight_links.clear();
 
   return true;
 }
