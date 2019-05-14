@@ -449,13 +449,11 @@ bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp& grasp,
   // Grasp Pose Variables
   geometry_msgs::Pose grasp_pose = grasp.grasp_pose.pose;
 
-  // Debug
-  if (false)
-  {
-    publishArrow(grasp_pose, rviz_visual_tools::GREEN);
-    publishEEMarkers(grasp_pose, ee_jmg);
-    ros::Duration(0.5).sleep();
-  }
+#if 0  // Debug
+  publishArrow(grasp_pose, rviz_visual_tools::GREEN);
+  publishEEMarkers(grasp_pose, ee_jmg);
+  ros::Duration(0.5).sleep();
+#endif
 
   Eigen::Isometry3d grasp_pose_eigen;
   tf2::fromMsg(grasp_pose, grasp_pose_eigen);

@@ -281,18 +281,17 @@ bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Isometry3d& poses,
 
   // Optionally collision check
   moveit::core::GroupStateValidityCallbackFn constraint_fn;
-  if (true)
-  {
-    bool collision_checking_verbose_ = false;
-    bool only_check_self_collision_ = false;
+#if 1
+  bool collision_checking_verbose_ = false;
+  bool only_check_self_collision_ = false;
 
-    // TODO(davetcoleman): this is currently not working, the locking seems to cause segfaults
-    // TODO(davetcoleman): change to std shared_ptr
-    boost::scoped_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls;
-    ls.reset(new planning_scene_monitor::LockedPlanningSceneRO(psm_));
-    constraint_fn = boost::bind(&isIKStateValid, static_cast<const planning_scene::PlanningSceneConstPtr&>(*ls).get(),
-                                collision_checking_verbose_, only_check_self_collision_, visual_tools_, _1, _2, _3);
-  }
+  // TODO(davetcoleman): this is currently not working, the locking seems to cause segfaults
+  // TODO(davetcoleman): change to std shared_ptr
+  boost::scoped_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls;
+  ls.reset(new planning_scene_monitor::LockedPlanningSceneRO(psm_));
+  constraint_fn = boost::bind(&isIKStateValid, static_cast<const planning_scene::PlanningSceneConstPtr&>(*ls).get(),
+                              collision_checking_verbose_, only_check_self_collision_, visual_tools_, _1, _2, _3);
+#endif
 
   // Solve
   std::size_t outer_attempts = 20;
@@ -336,19 +335,17 @@ bool isIKStateValid(const planning_scene::PlanningScene* planning_scene, bool ve
   robot_state->setJointGroupPositions(group, ik_solution);
   robot_state->update();
 
-  // Ensure there are objects in the planning scene
-  if (false)
+#if 0  // Ensure there are objects in the planning scene
+  const std::size_t num_collision_objects = planning_scene->getCollisionWorld()->getWorld()->size();
+  if (num_collision_objects == 0)
   {
-    const std::size_t num_collision_objects = planning_scene->getCollisionWorld()->getWorld()->size();
-    if (num_collision_objects == 0)
-    {
-      ROS_ERROR_STREAM_NAMED("imarker_robot_state", "No collision objects exist in world, you need at least a table "
-                                                    "modeled for the controller to work");
-      ROS_ERROR_STREAM_NAMED("imarker_robot_state", "To fix this, relaunch the teleop/head tracking/whatever MoveIt "
-                                                    "node to publish the collision objects");
-      return false;
-    }
+    ROS_ERROR_STREAM_NAMED("imarker_robot_state", "No collision objects exist in world, you need at least a table "
+                           "modeled for the controller to work");
+    ROS_ERROR_STREAM_NAMED("imarker_robot_state", "To fix this, relaunch the teleop/head tracking/whatever MoveIt "
+                           "node to publish the collision objects");
+    return false;
   }
+#endif
 
   if (!planning_scene)
   {
