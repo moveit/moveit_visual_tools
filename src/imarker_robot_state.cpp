@@ -333,8 +333,9 @@ bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Isometry3d& poses,
 namespace
 {
 bool isIKStateValid(const planning_scene::PlanningScene* planning_scene, bool verbose, bool only_check_self_collision,
-                    const moveit_visual_tools::MoveItVisualToolsPtr& visual_tools, moveit::core::RobotState* robot_state,
-                    const moveit::core::JointModelGroup* group, const double* ik_solution)
+                    const moveit_visual_tools::MoveItVisualToolsPtr& visual_tools,
+                    moveit::core::RobotState* robot_state, const moveit::core::JointModelGroup* group,
+                    const double* ik_solution)
 {
   // Apply IK solution to robot state
   robot_state->setJointGroupPositions(group, ik_solution);

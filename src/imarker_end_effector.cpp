@@ -283,7 +283,7 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verb
   robot_state->setJointGroupPositions(group, ik_solution);
   robot_state->update();
 
-#if 0 // Ensure there are objects in the planning scene
+#if 0  // Ensure there are objects in the planning scene
   const std::size_t num_collision_objects = planning_scene->getCollisionWorld()->getWorld()->size();
   if (num_collision_objects == 0)
   {
