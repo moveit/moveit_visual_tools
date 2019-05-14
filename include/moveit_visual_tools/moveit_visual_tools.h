@@ -428,7 +428,7 @@ public:
    * \brief Helper for publishCollisionWall
    */
   void getCollisionWallMsg(double x, double y, double z, double angle, double width, double height,
-                           const std::string name, moveit_msgs::CollisionObject& collision_obj);
+                           const std::string& name, moveit_msgs::CollisionObject& collision_obj);
 
   /**
    * \brief Publish a typical room wall
@@ -442,10 +442,10 @@ public:
    * \return true on sucess
    */
   bool publishCollisionWall(double x, double y, double angle = 0.0, double width = 2.0, double height = 1.5,
-                            const std::string name = "wall",
+                            const std::string& name = "wall",
                             const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
   bool publishCollisionWall(double x, double y, double z, double angle = 0.0, double width = 2.0, double height = 1.5,
-                            const std::string name = "wall",
+                            const std::string& name = "wall",
                             const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
 
   /**
@@ -468,7 +468,7 @@ public:
   }
 
   bool publishCollisionTable(double x, double y, double z, double angle, double width, double height, double depth,
-                             const std::string name, const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
+                             const std::string& name, const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Load a planning scene to a planning_scene_monitor from file
@@ -550,7 +550,7 @@ public:
   bool publishTrajectoryPath(const robot_trajectory::RobotTrajectoryPtr& trajectory, bool blocking = false);
   bool publishTrajectoryPath(const robot_trajectory::RobotTrajectory& trajectory, bool blocking = false);
   bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg,
-                             const moveit::core::RobotStateConstPtr robot_state, bool blocking = false);
+                             const moveit::core::RobotStateConstPtr& robot_state, bool blocking = false);
   bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg,
                              const moveit::core::RobotState& robot_state, bool blocking = false);
   bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg,
@@ -568,7 +568,7 @@ public:
   bool publishTrajectoryLine(const moveit_msgs::RobotTrajectory& trajectory_msg,
                              const moveit::core::LinkModel* ee_parent_link, const robot_model::JointModelGroup* arm_jmg,
                              const rviz_visual_tools::colors& color = rviz_visual_tools::LIME_GREEN);
-  bool publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr robot_trajectory,
+  bool publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
                              const moveit::core::LinkModel* ee_parent_link,
                              const rviz_visual_tools::colors& color = rviz_visual_tools::LIME_GREEN);
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectory& robot_trajectory,
@@ -586,7 +586,7 @@ public:
   bool publishTrajectoryLine(const moveit_msgs::RobotTrajectory& trajectory_msg,
                              const robot_model::JointModelGroup* arm_jmg,
                              const rviz_visual_tools::colors& color = rviz_visual_tools::LIME_GREEN);
-  bool publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr robot_trajectory,
+  bool publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
                              const robot_model::JointModelGroup* arm_jmg,
                              const rviz_visual_tools::colors& color = rviz_visual_tools::LIME_GREEN);
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectory& robot_trajectory,
@@ -627,7 +627,7 @@ public:
    * \param color - how to highlight the robot (solid-ly) if desired, default keeps color as specified in URDF
    * \return true on success
    */
-  bool publishRobotState(const std::vector<double> joint_positions, const robot_model::JointModelGroup* jmg,
+  bool publishRobotState(const std::vector<double>& joint_positions, const robot_model::JointModelGroup* jmg,
                          const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT);
 
   /**
@@ -659,7 +659,7 @@ public:
    * \brief Print to console the current robot state's joint values within its limits visually
    * \param robot_state - the robot to show
    */
-  void showJointLimits(moveit::core::RobotStatePtr robot_state);
+  void showJointLimits(const moveit::core::RobotStatePtr& robot_state);
 
   /**
    * @brief Get the planning scene monitor that this class is using

@@ -46,6 +46,7 @@
 
 // C++
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace moveit_visual_tools
@@ -53,7 +54,7 @@ namespace moveit_visual_tools
 IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonitorPtr psm,
                                      const std::string& imarker_name, std::vector<ArmData> arm_datas,
                                      rviz_visual_tools::colors color, const std::string& package_path)
-  : name_(imarker_name), nh_("~"), psm_(psm), arm_datas_(arm_datas), color_(color), package_path_(package_path)
+  : name_(imarker_name), nh_("~"), psm_(std::move(psm)), arm_datas_(std::move(arm_datas)), color_(color), package_path_(package_path)
 {
   // Load Visual tools
   visual_tools_ = std::make_shared<moveit_visual_tools::MoveItVisualTools>(
@@ -135,19 +136,19 @@ bool IMarkerRobotState::saveToFile()
   return true;
 }
 
-void IMarkerRobotState::setIMarkerCallback(IMarkerCallback callback)
+void IMarkerRobotState::setIMarkerCallback(const IMarkerCallback& callback)
 {
-  for (const IMarkerEndEffectorPtr ee : end_effectors_)
+  for (const IMarkerEndEffectorPtr& ee : end_effectors_)
     ee->setIMarkerCallback(callback);
 }
 
-void IMarkerRobotState::setRobotState(moveit::core::RobotStatePtr state)
+void IMarkerRobotState::setRobotState(const moveit::core::RobotStatePtr& state)
 {
   // Do a copy
   *imarker_state_ = *state;
 
   // Update the imarkers
-  for (IMarkerEndEffectorPtr ee : end_effectors_)
+  for (const IMarkerEndEffectorPtr& ee : end_effectors_)
     ee->setPoseFromRobotState();
 }
 
@@ -226,12 +227,7 @@ bool IMarkerRobotState::isStateValid(bool verbose)
   planning_scene_monitor::LockedPlanningSceneRO planning_scene(psm_);  // Read only lock
 
   // which planning group to collision check, "" is everything
-  if (planning_scene->isStateValid(*imarker_state_, "", verbose))
-  {
-    return true;
-  }
-
-  return false;
+  return planning_scene->isStateValid(*imarker_state_, "", verbose);
 }
 
 void IMarkerRobotState::publishRobotState()
@@ -272,7 +268,7 @@ bool IMarkerRobotState::getFilePath(std::string& file_path, const std::string& f
   return true;
 }
 
-bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Isometry3d poses,
+bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Isometry3d& poses,
                                      const moveit::core::JointModelGroup* group)
 {
   std::vector<std::string> tips;
@@ -317,7 +313,7 @@ bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Isometry3d poses,
       publishRobotState();
 
       // Update the imarkers
-      for (IMarkerEndEffectorPtr ee : end_effectors_)
+      for (const IMarkerEndEffectorPtr& ee : end_effectors_)
         ee->setPoseFromRobotState();
 
       return true;
@@ -333,7 +329,7 @@ bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Isometry3d poses,
 namespace
 {
 bool isIKStateValid(const planning_scene::PlanningScene* planning_scene, bool verbose, bool only_check_self_collision,
-                    moveit_visual_tools::MoveItVisualToolsPtr visual_tools, moveit::core::RobotState* robot_state,
+                    const moveit_visual_tools::MoveItVisualToolsPtr& visual_tools, moveit::core::RobotState* robot_state,
                     const moveit::core::JointModelGroup* group, const double* ik_solution)
 {
   // Apply IK solution to robot state
@@ -386,4 +382,4 @@ bool isIKStateValid(const planning_scene::PlanningScene* planning_scene, bool ve
   return false;
 }
 
-}  // end annonymous namespace
+}  // namespace

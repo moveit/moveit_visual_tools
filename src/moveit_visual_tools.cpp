@@ -70,7 +70,7 @@ const std::string LOGNAME = "visual_tools";
 MoveItVisualTools::MoveItVisualTools(const std::string& base_frame, const std::string& marker_topic,
                                      planning_scene_monitor::PlanningSceneMonitorPtr psm)
   : RvizVisualTools::RvizVisualTools(base_frame, marker_topic)
-  , psm_(psm)
+  , psm_(std::move(psm))
   , robot_state_topic_(DISPLAY_ROBOT_STATE_TOPIC)
   , planning_scene_topic_(PLANNING_SCENE_TOPIC)
 {
@@ -78,7 +78,7 @@ MoveItVisualTools::MoveItVisualTools(const std::string& base_frame, const std::s
 
 MoveItVisualTools::MoveItVisualTools(const std::string& base_frame, const std::string& marker_topic,
                                      robot_model::RobotModelConstPtr robot_model)
-  : RvizVisualTools::RvizVisualTools(base_frame, marker_topic), robot_model_(robot_model)
+  : RvizVisualTools::RvizVisualTools(base_frame, marker_topic), robot_model_(std::move(robot_model))
 {
 }
 
@@ -241,7 +241,7 @@ bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg,
                                      const std::vector<double>& ee_joint_pos)
 {
   // Get joint state group
-  if (ee_jmg == NULL)  // make sure EE_GROUP exists
+  if (ee_jmg == nullptr)  // make sure EE_GROUP exists
   {
     ROS_ERROR_STREAM_NAMED(LOGNAME, "Unable to find joint model group with address" << ee_jmg);
     return false;
@@ -252,7 +252,7 @@ bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg,
   shared_robot_state_->setToDefaultValues();
   shared_robot_state_->update();
 
-  if (ee_joint_pos.size() > 0)
+  if (!ee_joint_pos.empty())
   {
     if (ee_joint_pos.size() != ee_jmg->getActiveJointModels().size())
     {
@@ -401,10 +401,7 @@ bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose& pose, const 
   }
 
   // Helper for publishing rviz markers
-  if (!publishMarkers(ee_markers_map_[ee_jmg]))
-    return false;
-
-  return true;
+  return publishMarkers(ee_markers_map_[ee_jmg]);
 }
 
 bool MoveItVisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
@@ -875,7 +872,7 @@ bool MoveItVisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph& g
     {
       // Check if we've already added this pair of nodes (edge)
       return_value = added_edges.insert(node_ids(i, j));
-      if (return_value.second == false)
+      if (!return_value.second)
       {
         // Element already existed in set, so don't add a new collision object
       }
@@ -924,7 +921,7 @@ bool MoveItVisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph& g
 }
 
 void MoveItVisualTools::getCollisionWallMsg(double x, double y, double z, double angle, double width, double height,
-                                            const std::string name, moveit_msgs::CollisionObject& collision_obj)
+                                            const std::string& name, moveit_msgs::CollisionObject& collision_obj)
 {
   collision_obj.header.stamp = ros::Time::now();
   collision_obj.header.frame_id = base_frame_;
@@ -964,13 +961,13 @@ void MoveItVisualTools::getCollisionWallMsg(double x, double y, double z, double
 }
 
 bool MoveItVisualTools::publishCollisionWall(double x, double y, double angle, double width, double height,
-                                             const std::string name, const rviz_visual_tools::colors& color)
+                                             const std::string& name, const rviz_visual_tools::colors& color)
 {
   return publishCollisionWall(x, y, 0.0, angle, width, height, name, color);
 }
 
 bool MoveItVisualTools::publishCollisionWall(double x, double y, double z, double angle, double width, double height,
-                                             const std::string name, const rviz_visual_tools::colors& color)
+                                             const std::string& name, const rviz_visual_tools::colors& color)
 {
   moveit_msgs::CollisionObject collision_obj;
   getCollisionWallMsg(x, y, z, angle, width, height, name, collision_obj);
@@ -979,7 +976,7 @@ bool MoveItVisualTools::publishCollisionWall(double x, double y, double z, doubl
 }
 
 bool MoveItVisualTools::publishCollisionTable(double x, double y, double z, double angle, double width, double height,
-                                              double depth, const std::string name,
+                                              double depth, const std::string& name,
                                               const rviz_visual_tools::colors& color)
 {
   geometry_msgs::Pose table_pose;
@@ -1137,7 +1134,7 @@ bool MoveItVisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTraje
   // Get joint state group
   const robot_model::JointModelGroup* jmg = robot_model_->getJointModelGroup(planning_group);
 
-  if (jmg == NULL)  // not found
+  if (jmg == nullptr)  // not found
   {
     ROS_ERROR_STREAM_NAMED("publishTrajectoryPoint", "Could not find joint model group " << planning_group);
     return false;
@@ -1204,7 +1201,7 @@ bool MoveItVisualTools::publishTrajectoryPath(const robot_trajectory::RobotTraje
 }
 
 bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg,
-                                              const robot_state::RobotStateConstPtr robot_state, bool blocking)
+                                              const robot_state::RobotStateConstPtr& robot_state, bool blocking)
 {
   return publishTrajectoryPath(trajectory_msg, *robot_state, blocking);
 }
@@ -1222,7 +1219,7 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
                                               const moveit_msgs::RobotState& robot_state, bool blocking)
 {
   // Check if we have enough points
-  if (!trajectory_msg.joint_trajectory.points.size())
+  if (trajectory_msg.joint_trajectory.points.empty())
   {
     ROS_WARN_STREAM_NAMED(LOGNAME, "Unable to publish trajectory path because trajectory has zero points");
     return false;
@@ -1293,7 +1290,7 @@ bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::RobotTrajectory
   return publishTrajectoryLine(robot_trajectory, ee_parent_link, color);
 }
 
-bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr robot_trajectory,
+bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
                                               const moveit::core::LinkModel* ee_parent_link,
                                               const rviz_visual_tools::colors& color)
 {
@@ -1357,7 +1354,7 @@ bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::RobotTrajectory
   return true;
 }
 
-bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr robot_trajectory,
+bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
                                               const robot_model::JointModelGroup* arm_jmg,
                                               const rviz_visual_tools::colors& color)
 {
@@ -1417,7 +1414,7 @@ bool MoveItVisualTools::publishRobotState(const trajectory_msgs::JointTrajectory
   return publishRobotState(trajectory_pt.positions, jmg, color);
 }
 
-bool MoveItVisualTools::publishRobotState(const std::vector<double> joint_positions,
+bool MoveItVisualTools::publishRobotState(const std::vector<double>& joint_positions,
                                           const robot_model::JointModelGroup* jmg,
                                           const rviz_visual_tools::colors& color)
 {
@@ -1454,7 +1451,7 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState& robot_s
   moveit_msgs::DisplayRobotState& display_robot_msg = display_robot_msgs_[base_color];
 
   // Check if a robot state message already exists for this color
-  if (display_robot_msg.highlight_links.size() == 0)  // has not been colored yet, lets create that
+  if (display_robot_msg.highlight_links.empty())  // has not been colored yet, lets create that
   {
     if (color != rviz_visual_tools::DEFAULT)  // ignore color highlights when set to default
     {
@@ -1530,7 +1527,7 @@ bool MoveItVisualTools::hideRobot()
   return publishRobotState(hidden_robot_state_);
 }
 
-void MoveItVisualTools::showJointLimits(robot_state::RobotStatePtr robot_state)
+void MoveItVisualTools::showJointLimits(const robot_state::RobotStatePtr& robot_state)
 {
   const std::vector<const moveit::core::JointModel*>& joints = robot_model_->getActiveJointModels();
 

@@ -108,7 +108,7 @@ void IMarkerEndEffector::iMarkerCallback(const visualization_msgs::InteractiveMa
   // Only allow one feedback to be processed at a time
   {
     // boost::unique_lock<boost::mutex> scoped_lock(imarker_mutex_);
-    if (imarker_ready_to_process_ == false)
+    if (!imarker_ready_to_process_)
     {
       return;
     }
@@ -276,7 +276,7 @@ IMarkerEndEffector::makeBoxControl(visualization_msgs::InteractiveMarker& msg)
 namespace
 {
 bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verbose, bool only_check_self_collision,
-                  moveit_visual_tools::MoveItVisualToolsPtr visual_tools, moveit::core::RobotState* robot_state,
+                  const moveit_visual_tools::MoveItVisualToolsPtr& visual_tools, moveit::core::RobotState* robot_state,
                   const moveit::core::JointModelGroup* group, const double* ik_solution)
 {
   // Apply IK solution to robot state
@@ -328,4 +328,4 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verb
   return false;
 }
 
-}  // end annonymous namespace
+}  // namespace
