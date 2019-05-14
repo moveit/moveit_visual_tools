@@ -1602,10 +1602,6 @@ bool MoveItVisualTools::checkForVirtualJoint(const moveit::core::RobotState& rob
   if (!robot_state.getRobotModel()->hasJointModel(VJOINT_NAME))
   {
     ROS_WARN_STREAM_NAMED("moveit_visual_tools", "Joint '" << VJOINT_NAME << "' does not exist.");
-    const std::vector<std::string>& names = robot_state.getRobotModel()->getJointModelNames();
-    // ROS_DEBUG_STREAM_NAMED("moveit_visual_tools", "Available names:");
-    // std::copy(names.begin(), names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
-
     return false;
   }
 

@@ -54,7 +54,12 @@ namespace moveit_visual_tools
 IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonitorPtr psm,
                                      const std::string& imarker_name, std::vector<ArmData> arm_datas,
                                      rviz_visual_tools::colors color, const std::string& package_path)
-  : name_(imarker_name), nh_("~"), psm_(std::move(psm)), arm_datas_(std::move(arm_datas)), color_(color), package_path_(package_path)
+  : name_(imarker_name)
+  , nh_("~")
+  , arm_datas_(std::move(arm_datas))
+  , psm_(std::move(psm))
+  , color_(color)
+  , package_path_(package_path)
 {
   // Load Visual tools
   visual_tools_ = std::make_shared<moveit_visual_tools::MoveItVisualTools>(

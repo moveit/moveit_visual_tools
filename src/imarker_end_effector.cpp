@@ -56,12 +56,12 @@ IMarkerEndEffector::IMarkerEndEffector(IMarkerRobotState* imarker_parent, const 
                                        ArmData arm_data, rviz_visual_tools::colors color)
   : name_(imarker_name)
   , imarker_parent_(imarker_parent)
+  , imarker_state_(imarker_parent_->imarker_state_)
   , psm_(imarker_parent_->psm_)
+  , visual_tools_(imarker_parent_->visual_tools_)
   , arm_data_(arm_data)
   , color_(color)
   , imarker_server_(imarker_parent_->imarker_server_)
-  , imarker_state_(imarker_parent_->imarker_state_)
-  , visual_tools_(imarker_parent_->visual_tools_)
 {
   // Get pose from robot state
   imarker_pose_ = imarker_state_->getGlobalLinkTransform(arm_data_.ee_link_);
