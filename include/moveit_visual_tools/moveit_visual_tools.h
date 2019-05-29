@@ -52,6 +52,7 @@
 #include <moveit_msgs/Grasp.h>
 #include <moveit_msgs/DisplayRobotState.h>
 #include <moveit_msgs/WorkspaceParameters.h>
+#include <moveit_msgs/DisplayTrajectory.h>
 
 // ROS Messages
 #include <trajectory_msgs/JointTrajectory.h>
@@ -554,6 +555,7 @@ public:
                              const moveit::core::RobotState& robot_state, bool blocking = false);
   bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg,
                              const moveit_msgs::RobotState& robot_state, bool blocking = false);
+  void publishTrajectoryPath(const moveit_msgs::DisplayTrajectory& display_trajectory_msg);
 
   /**
    * \brief Display a line of the end effector path from a robot trajectory path
@@ -633,7 +635,8 @@ public:
    *        To use, add a RobotState marker to Rviz and subscribe to the DISPLAY_ROBOT_STATE_TOPIC, above
    * \param robot_state - joint values of robot
    * \param color - how to highlight the robot (solid-ly) if desired, default keeps color as specified in URDF
-   * \param highlight_links - if the |color| is not |DEFAULT|, allows selective robot links to be highlighted. by default (empty) all links are highlighted 
+   * \param highlight_links - if the |color| is not |DEFAULT|, allows selective robot links to be highlighted. by
+   * default (empty) all links are highlighted
    */
   bool publishRobotState(const moveit::core::RobotState& robot_state,
                          const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT,
@@ -641,6 +644,7 @@ public:
   bool publishRobotState(const moveit::core::RobotStatePtr& robot_state,
                          const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT,
                          const std::vector<std::string>& highlight_links = {});
+  void publishRobotState(const moveit_msgs::DisplayRobotState& display_robot_state_msg);
 
   /**
    * \brief Fake removing a Robot State display in Rviz by simply moving it very far away

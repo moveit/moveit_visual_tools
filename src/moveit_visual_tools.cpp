@@ -38,7 +38,6 @@
 #include <moveit_visual_tools/moveit_visual_tools.h>
 
 // MoveIt Messages
-#include <moveit_msgs/DisplayTrajectory.h>
 #include <moveit_msgs/CollisionObject.h>
 
 // MoveIt
@@ -1236,10 +1235,7 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
   display_trajectory_msg.trajectory[0] = trajectory_msg;
   display_trajectory_msg.trajectory_start = robot_state;
 
-  // Publish message
-  loadTrajectoryPub();  // always call this before publishing
-  pub_display_path_.publish(display_trajectory_msg);
-  ros::spinOnce();
+  publishTrajectoryPath(display_trajectory_msg);
 
   // Wait the duration of the trajectory
   if (blocking)
@@ -1264,6 +1260,14 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
   }
 
   return true;
+}
+
+void MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::DisplayTrajectory& display_trajectory_msg)
+{
+  // Publish message
+  loadTrajectoryPub();  // always call this before publishing
+  pub_display_path_.publish(display_trajectory_msg);
+  ros::spinOnce();
 }
 
 bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::RobotTrajectory& trajectory_msg,
@@ -1439,7 +1443,8 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState& robot_s
                                           const rviz_visual_tools::colors& color,
                                           const std::vector<std::string>& highlight_links)
 {
-  // when only a subset of links should be colored, the default message is used rather than the cached solid robot messages
+  // when only a subset of links should be colored, the default message is used rather than the cached solid robot
+  // messages
   rviz_visual_tools::colors base_color = color;
   if (!highlight_links.empty())
     base_color = rviz_visual_tools::DEFAULT;
@@ -1491,15 +1496,20 @@ bool MoveItVisualTools::publishRobotState(const robot_state::RobotState& robot_s
   }
 
   // Publish
-  loadRobotStatePub();
-  pub_robot_state_.publish(display_robot_msg);
-  ros::spinOnce();
+  publishRobotState(display_robot_msg);
 
   // remove highlight links from default message
   if (!highlight_links.empty())
     display_robot_msg.highlight_links.clear();
 
   return true;
+}
+
+void MoveItVisualTools::publishRobotState(const moveit_msgs::DisplayRobotState& robot_state_msg)
+{
+  loadRobotStatePub();
+  pub_robot_state_.publish(robot_state_msg);
+  ros::spinOnce();
 }
 
 bool MoveItVisualTools::hideRobot()
