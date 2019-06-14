@@ -1175,7 +1175,12 @@ bool MoveItVisualTools::publishTrajectoryPath(const std::vector<robot_state::Rob
   moveit_msgs::RobotTrajectory trajectory_msg;
   robot_trajectory->getRobotTrajectoryMsg(trajectory_msg);
 
-  return publishTrajectoryPath(trajectory_msg, shared_robot_state_, blocking);
+  // Use first trajectory point as reference state
+  moveit_msgs::RobotState robot_state_msg;
+  if (!trajectory.empty())
+    robot_state::robotStateToRobotStateMsg(*trajectory[0], robot_state_msg);
+
+  return publishTrajectoryPath(trajectory_msg, robot_state_msg, blocking);
 }
 
 bool MoveItVisualTools::publishTrajectoryPath(const robot_trajectory::RobotTrajectoryPtr& trajectory, bool blocking)
@@ -1200,7 +1205,12 @@ bool MoveItVisualTools::publishTrajectoryPath(const robot_trajectory::RobotTraje
     }
   }
 
-  return publishTrajectoryPath(trajectory_msg, shared_robot_state_, blocking);
+  // Use first trajectory point as reference state
+  moveit_msgs::RobotState robot_state_msg;
+  if (!trajectory.empty())
+    robot_state::robotStateToRobotStateMsg(trajectory.getFirstWayPoint(), robot_state_msg);
+
+  return publishTrajectoryPath(trajectory_msg, robot_state_msg, blocking);
 }
 
 bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg,
