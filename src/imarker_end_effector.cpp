@@ -56,12 +56,12 @@ IMarkerEndEffector::IMarkerEndEffector(IMarkerRobotState* imarker_parent, const 
                                        ArmData arm_data, rviz_visual_tools::colors color)
   : name_(imarker_name)
   , imarker_parent_(imarker_parent)
+  , imarker_state_(imarker_parent_->imarker_state_)
   , psm_(imarker_parent_->psm_)
+  , visual_tools_(imarker_parent_->visual_tools_)
   , arm_data_(arm_data)
   , color_(color)
   , imarker_server_(imarker_parent_->imarker_server_)
-  , imarker_state_(imarker_parent_->imarker_state_)
-  , visual_tools_(imarker_parent_->visual_tools_)
 {
   // Get pose from robot state
   imarker_pose_ = imarker_state_->getGlobalLinkTransform(arm_data_.ee_link_);
@@ -108,7 +108,7 @@ void IMarkerEndEffector::iMarkerCallback(const visualization_msgs::InteractiveMa
   // Only allow one feedback to be processed at a time
   {
     // boost::unique_lock<boost::mutex> scoped_lock(imarker_mutex_);
-    if (imarker_ready_to_process_ == false)
+    if (!imarker_ready_to_process_)
     {
       return;
     }
@@ -276,26 +276,24 @@ IMarkerEndEffector::makeBoxControl(visualization_msgs::InteractiveMarker& msg)
 namespace
 {
 bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verbose, bool only_check_self_collision,
-                  moveit_visual_tools::MoveItVisualToolsPtr visual_tools, moveit::core::RobotState* robot_state,
+                  const moveit_visual_tools::MoveItVisualToolsPtr& visual_tools, moveit::core::RobotState* robot_state,
                   const moveit::core::JointModelGroup* group, const double* ik_solution)
 {
   // Apply IK solution to robot state
   robot_state->setJointGroupPositions(group, ik_solution);
   robot_state->update();
 
-  // Ensure there are objects in the planning scene
-  if (false)
+#if 0  // Ensure there are objects in the planning scene
+  const std::size_t num_collision_objects = planning_scene->getCollisionWorld()->getWorld()->size();
+  if (num_collision_objects == 0)
   {
-    const std::size_t num_collision_objects = planning_scene->getCollisionWorld()->getWorld()->size();
-    if (num_collision_objects == 0)
-    {
-      ROS_ERROR_STREAM_NAMED("cart_path_planner", "No collision objects exist in world, you need at least a table "
-                                                  "modeled for the controller to work");
-      ROS_ERROR_STREAM_NAMED("cart_path_planner", "To fix this, relaunch the teleop/head tracking/whatever MoveIt "
-                                                  "node to publish the collision objects");
-      return false;
-    }
+    ROS_ERROR_STREAM_NAMED("cart_path_planner", "No collision objects exist in world, you need at least a table "
+                           "modeled for the controller to work");
+    ROS_ERROR_STREAM_NAMED("cart_path_planner", "To fix this, relaunch the teleop/head tracking/whatever MoveIt "
+                           "node to publish the collision objects");
+    return false;
   }
+#endif
 
   if (!planning_scene)
   {
@@ -328,4 +326,4 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verb
   return false;
 }
 
-}  // end annonymous namespace
+}  // namespace

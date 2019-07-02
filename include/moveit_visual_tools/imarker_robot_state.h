@@ -98,7 +98,7 @@ public:
   bool saveToFile();
 
   /** \brief Set where in the parent class the feedback should be sent */
-  void setIMarkerCallback(IMarkerCallback callback);
+  void setIMarkerCallback(const IMarkerCallback& callback);
 
   /** \brief Get a pointer to the current robot state */
   moveit::core::RobotStateConstPtr getRobotState()
@@ -111,7 +111,7 @@ public:
   }
 
   /** \brief Set the robot state */
-  void setRobotState(moveit::core::RobotStatePtr state);
+  void setRobotState(const moveit::core::RobotStatePtr& state);
 
   /** \brief Set the robot state to current in planning scene monitor */
   void setToCurrentState();
@@ -138,7 +138,7 @@ public:
     return name_to_eef_[name];
   }
 
-  bool setFromPoses(const EigenSTL::vector_Isometry3d poses, const moveit::core::JointModelGroup* group);
+  bool setFromPoses(const EigenSTL::vector_Isometry3d& poses, const moveit::core::JointModelGroup* group);
 
 protected:
   // --------------------------------------------------------
@@ -186,7 +186,7 @@ namespace
 {
 /** \brief Collision checking handle for IK solvers */
 bool isIKStateValid(const planning_scene::PlanningScene* planning_scene, bool verbose, bool only_check_self_collision,
-                    moveit_visual_tools::MoveItVisualToolsPtr visual_tools_, robot_state::RobotState* state,
+                    const moveit_visual_tools::MoveItVisualToolsPtr& visual_tools_, robot_state::RobotState* state,
                     const robot_state::JointModelGroup* group, const double* ik_solution);
 }
 

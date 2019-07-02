@@ -1,22 +1,26 @@
-# This config file for Travis CI utilizes https://github.com/ros-planning/moveit_ci/ package.
+# This config file for Travis CI utilizes https://github.com/ros-planning/moveit_ci package.
 sudo: required
-dist: trusty
+dist: xenial  # distro used by Travis, moveit_ci uses the docker image's distro
 services:
   - docker
 language: cpp
-cache: ccache
 compiler: gcc
+cache: ccache
 
-notifications:
-  email:
-    recipients:
-      - 130s@2000.jukuin.keio.ac.jp
 env:
+  global:
+    - DOCKER_IMAGE=moveit/moveit:master-source
+    - CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-unused-parameter -Wno-unused-function"
+    - WARNINGS_OK=false
   matrix:
-    - ROS_DISTRO=kinetic ROS_REPO=ros              TEST=clang-format
-    - ROS_DISTRO=melodic ROS_REPO=ros              UPSTREAM_WORKSPACE=moveit.rosinstall
-    - ROS_DISTRO=melodic ROS_REPO=ros-shadow-fixed UPSTREAM_WORKSPACE=moveit.rosinstall
+    - TEST="clang-format catkin_lint"
+    - TEST=clang-tidy-fix
+    - DOCKER_IMAGE=moveit/moveit:melodic-source
+    - DOCKER_IMAGE=moveit/moveit:master-source
+    - DOCKER_IMAGE=moveit/moveit:kinetic-ci  UPSTREAM_WORKSPACE=moveit.rosinstall  TEST_BLACKLIST=moveit_ros_perception
+
 before_script:
-  - git clone -q https://github.com/ros-planning/moveit_ci.git .moveit_ci
+  - git clone -q --depth=1 https://github.com/ros-planning/moveit_ci.git .moveit_ci
+
 script:
   - .moveit_ci/travis.sh
