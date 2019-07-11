@@ -23,6 +23,7 @@
   <depend>moveit_core</depend>
   <depend>roscpp</depend>
   <depend>tf2_ros</depend>
+  <depend>interactive_markers</depend>
   <depend>visualization_msgs</depend>
   <depend>graph_msgs</depend>
   <depend>std_msgs</depend>
