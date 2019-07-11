@@ -35,6 +35,9 @@
 /* Author: Dave Coleman
    Desc:   Class to encapsule a visualized robot state that can be controlled using an interactive marker
 */
+#ifdef _MSC_VER
+#define _ENABLE_EXTENDED_ALIGNED_STORAGE  // https://devblogs.microsoft.com/cppblog/stl-features-and-fixes-in-vs-2017-15-8/
+#endif
 
 // MoveIt
 #include <moveit/robot_state/conversions.h>
