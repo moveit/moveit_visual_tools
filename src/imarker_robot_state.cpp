@@ -342,7 +342,7 @@ bool isIKStateValid(const planning_scene::PlanningScene* planning_scene, bool ve
   robot_state->update();
 
 #if 0  // Ensure there are objects in the planning scene
-  const std::size_t num_collision_objects = planning_scene->getCollisionWorld()->getWorld()->size();
+  const std::size_t num_collision_objects = planning_scene->getCollisionEnv()->getWorld()->size();
   if (num_collision_objects == 0)
   {
     ROS_ERROR_STREAM_NAMED("imarker_robot_state", "No collision objects exist in world, you need at least a table "
