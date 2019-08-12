@@ -323,25 +323,32 @@ public:
                              const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
 
   /**
-   * \brief Create a MoveIt Collision block at the given pose
+   * \brief Create/Publish a MoveIt Collision block at the given pose
    * \param pose - location of center of block
    * \param name - semantic name of MoveIt collision object
    * \param size - height=width=depth=size
    * \param color to display the collision object with
    * \return true on sucess
    **/
+  moveit_msgs::CollisionObject createCollisionBlock(const geometry_msgs::Pose& block_pose, const std::string& name,
+                                                    double block_size);
+
   bool publishCollisionBlock(const geometry_msgs::Pose& block_pose, const std::string& block_name = "block",
                              double block_size = 0.1,
                              const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
 
   /**
-   * \brief Create a MoveIt collision rectangular cuboid at the given pose
+   * \brief Create/Publish a MoveIt collision rectangular cuboid at the given pose
    * \param point1 - top left of rectangle
    * \param point2 - bottom right of rectangle
    * \param name - semantic name of MoveIt collision object
    * \param color to display the collision object with
    * \return true on sucess
    **/
+  moveit_msgs::CollisionObject createCollisionObject(const Eigen::Vector3d& point1, const Eigen::Vector3d& point2,
+                                                     const std::string& name);
+  moveit_msgs::CollisionObject createCollisionObject(const geometry_msgs::Point& point1,
+                                                     const geometry_msgs::Point& point2, const std::string& name);
   bool publishCollisionCuboid(const Eigen::Vector3d& point1, const Eigen::Vector3d& point2, const std::string& name,
                               const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
   bool publishCollisionCuboid(const geometry_msgs::Point& point1, const geometry_msgs::Point& point2,
@@ -349,7 +356,7 @@ public:
                               const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
 
   /**
-   * \brief Create a MoveIt collision rectangular cuboid at the given pose
+   * \brief Create/Publish a MoveIt collision rectangular cuboid at the given pose
    * \param pose - position of the centroid of the cube
    * \param width - width of the object in its local frame
    * \param depth - depth of the object in its local frame
@@ -358,6 +365,10 @@ public:
    * \param color to display the collision object with
    * \return true on sucess
    **/
+  moveit_msgs::CollisionObject createCollisionObject(const Eigen::Isometry3d& pose, double width, double depth,
+                                                     double height, const std::string& name);
+  moveit_msgs::CollisionObject createCollisionObject(const geometry_msgs::Pose& pose, double width, double depth,
+                                                     double height, const std::string& name);
   bool publishCollisionCuboid(const Eigen::Isometry3d& pose, double width, double depth, double height,
                               const std::string& name, const rviz_visual_tools::colors& color);
 
