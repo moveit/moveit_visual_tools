@@ -255,7 +255,7 @@ public:
 
   /**
    * \brief Display an animated vector of grasps including its approach movement in Rviz
-   *        Note this function calls trigger() automatically in order to achieve animations
+   *        Note this function calls publish() automatically in order to achieve animations
    * \param possible_grasps - a set of grasp positions to visualize
    * \param ee_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
    * \param animate_speed - how fast the gripper approach is animated, optional
@@ -265,7 +265,7 @@ public:
 
   /**
    * \brief Animate a single grasp in its movement direction
-   *        Note this function calls trigger() automatically in order to achieve animations
+   *        Note this function calls publish() automatically in order to achieve animations
    * \param grasp
    * \param ee_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
    * \param animate_speed - how fast the gripper approach is animated
