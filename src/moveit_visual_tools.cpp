@@ -1517,7 +1517,7 @@ void MoveItVisualTools::publishRobotState(const moveit_msgs::DisplayRobotState& 
   ros::spinOnce();
 }
 
-void MoveItVisualTools::hideRobot()
+bool MoveItVisualTools::hideRobot()
 {
   moveit_msgs::DisplayRobotState display_robot_state_msg;
   // Hide the robot state
@@ -1525,6 +1525,7 @@ void MoveItVisualTools::hideRobot()
 
   // Publish
   publishRobotState(display_robot_state_msg);
+  return true;
 }
 
 void MoveItVisualTools::showJointLimits(const robot_state::RobotStatePtr& robot_state)
