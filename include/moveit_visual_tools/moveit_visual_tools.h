@@ -222,26 +222,26 @@ public:
    */
   bool publishEEMarkers(const Eigen::Isometry3d& pose, const robot_model::JointModelGroup* ee_jmg,
                         const std::vector<double>& ee_joint_pos,
-                        const rviz_visual_tools::colors& color = rviz_visual_tools::CLEAR,
+                        const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT,
                         const std::string& ns = "end_effector")
   {
     return publishEEMarkers(convertPose(pose), ee_jmg, ee_joint_pos, color, ns);
   }
   bool publishEEMarkers(const Eigen::Isometry3d& pose, const robot_model::JointModelGroup* ee_jmg,
-                        const rviz_visual_tools::colors& color = rviz_visual_tools::CLEAR,
+                        const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT,
                         const std::string& ns = "end_effector")
   {
     return publishEEMarkers(convertPose(pose), ee_jmg, {}, color, ns);
   }
   bool publishEEMarkers(const geometry_msgs::Pose& pose, const robot_model::JointModelGroup* ee_jmg,
-                        const rviz_visual_tools::colors& color = rviz_visual_tools::CLEAR,
+                        const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT,
                         const std::string& ns = "end_effector")
   {
     return publishEEMarkers(pose, ee_jmg, {}, color, ns);
   }
   bool publishEEMarkers(const geometry_msgs::Pose& pose, const robot_model::JointModelGroup* ee_jmg,
                         const std::vector<double>& ee_joint_pos,
-                        const rviz_visual_tools::colors& color = rviz_visual_tools::CLEAR,
+                        const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT,
                         const std::string& ns = "end_effector");
 
   /**
@@ -255,6 +255,7 @@ public:
 
   /**
    * \brief Display an animated vector of grasps including its approach movement in Rviz
+   *        Note this function calls publish() automatically in order to achieve animations
    * \param possible_grasps - a set of grasp positions to visualize
    * \param ee_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
    * \param animate_speed - how fast the gripper approach is animated, optional
@@ -264,6 +265,7 @@ public:
 
   /**
    * \brief Animate a single grasp in its movement direction
+   *        Note this function calls publish() automatically in order to achieve animations
    * \param grasp
    * \param ee_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
    * \param animate_speed - how fast the gripper approach is animated
