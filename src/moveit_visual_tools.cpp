@@ -1529,7 +1529,7 @@ bool MoveItVisualTools::hideRobot()
 {
   moveit_msgs::DisplayRobotState display_robot_state_msg;
   // Hide the robot state
-  display_robot_state_msg.hide_display = true;
+  display_robot_state_msg.hide = true;
 
   // Publish
   publishRobotState(display_robot_state_msg);
