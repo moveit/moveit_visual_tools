@@ -275,7 +275,6 @@ bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg,
   // Keep track of how many unique markers we have between different EEs
   static std::size_t marker_id_offset = 0;
 
-  // -----------------------------------------------------------------------------------------------
   // Get end effector group
 
   // Create color to use for EE markers
@@ -284,12 +283,18 @@ bool MoveItVisualTools::loadEEMarker(const robot_model::JointModelGroup* ee_jmg,
   // Get link names that are in end effector
   const std::vector<std::string>& ee_link_names = ee_jmg->getLinkModelNames();
 
-  // -----------------------------------------------------------------------------------------------
   // Get EE link markers for Rviz
-
   shared_robot_state_->getRobotMarkers(ee_markers_map_[ee_jmg], ee_link_names, marker_color, ee_jmg->getName(),
                                        ros::Duration());
   ROS_DEBUG_STREAM_NAMED(LOGNAME, "Number of rviz markers in end effector: " << ee_markers_map_[ee_jmg].markers.size());
+
+  // Error check
+  if (ee_markers_map_[ee_jmg].markers.empty())
+  {
+    ROS_ERROR_STREAM_NAMED(LOGNAME,
+                           "No links found to visualize in end effector for joint model group: " << ee_jmg->getName());
+    return false;
+  }
 
   const std::string& ee_parent_link_name = ee_jmg->getEndEffectorParentGroup().second;
   // ROS_DEBUG_STREAM_NAMED(LOGNAME,"EE Parent link: " << ee_parent_link_name);
@@ -373,9 +378,6 @@ bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose& pose, const 
   Eigen::Isometry3d eigen_goal_ee_pose = convertPose(pose);
   Eigen::Isometry3d eigen_this_marker;
 
-  // publishArrow( pose, rviz_visual_tools::RED, rviz_visual_tools::LARGE );
-
-  // -----------------------------------------------------------------------------------------------
   // Process each link of the end effector
   for (std::size_t i = 0; i < ee_markers_map_[ee_jmg].markers.size(); ++i)
   {
@@ -393,7 +395,8 @@ bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose& pose, const 
     ee_markers_map_[ee_jmg].markers[i].lifetime = marker_lifetime_;
 
     // Color
-    ee_markers_map_[ee_jmg].markers[i].color = getColor(color);
+    if (color != rviz_visual_tools::DEFAULT)
+      ee_markers_map_[ee_jmg].markers[i].color = getColor(color);
 
     // Convert pose
     eigen_this_marker = eigen_goal_ee_pose * ee_poses_map_[ee_jmg][i];
@@ -401,7 +404,14 @@ bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::Pose& pose, const 
   }
 
   // Helper for publishing rviz markers
-  return publishMarkers(ee_markers_map_[ee_jmg]);
+  // Does not require trigger() because publishing array auto-triggers
+  if (!publishMarkers(ee_markers_map_[ee_jmg]))
+  {
+    ROS_WARN_STREAM_NAMED(LOGNAME, "Unable to publish EE markers");
+    return false;
+  }
+
+  return true;
 }
 
 bool MoveItVisualTools::publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
@@ -511,10 +521,8 @@ bool MoveItVisualTools::publishAnimatedGrasp(const moveit_msgs::Grasp& grasp,
     // Convert eigen pre-grasp position back to regular message
     pre_grasp_pose = tf2::toMsg(pre_grasp_pose_eigen);
 
-    // publishArrow(pre_grasp_pose, moveit_visual_tools::BLUE);
     publishEEMarkers(pre_grasp_pose, ee_jmg);
-    if (batch_publishing_enabled_)
-      trigger();
+
     ros::Duration(animate_speed).sleep();
 
     // Pause more at initial pose for debugging purposes
