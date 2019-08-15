@@ -1527,20 +1527,13 @@ void MoveItVisualTools::publishRobotState(const moveit_msgs::DisplayRobotState& 
 
 bool MoveItVisualTools::hideRobot()
 {
-  static const std::string VJOINT_NAME = "virtual_joint";
-
-  // Always load the robot state before using
-  loadSharedRobotState();
-
-  // Apply transform
-  Eigen::Isometry3d offset;
-  offset.translation().x() = rviz_visual_tools::LARGE_SCALE;
-  offset.translation().y() = rviz_visual_tools::LARGE_SCALE;
-  offset.translation().z() = rviz_visual_tools::LARGE_SCALE;
-  applyVirtualJointTransform(*hidden_robot_state_, offset);
+  moveit_msgs::DisplayRobotState display_robot_state_msg;
+  // Hide the robot state
+  display_robot_state_msg.hide = true;
 
   // Publish
-  return publishRobotState(hidden_robot_state_);
+  publishRobotState(display_robot_state_msg);
+  return true;
 }
 
 void MoveItVisualTools::showJointLimits(const robot_state::RobotStatePtr& robot_state)
