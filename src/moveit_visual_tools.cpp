@@ -618,8 +618,9 @@ bool MoveItVisualTools::attachCO(const std::string& name, const std::string& ee_
   return processAttachedCollisionObjectMsg(aco);
 }
 
-moveit_msgs::CollisionObject MoveItVisualTools::createCollisionBlock(const geometry_msgs::Pose& block_pose,
-                                                                     const std::string& name, double block_size)
+moveit_msgs::CollisionObject MoveItVisualTools::createBlockCollisionObjectMsg(const geometry_msgs::Pose& block_pose,
+                                                                              const std::string& name,
+                                                                              double block_size)
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
@@ -643,12 +644,12 @@ moveit_msgs::CollisionObject MoveItVisualTools::createCollisionBlock(const geome
 bool MoveItVisualTools::publishCollisionBlock(const geometry_msgs::Pose& block_pose, const std::string& name,
                                               double block_size, const rviz_visual_tools::colors& color)
 {
-  return processCollisionObjectMsg(createCollisionBlock(block_pose, name, block_size), color);
+  return processCollisionObjectMsg(createBlockCollisionObjectMsg(block_pose, name, block_size), color);
 }
 
-moveit_msgs::CollisionObject MoveItVisualTools::createCollisionObject(const geometry_msgs::Point& point1,
-                                                                      const geometry_msgs::Point& point2,
-                                                                      const std::string& name)
+moveit_msgs::CollisionObject MoveItVisualTools::createCuboidCollisionObjectMsg(const geometry_msgs::Point& point1,
+                                                                               const geometry_msgs::Point& point2,
+                                                                               const std::string& name)
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
@@ -682,11 +683,11 @@ moveit_msgs::CollisionObject MoveItVisualTools::createCollisionObject(const geom
   return collision_obj;
 }
 
-moveit_msgs::CollisionObject MoveItVisualTools::createCollisionObject(const Eigen::Vector3d& point1,
-                                                                      const Eigen::Vector3d& point2,
-                                                                      const std::string& name)
+moveit_msgs::CollisionObject MoveItVisualTools::createCuboidCollisionObjectMsg(const Eigen::Vector3d& point1,
+                                                                               const Eigen::Vector3d& point2,
+                                                                               const std::string& name)
 {
-  return createCollisionObject(convertPoint(point1), convertPoint(point2), name);
+  return createCuboidCollisionObjectMsg(convertPoint(point1), convertPoint(point2), name);
 }
 
 bool MoveItVisualTools::publishCollisionCuboid(const Eigen::Vector3d& point1, const Eigen::Vector3d& point2,
@@ -698,13 +699,12 @@ bool MoveItVisualTools::publishCollisionCuboid(const Eigen::Vector3d& point1, co
 bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::Point& point1, const geometry_msgs::Point& point2,
                                                const std::string& name, const rviz_visual_tools::colors& color)
 {
-  // ROS_INFO_STREAM_NAMED(LOGNAME,"CollisionObject: \n " << collision_obj);
-  return processCollisionObjectMsg(createCollisionObject(point1, point2, name), color);
+  return processCollisionObjectMsg(createCuboidCollisionObjectMsg(point1, point2, name), color);
 }
 
-moveit_msgs::CollisionObject MoveItVisualTools::createCollisionObject(const geometry_msgs::Pose& pose, double width,
-                                                                      double depth, double height,
-                                                                      const std::string& name)
+moveit_msgs::CollisionObject MoveItVisualTools::createCuboidCollisionObjectMsg(const geometry_msgs::Pose& block_pose,
+                                                                               double width, double depth,
+                                                                               double height, const std::string& name)
 {
   moveit_msgs::CollisionObject collision_obj;
   collision_obj.header.stamp = ros::Time::now();
@@ -712,9 +712,9 @@ moveit_msgs::CollisionObject MoveItVisualTools::createCollisionObject(const geom
   collision_obj.id = name;
   collision_obj.operation = moveit_msgs::CollisionObject::ADD;
 
-  // Calculate center pose
+  // Calculate center block_pose
   collision_obj.primitive_poses.resize(1);
-  collision_obj.primitive_poses[0] = pose;
+  collision_obj.primitive_poses[0] = block_pose;
 
   // Calculate scale
   collision_obj.primitives.resize(1);
@@ -736,29 +736,25 @@ moveit_msgs::CollisionObject MoveItVisualTools::createCollisionObject(const geom
   return collision_obj;
 }
 
-moveit_msgs::CollisionObject MoveItVisualTools::createCollisionObject(const Eigen::Isometry3d& pose, double width,
-                                                                      double depth, double height,
-                                                                      const std::string& name)
+moveit_msgs::CollisionObject MoveItVisualTools::createCuboidCollisionObjectMsg(const Eigen::Isometry3d& block_pose,
+                                                                               double width, double depth,
+                                                                               double height, const std::string& name)
 {
-  geometry_msgs::Pose pose_msg = tf2::toMsg(pose);
-  return createCollisionObject(pose_msg, width, depth, height, name, color);
+  return createCuboidCollisionObjectMsg(convertPose(block_pose), width, depth, height, name);
 }
 
-bool MoveItVisualTools::publishCollisionCuboid(const Eigen::Isometry3d& pose, double width, double depth, double height,
-                                               const std::string& name, const rviz_visual_tools::colors& color)
-{
-  geometry_msgs::Pose pose_msg = tf2::toMsg(pose);
-  return publishCollisionCuboid(pose_msg, width, depth, height, name, color);
-}
-
-bool MoveItVisualTools::publishCollisionCuboid(const moveit_msgs::CollisionObject& collision_obj,
-                                               const rviz_visual_tools::colors& color)
-
-bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::Pose& pose, double width, double depth,
+bool MoveItVisualTools::publishCollisionCuboid(const Eigen::Isometry3d& block_pose, double width, double depth,
                                                double height, const std::string& name,
                                                const rviz_visual_tools::colors& color)
 {
-  return processCollisionObjectMsg(createCollisionObject(pose, width, depth, height, name, color), color);
+  return publishCollisionCuboid(convertPose(block_pose), width, depth, height, name, color);
+}
+
+bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::Pose& block_pose, double width, double depth,
+                                               double height, const std::string& name,
+                                               const rviz_visual_tools::colors& color)
+{
+  return processCollisionObjectMsg(createCuboidCollisionObjectMsg(block_pose, width, depth, height, name), color);
 }
 
 bool MoveItVisualTools::publishCollisionFloor(double z, const std::string& plane_name,
