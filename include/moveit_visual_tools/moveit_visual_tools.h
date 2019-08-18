@@ -367,6 +367,25 @@ public:
                               const std::string& name, const rviz_visual_tools::colors& color);
 
   /**
+   * \brief Create a MoveIt collision rectangular cuboid at the given pose
+   * \param pose - position of the centroid of the cube
+   * \param size - the size (x,y,z) of the object in its local frame
+   * \param name - semantic name of MoveIt collision object
+   * \param color to display the collision object with
+   * \return true on sucess
+   **/
+  bool publishCollisionCuboid(const Eigen::Isometry3d& pose, const Eigen::Vector3d& size, const std::string& name,
+                              const rviz_visual_tools::colors& color)
+  {
+    return publishCollisionCuboid(pose, size.x(), size.y(), size.z(), name, color);
+  }
+  bool publishCollisionCuboid(const geometry_msgs::Pose& pose, const geometry_msgs::Vector3& size,
+                              const std::string& name, const rviz_visual_tools::colors& color)
+  {
+    return publishCollisionCuboid(pose, size.x, size.y, size.z, name, color);
+  }
+
+  /**
    * \brief Create a MoveIt Collision cylinder between two points
    * \param point a - x,y,z in space of a point
    * \param point b - x,y,z in space of a point
