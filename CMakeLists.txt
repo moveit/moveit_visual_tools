@@ -29,6 +29,7 @@ catkin_package(
   LIBRARIES
     ${PROJECT_NAME}
   CATKIN_DEPENDS
+    roscpp
     rviz_visual_tools
     moveit_ros_planning
     moveit_core
