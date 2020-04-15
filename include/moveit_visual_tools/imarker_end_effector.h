@@ -165,6 +165,9 @@ private:
 
   // Hook to parent class
   IMarkerCallback imarker_callback_;
+
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };  // end class
 
 // Create std pointers for this class
