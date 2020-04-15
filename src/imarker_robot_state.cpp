@@ -61,9 +61,10 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
   , color_(color)
   , package_path_(package_path)
 {
-  // Load Visual tools
-  visual_tools_ = std::make_shared<moveit_visual_tools::MoveItVisualTools>(
-      psm_->getRobotModel()->getModelFrame(), nh_.getNamespace() + "/" + imarker_name, psm_);
+  // Load Visual tools with respect to Eigen memory alignment
+  visual_tools_ = std::allocate_shared<moveit_visual_tools::MoveItVisualTools>(
+      Eigen::aligned_allocator<moveit_visual_tools::MoveItVisualTools>(), psm_->getRobotModel()->getModelFrame(),
+      nh_.getNamespace() + "/" + imarker_name, psm_);
 
   // visual_tools_->setPlanningSceneMonitor(psm_);
   visual_tools_->loadRobotStatePub(nh_.getNamespace() + "/imarker_" + imarker_name + "_state");
@@ -97,7 +98,9 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
     else
       eef_name = imarker_name + "_left";
 
-    end_effectors_[i] = std::make_shared<IMarkerEndEffector>(this, eef_name, arm_datas_[i], color);
+    // respect Eigen alignment
+    end_effectors_[i] = std::allocate_shared<IMarkerEndEffector>(Eigen::aligned_allocator<IMarkerEndEffector>(), this,
+                                                                 eef_name, arm_datas_[i], color);
 
     // Create map from eef name to object
     name_to_eef_[eef_name] = end_effectors_[i];
