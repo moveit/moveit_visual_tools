@@ -669,7 +669,7 @@ public:
   void publishRobotState(const moveit_msgs::DisplayRobotState& display_robot_state_msg);
 
   /**
-   * \brief Fake removing a Robot State display in Rviz by simply moving it very far away
+   * \brief Hide robot in RobotState display in Rviz
    * \return true on success
    */
   bool hideRobot();
