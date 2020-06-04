@@ -250,8 +250,8 @@ public:
    * \param ee_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
    * \param animate_speed - how fast the gripper approach is animated, optional
    */
-  bool publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps, const moveit::core::JointModelGroup* ee_jmg,
-                     double animate_speed = 0.1);
+  bool publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
+                     const moveit::core::JointModelGroup* ee_jmg, double animate_speed = 0.1);
 
   /**
    * \brief Display an animated vector of grasps including its approach movement in Rviz
@@ -588,7 +588,8 @@ public:
    * \return true on success
    */
   bool publishTrajectoryLine(const moveit_msgs::RobotTrajectory& trajectory_msg,
-                             const moveit::core::LinkModel* ee_parent_link, const moveit::core::JointModelGroup* arm_jmg,
+                             const moveit::core::LinkModel* ee_parent_link,
+                             const moveit::core::JointModelGroup* arm_jmg,
                              const rviz_visual_tools::colors& color = rviz_visual_tools::LIME_GREEN);
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
                              const moveit::core::LinkModel* ee_parent_link,
