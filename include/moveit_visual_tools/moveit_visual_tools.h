@@ -60,6 +60,7 @@
 // C++
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace moveit_visual_tools
@@ -200,7 +201,7 @@ public:
    */
   void setPlanningSceneMonitor(planning_scene_monitor::PlanningSceneMonitorPtr psm)
   {
-    psm_ = psm;
+    psm_ = std::move(psm);
   }
 
   /**
@@ -481,13 +482,6 @@ public:
    * \param color to display the collision object with
    * \return true on sucess
    */
-  RVIZ_VISUAL_TOOLS_DEPRECATED
-  bool publishCollisionTable(double x, double y, double angle, double width, double height, double depth,
-                             const std::string name, const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN)
-  {
-    return publishCollisionTable(x, y, 0, angle, width, height, depth, name, color);
-  }
-
   bool publishCollisionTable(double x, double y, double z, double angle, double width, double height, double depth,
                              const std::string& name,
                              const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
