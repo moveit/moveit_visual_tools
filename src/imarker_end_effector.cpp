@@ -43,8 +43,8 @@
 #include <string>
 
 // Conversions
-#include <eigen_conversions/eigen_msg.h>
-#include <tf_conversions/tf_eigen.h>
+#include <tf2_eigen/tf2_eigen.h>
+#include <tf2/convert.h>
 
 // this package
 #include <moveit_visual_tools/imarker_robot_state.h>
@@ -117,7 +117,7 @@ void IMarkerEndEffector::iMarkerCallback(const visualization_msgs::InteractiveMa
 
   // Convert
   Eigen::Isometry3d robot_ee_pose;
-  tf::poseMsgToEigen(feedback->pose, robot_ee_pose);
+  tf2::convert(feedback->pose, robot_ee_pose);
 
   // Update robot
   solveIK(robot_ee_pose);
@@ -170,7 +170,7 @@ void IMarkerEndEffector::initializeInteractiveMarkers()
 {
   // Convert
   geometry_msgs::Pose pose_msg;
-  tf::poseEigenToMsg(imarker_pose_, pose_msg);
+  tf2::convert(imarker_pose_, pose_msg);
 
   // marker
   make6DofMarker(pose_msg);
@@ -187,7 +187,7 @@ void IMarkerEndEffector::sendUpdatedIMarkerPose()
 {
   // Convert
   geometry_msgs::Pose pose_msg;
-  tf::poseEigenToMsg(imarker_pose_, pose_msg);
+  tf2::convert(imarker_pose_, pose_msg);
 
   imarker_server_->setPose(int_marker_.name, pose_msg);
   imarker_server_->applyChanges();
