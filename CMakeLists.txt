@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   visualization_msgs
   graph_msgs
   std_msgs
+  tf_conversions
   trajectory_msgs
   cmake_modules
   roslint
@@ -37,6 +38,7 @@ catkin_package(
     visualization_msgs
     graph_msgs
     std_msgs
+    tf_conversions
     trajectory_msgs
   INCLUDE_DIRS include
 )
