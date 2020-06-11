@@ -179,8 +179,8 @@ namespace
 {
 /** \brief Collision checking handle for IK solvers */
 bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verbose, bool only_check_self_collision,
-                  const moveit_visual_tools::MoveItVisualToolsPtr& visual_tools_, robot_state::RobotState* state,
-                  const robot_state::JointModelGroup* group, const double* ik_solution);
+                  const moveit_visual_tools::MoveItVisualToolsPtr& visual_tools_, moveit::core::RobotState* state,
+                  const moveit::core::JointModelGroup* group, const double* ik_solution);
 }
 
 #endif  // MOVEIT_VISUAL_TOOLS_IMARKER_END_EFFECTOR_H
