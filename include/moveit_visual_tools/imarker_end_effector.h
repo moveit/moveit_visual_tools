@@ -55,6 +55,8 @@
 
 // C++
 #include <string>
+#include <utility>
+
 #include <vector>
 
 namespace moveit_visual_tools
@@ -116,7 +118,7 @@ public:
 
   void setIMarkerCallback(IMarkerCallback callback)
   {
-    imarker_callback_ = callback;
+    imarker_callback_ = std::move(callback);
   }
 
   const moveit::core::LinkModel* getEELink()
