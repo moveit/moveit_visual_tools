@@ -11,7 +11,11 @@ This package helps you visualize:
  - End effectors
  - Interactive markers to move robot arms using IK from remote applications
 
-Developed by [Dave Coleman](http://dav.ee) at the Correll Robotics Lab, University of Colorado Boulder with outside contributors.
+<img src="https://picknik.ai/assets/images/logo.jpg" width="120">
+
+This open source project was developed at [PickNik Robotics](https://picknik.ai/). Need professional ROS development and consulting? Contact us at projects@picknik.ai for a free consultation.
+
+## Status:
 
 * [![Build Status](https://travis-ci.org/ros-planning/moveit_visual_tools.svg)](https://travis-ci.org/ros-planning/moveit_visual_tools) Travis CI
 * [![Build Status](http://build.ros.org/buildStatus/icon?job=Kbin_uX64__moveit_visual_tools__ubuntu_xenial_amd64__binary)](http://build.ros.org/view/Kbin_uX64/job/Kbin_uX64__moveit_visual_tools__ubuntu_xenial_amd64__binary/) ROS Buildfarm - AMD64 Xenial Debian Build - Ubuntu 16.04 LTS
