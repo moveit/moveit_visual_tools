@@ -78,6 +78,14 @@ class MoveItVisualTools : public rviz_visual_tools::RvizVisualTools
 public:
   /**
    * \brief Constructor
+   *
+   * All Markers will be rendered in the planning frame of the model ROBOT_DESCRIPTION
+   * and are published to rviz_visual_tools::RVIZ_MARKER_TOPIC
+   */
+  MoveItVisualTools();
+
+  /**
+   * \brief Constructor
    * \param base_frame - common base for all visualization markers, usually "/world" or "/odom"
    * \param marker_topic - rostopic to publish markers to - your Rviz display should match
    * \param planning_scene_monitor - optionally pass in a pre-loaded planning scene monitor to
