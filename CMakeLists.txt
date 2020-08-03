@@ -20,6 +20,8 @@ find_package(catkin REQUIRED COMPONENTS
   cmake_modules
   roslint
   interactive_markers
+  eigen_conversions
+  tf_conversions
 )
 
 find_package(Eigen3 REQUIRED)
@@ -38,6 +40,8 @@ catkin_package(
     graph_msgs
     std_msgs
     trajectory_msgs
+    eigen_conversions
+    tf_conversions
   INCLUDE_DIRS include
 )
 

@@ -30,5 +30,7 @@
   <depend>trajectory_msgs</depend>
   <depend>roslint</depend>
   <depend>cmake_modules</depend>
+  <depend>eigen_conversions</depend>
+  <depend>tf_conversions</depend>
 
 </package>
