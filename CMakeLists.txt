@@ -57,6 +57,7 @@ add_library(${PROJECT_NAME}
   src/imarker_robot_state.cpp
   src/imarker_end_effector.cpp
 )
+set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
 add_dependencies(${PROJECT_NAME} graph_msgs_generate_messages_cpp)
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES} ${Boost_LIBRARIES}
