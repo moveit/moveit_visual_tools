@@ -29,5 +29,6 @@
   <depend>trajectory_msgs</depend>
   <depend>roslint</depend>
   <depend>cmake_modules</depend>
+  <depend>interactive_markers</depend>
 
 </package>

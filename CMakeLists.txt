@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   trajectory_msgs
   cmake_modules
   roslint
+  interactive_markers
 )
 
 find_package(Eigen3 REQUIRED)
@@ -38,6 +39,7 @@ catkin_package(
     graph_msgs
     std_msgs
     trajectory_msgs
+    interactive_markers
   INCLUDE_DIRS include
 )
 
