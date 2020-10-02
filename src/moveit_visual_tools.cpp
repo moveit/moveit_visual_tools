@@ -67,6 +67,15 @@ namespace moveit_visual_tools
 {
 const std::string LOGNAME = "visual_tools";
 
+MoveItVisualTools::MoveItVisualTools()
+  : RvizVisualTools("", rviz_visual_tools::RVIZ_MARKER_TOPIC)
+  , robot_state_topic_(DISPLAY_ROBOT_STATE_TOPIC)
+  , planning_scene_topic_(PLANNING_SCENE_TOPIC)
+{
+  loadSharedRobotState();
+  setBaseFrame(robot_model_->getModelFrame());
+}
+
 MoveItVisualTools::MoveItVisualTools(const std::string& base_frame, const std::string& marker_topic,
                                      planning_scene_monitor::PlanningSceneMonitorPtr psm)
   : RvizVisualTools::RvizVisualTools(base_frame, marker_topic)
