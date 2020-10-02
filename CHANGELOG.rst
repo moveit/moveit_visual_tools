@@ -2,6 +2,34 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.6.0 (2020-10-09)
+------------------
+* [feature] Unified collision environment used (`#54 <https://github.com/ros-planning/moveit_visual_tools/issues/54>`_)
+* [feature] publish cuboids with size (`#59 <https://github.com/ros-planning/moveit_visual_tools/issues/59>`_)
+* [feature] hideRobot(): use new .hide member of DisplayRobotState msg (`#56 <https://github.com/ros-planning/moveit_visual_tools/issues/56>`_)
+* [feature] Use first trajectory point as start state for visualization (`#49 <https://github.com/ros-planning/moveit_visual_tools/issues/49>`_)
+* [feature] exposing the publishers to the user (`#48 <https://github.com/ros-planning/moveit_visual_tools/issues/48>`_)
+* [feature] Highlight selected links in publishRobotState() + improved collision visualization (`#45 <https://github.com/ros-planning/moveit_visual_tools/issues/45>`_)
+* [fix] Update to Noetic and fix various warnings (`#79 <https://github.com/ros-planning/moveit_visual_tools/issues/79>`_)
+* [fix] Fix Eigen alignment (`#63 <https://github.com/ros-planning/moveit_visual_tools/issues/63>`_)
+* [fix] missing end effector markers because clear (`#51 <https://github.com/ros-planning/moveit_visual_tools/issues/51>`_)
+* [fix] Remove #attempts from setFromIK (`#43 <https://github.com/ros-planning/moveit_visual_tools/issues/43>`_)
+* [documentation] Update README.md (`#69 <https://github.com/ros-planning/moveit_visual_tools/issues/69>`_)
+* [documentation] update doc of hideRobot() (`#64 <https://github.com/ros-planning/moveit_visual_tools/issues/64>`_)
+* [maint] add soname version (`#74 <https://github.com/ros-planning/moveit_visual_tools/issues/74>`_)
+* [maint] Replace tf_conversions with tf2's toMsg / fromMsg (`#66 <https://github.com/ros-planning/moveit_visual_tools/issues/66>`_)
+* [maint] fix clang-tidy issue (`#68 <https://github.com/ros-planning/moveit_visual_tools/issues/68>`_)
+* [maint] Cleanup (`#65 <https://github.com/ros-planning/moveit_visual_tools/issues/65>`_)
+  * Replace robot_model and robot_state namespaces by moveit::core
+  * Fix clang-tidy issues
+  * Remove deprecated function
+* [maint] Bump required cmake version (`#62 <https://github.com/ros-planning/moveit_visual_tools/issues/62>`_)
+* [maint] moveit.rosinstall: use master branch for all deps (`#57 <https://github.com/ros-planning/moveit_visual_tools/issues/57>`_)
+* [maint] drop melodic + kinetic support for master branch (`#58 <https://github.com/ros-planning/moveit_visual_tools/issues/58>`_)
+* [maint] Fix Travis config + issues (`#47 <https://github.com/ros-planning/moveit_visual_tools/issues/47>`_)
+* [maint] Change 'MoveIt!' to MoveIt
+* Contributors: Bjar Ne, Dave Coleman, Henning Kayser, Jafar Abdi, Jens P, Mark Moll, Michael Görner, Mike Lautman, Robert Haschke, Tyler Weaver
+
 3.5.2 (2018-12-10)
 ------------------
 * Use LOGNAME for named logging (`#42 <https://github.com/ros-planning/moveit_visual_tools/issues/42>`_)
