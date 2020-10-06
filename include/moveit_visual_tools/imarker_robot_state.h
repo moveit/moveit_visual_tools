@@ -182,12 +182,4 @@ typedef std::shared_ptr<IMarkerRobotState> IMarkerRobotStatePtr;
 typedef std::shared_ptr<const IMarkerRobotState> IMarkerRobotStateConstPtr;
 }  // namespace moveit_visual_tools
 
-namespace
-{
-/** \brief Collision checking handle for IK solvers */
-bool isIKStateValid(const planning_scene::PlanningScene* planning_scene, bool verbose, bool only_check_self_collision,
-                    const moveit_visual_tools::MoveItVisualToolsPtr& visual_tools_, moveit::core::RobotState* state,
-                    const moveit::core::JointModelGroup* group, const double* ik_solution);
-}
-
 #endif  // MOVEIT_VISUAL_TOOLS_IMARKER_ROBOT_STATE_H

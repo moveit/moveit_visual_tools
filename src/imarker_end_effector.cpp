@@ -49,6 +49,61 @@
 #include <moveit_visual_tools/imarker_robot_state.h>
 #include <moveit_visual_tools/imarker_end_effector.h>
 
+namespace
+{
+bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verbose, bool only_check_self_collision,
+                  const moveit_visual_tools::MoveItVisualToolsPtr& visual_tools, moveit::core::RobotState* robot_state,
+                  const moveit::core::JointModelGroup* group, const double* ik_solution)
+{
+  // Apply IK solution to robot state
+  robot_state->setJointGroupPositions(group, ik_solution);
+  robot_state->update();
+
+#if 0  // Ensure there are objects in the planning scene
+  const std::size_t num_collision_objects = planning_scene->getCollisionEnv()->getWorld()->size();
+  if (num_collision_objects == 0)
+  {
+    ROS_ERROR_STREAM_NAMED("cart_path_planner", "No collision objects exist in world, you need at least a table "
+                           "modeled for the controller to work");
+    ROS_ERROR_STREAM_NAMED("cart_path_planner", "To fix this, relaunch the teleop/head tracking/whatever MoveIt "
+                           "node to publish the collision objects");
+    return false;
+  }
+#endif
+
+  if (!planning_scene)
+  {
+    ROS_ERROR_STREAM_NAMED("cart_path_planner", "No planning scene provided");
+    return false;
+  }
+  if (only_check_self_collision)
+  {
+    // No easy API exists for only checking self-collision, so we do it here.
+    // TODO(davetcoleman): move this into planning_scene.cpp
+    collision_detection::CollisionRequest req;
+    req.verbose = verbose;
+    req.group_name = group->getName();
+    collision_detection::CollisionResult res;
+    planning_scene->checkSelfCollision(req, res, *robot_state);
+    if (!res.collision)
+      return true;  // not in collision
+  }
+  else if (!planning_scene->isStateColliding(*robot_state, group->getName()))
+    return true;  // not in collision
+
+  // Display more info about the collision
+  if (verbose)
+  {
+    visual_tools->publishRobotState(*robot_state, rviz_visual_tools::RED);
+    planning_scene->isStateColliding(*robot_state, group->getName(), true);
+    visual_tools->publishContactPoints(*robot_state, planning_scene);
+  }
+  ROS_WARN_STREAM_THROTTLE_NAMED(2.0, "cart_path_planner", "Collision");
+  return false;
+}
+
+}  // namespace
+
 namespace moveit_visual_tools
 {
 IMarkerEndEffector::IMarkerEndEffector(IMarkerRobotState* imarker_parent, const std::string& imarker_name,
@@ -269,58 +324,3 @@ IMarkerEndEffector::makeBoxControl(visualization_msgs::InteractiveMarker& msg)
 }
 
 }  // namespace moveit_visual_tools
-
-namespace
-{
-bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verbose, bool only_check_self_collision,
-                  const moveit_visual_tools::MoveItVisualToolsPtr& visual_tools, moveit::core::RobotState* robot_state,
-                  const moveit::core::JointModelGroup* group, const double* ik_solution)
-{
-  // Apply IK solution to robot state
-  robot_state->setJointGroupPositions(group, ik_solution);
-  robot_state->update();
-
-#if 0  // Ensure there are objects in the planning scene
-  const std::size_t num_collision_objects = planning_scene->getCollisionEnv()->getWorld()->size();
-  if (num_collision_objects == 0)
-  {
-    ROS_ERROR_STREAM_NAMED("cart_path_planner", "No collision objects exist in world, you need at least a table "
-                           "modeled for the controller to work");
-    ROS_ERROR_STREAM_NAMED("cart_path_planner", "To fix this, relaunch the teleop/head tracking/whatever MoveIt "
-                           "node to publish the collision objects");
-    return false;
-  }
-#endif
-
-  if (!planning_scene)
-  {
-    ROS_ERROR_STREAM_NAMED("cart_path_planner", "No planning scene provided");
-    return false;
-  }
-  if (only_check_self_collision)
-  {
-    // No easy API exists for only checking self-collision, so we do it here.
-    // TODO(davetcoleman): move this into planning_scene.cpp
-    collision_detection::CollisionRequest req;
-    req.verbose = verbose;
-    req.group_name = group->getName();
-    collision_detection::CollisionResult res;
-    planning_scene->checkSelfCollision(req, res, *robot_state);
-    if (!res.collision)
-      return true;  // not in collision
-  }
-  else if (!planning_scene->isStateColliding(*robot_state, group->getName()))
-    return true;  // not in collision
-
-  // Display more info about the collision
-  if (verbose)
-  {
-    visual_tools->publishRobotState(*robot_state, rviz_visual_tools::RED);
-    planning_scene->isStateColliding(*robot_state, group->getName(), true);
-    visual_tools->publishContactPoints(*robot_state, planning_scene);
-  }
-  ROS_WARN_STREAM_THROTTLE_NAMED(2.0, "cart_path_planner", "Collision");
-  return false;
-}
-
-}  // namespace
