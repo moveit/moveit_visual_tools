@@ -606,7 +606,7 @@ bool MoveItVisualTools::cleanupCO(const std::string& name)
   return processCollisionObjectMsg(co);
 }
 
-bool MoveItVisualTools::cleanupACO(const std::string& name)
+bool MoveItVisualTools::cleanupACO(const std::string& /*name*/)
 {
   // Clean up old attached collision object
   moveit_msgs::AttachedCollisionObject aco;

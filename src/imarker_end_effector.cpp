@@ -229,7 +229,7 @@ void IMarkerEndEffector::initializeInteractiveMarkers()
   make6DofMarker(pose_msg);
 }
 
-void IMarkerEndEffector::updateIMarkerPose(const Eigen::Isometry3d& pose)
+void IMarkerEndEffector::updateIMarkerPose(const Eigen::Isometry3d& /*pose*/)
 {
   // Move marker to tip of fingers
   // imarker_pose_ = pose * imarker_offset_.inverse();
