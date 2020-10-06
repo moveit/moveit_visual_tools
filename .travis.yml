@@ -9,8 +9,8 @@ cache: ccache
 
 env:
   global:
-    - DOCKER_IMAGE=moveit/moveit:master-source
-    - CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-unused-parameter -Wno-unused-function"
+    - ROS_DISTRO=noetic
+    - CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls"
     - WARNINGS_OK=false
   matrix:
     - TEST="clang-format catkin_lint"
