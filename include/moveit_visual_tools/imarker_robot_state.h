@@ -54,8 +54,8 @@
 
 namespace moveit_visual_tools
 {
-using visualization_msgs::InteractiveMarkerFeedback;
 using visualization_msgs::InteractiveMarkerControl;
+using visualization_msgs::InteractiveMarkerFeedback;
 
 typedef std::function<void(const visualization_msgs::InteractiveMarkerFeedbackConstPtr&, const Eigen::Isometry3d&)>
     IMarkerCallback;

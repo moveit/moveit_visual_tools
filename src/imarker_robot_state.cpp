@@ -278,8 +278,8 @@ bool IMarkerRobotState::setToRandomState(double clearance)
       ROS_WARN_STREAM_NAMED(name_, "Taking long time to find valid random state");
   }
 
-  ROS_ERROR_STREAM_NAMED(name_, "Unable to find valid random robot state for imarker after " << MAX_ATTEMPTS << " attem"
-                                                                                                                "pts");
+  ROS_ERROR_STREAM_NAMED(name_,
+                         "Unable to find valid random robot state for imarker after " << MAX_ATTEMPTS << " attempts");
 
   return false;
 }
