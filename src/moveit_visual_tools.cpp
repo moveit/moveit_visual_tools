@@ -647,7 +647,7 @@ bool MoveItVisualTools::publishCollisionBlock(const geometry_msgs::Pose& block_p
   collision_obj.primitives.resize(1);
   collision_obj.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
   collision_obj.primitives[0].dimensions.resize(
-      geometric_shapes::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>::value);
+      geometric_shapes::solidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>());
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = block_size;
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = block_size;
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = block_size;
@@ -684,7 +684,7 @@ bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::Point& point
   collision_obj.primitives.resize(1);
   collision_obj.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
   collision_obj.primitives[0].dimensions.resize(
-      geometric_shapes::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>::value);
+      geometric_shapes::solidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>());
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = fabs(point1.x - point2.x);
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = fabs(point1.y - point2.y);
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = fabs(point1.z - point2.z);
@@ -726,7 +726,7 @@ bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::Pose& pose, 
   collision_obj.primitives.resize(1);
   collision_obj.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
   collision_obj.primitives[0].dimensions.resize(
-      geometric_shapes::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>::value);
+      geometric_shapes::solidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>());
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = width;
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = depth;
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = height;
@@ -806,7 +806,7 @@ bool MoveItVisualTools::publishCollisionCylinder(const geometry_msgs::Pose& obje
   collision_obj.primitives.resize(1);
   collision_obj.primitives[0].type = shape_msgs::SolidPrimitive::CYLINDER;
   collision_obj.primitives[0].dimensions.resize(
-      geometric_shapes::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::CYLINDER>::value);
+      geometric_shapes::solidPrimitiveDimCount<shape_msgs::SolidPrimitive::CYLINDER>());
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT] = height;
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] = radius;
   collision_obj.primitive_poses.resize(1);
@@ -918,8 +918,7 @@ bool MoveItVisualTools::publishCollisionGraph(const graph_msgs::GeometryGraph& g
         // Create the solid primitive
         shape_msgs::SolidPrimitive cylinder;
         cylinder.type = shape_msgs::SolidPrimitive::CYLINDER;
-        cylinder.dimensions.resize(
-            geometric_shapes::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::CYLINDER>::value);
+        cylinder.dimensions.resize(geometric_shapes::solidPrimitiveDimCount<shape_msgs::SolidPrimitive::CYLINDER>());
         cylinder.dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT] = height;
         cylinder.dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] = radius;
 
@@ -944,7 +943,7 @@ void MoveItVisualTools::getCollisionWallMsg(double x, double y, double z, double
   collision_obj.primitives.resize(1);
   collision_obj.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
   collision_obj.primitives[0].dimensions.resize(
-      geometric_shapes::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>::value);
+      geometric_shapes::solidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>());
 
   geometry_msgs::Pose rec_pose;
 
@@ -1016,7 +1015,7 @@ bool MoveItVisualTools::publishCollisionTable(double x, double y, double z, doub
   collision_obj.primitives.resize(1);
   collision_obj.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
   collision_obj.primitives[0].dimensions.resize(
-      geometric_shapes::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>::value);
+      geometric_shapes::solidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>());
 
   // Size
   collision_obj.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = depth;
