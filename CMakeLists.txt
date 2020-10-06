@@ -42,13 +42,10 @@ catkin_package(
 )
 
 ## Build
+include_directories(include)
 include_directories(SYSTEM
-  ${EIGEN3_INCLUDE_DIRS}
-)
-
-include_directories(
-  include
   ${catkin_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
 )
 
 # Visualization Tools Library
