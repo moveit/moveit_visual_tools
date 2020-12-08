@@ -270,7 +270,12 @@ bool MoveItVisualTools::loadEEMarker(const moveit::core::JointModelGroup* ee_jmg
                                           << ee_jmg->getName() << "(" << ee_jmg->getActiveJointModels().size() << ")");
       return false;
     }
-    shared_robot_state_->setJointGroupPositions(ee_jmg, ee_joint_pos);
+    std::size_t i = 0;
+    for (auto& joint : ee_jmg->getActiveJointModels())
+    {
+      shared_robot_state_->setJointPositions(joint, &ee_joint_pos[i]);
+      ++i;  // Note that joints with more than one variable will be rejected above
+    }
     shared_robot_state_->update(true);
   }
 
