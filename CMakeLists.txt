@@ -54,6 +54,8 @@ add_library(${PROJECT_NAME}
   src/imarker_robot_state.cpp
   src/imarker_end_effector.cpp
 )
+target_compile_options(${PROJECT_NAME} PRIVATE
+  "-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls")
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
 add_dependencies(${PROJECT_NAME} graph_msgs_generate_messages_cpp)
 target_link_libraries(${PROJECT_NAME}
@@ -62,6 +64,8 @@ target_link_libraries(${PROJECT_NAME}
 
 # Demo executable
 add_executable(${PROJECT_NAME}_demo src/${PROJECT_NAME}_demo.cpp)
+target_compile_options(${PROJECT_NAME}_demo PRIVATE
+  "-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls")
 target_link_libraries(${PROJECT_NAME}_demo
   ${catkin_LIBRARIES} ${PROJECT_NAME}
 )
