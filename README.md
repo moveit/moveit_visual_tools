@@ -17,7 +17,7 @@ This open source project was developed at [PickNik Robotics](https://picknik.ai/
 
 ## Status:
 
-* [![Build Status](https://travis-ci.org/ros-planning/moveit_visual_tools.svg)](https://travis-ci.org/ros-planning/moveit_visual_tools) Travis CI
+* [![Format](https://github.com/ros-planning/moveit_visual_tools/actions/workflows/format.yaml/badge.svg?branch=master)](https://github.com/ros-planning/moveit_visual_tools/actions/workflows/format.yaml?branch=master) [![BuildAndTest](https://github.com/ros-planning/moveit_visual_tools/actions/workflows/industrial_ci_action.yaml/badge.svg?branch=master)](https://github.com/ros-planning/moveit_visual_tools/actions/workflows/industrial_ci_action.yaml?branch=master) GitHub Actions
 * [![Build Status](http://build.ros.org/buildStatus/icon?job=Kbin_uX64__moveit_visual_tools__ubuntu_xenial_amd64__binary)](http://build.ros.org/view/Kbin_uX64/job/Kbin_uX64__moveit_visual_tools__ubuntu_xenial_amd64__binary/) ROS Buildfarm - AMD64 Xenial Debian Build - Ubuntu 16.04 LTS
 * [![Build Status](http://build.ros.org/buildStatus/icon?job=Kdev__moveit_visual_tools__ubuntu_xenial_amd64)](http://build.ros.org/view/Kdev/job/Kdev__moveit_visual_tools__ubuntu_xenial_amd64/) ROS Buildfarm - AMD64 Xenial Devel Build - Ubuntu 16.04 LTS
 * [![Build Status](http://build.ros.org/buildStatus/icon?job=Msrc_uB__moveit_visual_tools__ubuntu_bionic__source)](http://build.ros.org/job/Msrc_uB__moveit_visual_tools__ubuntu_bionic__source/) ROS Buildfarm - AMD64 Bionic Source Build - Ubuntu 18.04 LTS
