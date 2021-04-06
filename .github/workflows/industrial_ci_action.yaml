@@ -28,6 +28,7 @@ jobs:
       CLANG_TIDY: true
       CLANG_TIDY_BASE_REF: "${{ github.base_ref || github.ref }}"
 
+    name: "${{ matrix.env.ROS_DISTRO }} + ${{ matrix.env.ROS_REPO }}${{ matrix.env.CLANG_TIDY && ' + clang-tidy' || '' }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
