@@ -40,9 +40,9 @@
 #define MOVEIT_VISUAL_TOOLS_IMARKER_ROBOT_STATE_H
 
 // ROS
-#include <ros/ros.h>
-#include <interactive_markers/interactive_marker_server.h>
-#include <visualization_msgs/InteractiveMarkerFeedback.h>
+#include <rclcpp/rclcpp.hpp>
+#include <interactive_markers/interactive_marker_server.hpp>
+#include <visualization_msgs/msg/interactive_marker_feedback.hpp>
 
 // MoveIt
 #include <moveit/robot_state/robot_state.h>
@@ -54,10 +54,10 @@
 
 namespace moveit_visual_tools
 {
-using visualization_msgs::InteractiveMarkerControl;
-using visualization_msgs::InteractiveMarkerFeedback;
+using visualization_msgs::msg::InteractiveMarkerControl;
+using visualization_msgs::msg::InteractiveMarkerFeedback;
 
-typedef std::function<void(const visualization_msgs::InteractiveMarkerFeedbackConstPtr&, const Eigen::Isometry3d&)>
+typedef std::function<void(const visualization_msgs::msg::InteractiveMarkerFeedback&, const Eigen::Isometry3d&)>
     IMarkerCallback;
 
 typedef std::shared_ptr<interactive_markers::InteractiveMarkerServer> InteractiveMarkerServerPtr;
@@ -86,7 +86,7 @@ public:
    * \brief Constructor
    */
   IMarkerRobotState(planning_scene_monitor::PlanningSceneMonitorPtr psm, const std::string& imarker_name,
-                    std::vector<ArmData> arm_datas, rviz_visual_tools::colors color, const std::string& package_path);
+                    std::vector<ArmData> arm_datas, rviz_visual_tools::Colors color, const std::string& package_path);
 
   ~IMarkerRobotState()
   {
@@ -165,7 +165,7 @@ protected:
 
   // Settings
   std::size_t refresh_rate_ = 30;
-  rviz_visual_tools::colors color_ = rviz_visual_tools::PURPLE;
+  rviz_visual_tools::Colors color_ = rviz_visual_tools::PURPLE;
 
   // Interactive markers
   InteractiveMarkerServerPtr imarker_server_;

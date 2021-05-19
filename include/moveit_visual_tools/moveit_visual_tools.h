@@ -41,21 +41,21 @@
 #define MOVEIT_VISUAL_TOOLS_MOVEIT_VISUAL_TOOLS_H
 
 // Rviz Visualization Tool
-#include <rviz_visual_tools/rviz_visual_tools.h>
+#include <rviz_visual_tools/rviz_visual_tools.hpp>
 
 // MoveIt
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 // #include <moveit/macros/deprecation.h>
-#include <rviz_visual_tools/deprecation.h>
+// #include <rviz_visual_tools/deprecation.h>
 
 // MoveIt Messages
-#include <moveit_msgs/Grasp.h>
-#include <moveit_msgs/DisplayRobotState.h>
-#include <moveit_msgs/WorkspaceParameters.h>
-#include <moveit_msgs/DisplayTrajectory.h>
+#include <moveit_msgs/msg/grasp.hpp>
+#include <moveit_msgs/msg/display_robot_state.hpp>
+#include <moveit_msgs/msg/workspace_parameters.hpp>
+#include <moveit_msgs/msg/display_robot_state.hpp>
 
 // ROS Messages
-#include <trajectory_msgs/JointTrajectory.h>
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
 
 // C++
 #include <map>
@@ -134,15 +134,15 @@ public:
    * \param color to display the collision object with
    * \return true on success
    */
-  bool processCollisionObjectMsg(const moveit_msgs::CollisionObject& msg,
-                                 const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
+  bool processCollisionObjectMsg(const moveit_msgs::msg::CollisionObject& msg,
+                                 const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Skip a ROS message call by sending directly to planning scene monitor
    * \param attached collision object message
    * \return true on success
    */
-  bool processAttachedCollisionObjectMsg(const moveit_msgs::AttachedCollisionObject& msg);
+  bool processAttachedCollisionObjectMsg(const moveit_msgs::msg::AttachedCollisionObject& msg);
 
   /**
    * \brief Move an already published collision object to a new locaiton in space
@@ -151,9 +151,9 @@ public:
    * \return true on success
    */
   bool moveCollisionObject(const Eigen::Isometry3d& pose, const std::string& name,
-                           const rviz_visual_tools::colors& color);
-  bool moveCollisionObject(const geometry_msgs::Pose& pose, const std::string& name,
-                           const rviz_visual_tools::colors& color);
+                           const rviz_visual_tools::Colors& color);
+  bool moveCollisionObject(const geometry_msgs::msg::Pose& pose, const std::string& name,
+                           const rviz_visual_tools::Colors& color);
 
   /**
    * \brief When mannual_trigger_update_ is true, use this to tell the planning scene to send
@@ -231,26 +231,26 @@ public:
    */
   bool publishEEMarkers(const Eigen::Isometry3d& pose, const moveit::core::JointModelGroup* ee_jmg,
                         const std::vector<double>& ee_joint_pos,
-                        const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT,
+                        const rviz_visual_tools::Colors& color = rviz_visual_tools::DEFAULT,
                         const std::string& ns = "end_effector")
   {
     return publishEEMarkers(convertPose(pose), ee_jmg, ee_joint_pos, color, ns);
   }
   bool publishEEMarkers(const Eigen::Isometry3d& pose, const moveit::core::JointModelGroup* ee_jmg,
-                        const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT,
+                        const rviz_visual_tools::Colors& color = rviz_visual_tools::DEFAULT,
                         const std::string& ns = "end_effector")
   {
     return publishEEMarkers(convertPose(pose), ee_jmg, {}, color, ns);
   }
-  bool publishEEMarkers(const geometry_msgs::Pose& pose, const moveit::core::JointModelGroup* ee_jmg,
-                        const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT,
+  bool publishEEMarkers(const geometry_msgs::msg::Pose& pose, const moveit::core::JointModelGroup* ee_jmg,
+                        const rviz_visual_tools::Colors& color = rviz_visual_tools::DEFAULT,
                         const std::string& ns = "end_effector")
   {
     return publishEEMarkers(pose, ee_jmg, {}, color, ns);
   }
-  bool publishEEMarkers(const geometry_msgs::Pose& pose, const moveit::core::JointModelGroup* ee_jmg,
+  bool publishEEMarkers(const geometry_msgs::msg::Pose& pose, const moveit::core::JointModelGroup* ee_jmg,
                         const std::vector<double>& ee_joint_pos,
-                        const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT,
+                        const rviz_visual_tools::Colors& color = rviz_visual_tools::DEFAULT,
                         const std::string& ns = "end_effector");
 
   /**
@@ -259,7 +259,7 @@ public:
    * \param ee_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
    * \param animate_speed - how fast the gripper approach is animated, optional
    */
-  bool publishGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
+  bool publishGrasps(const std::vector<moveit_msgs::msg::Grasp>& possible_grasps,
                      const moveit::core::JointModelGroup* ee_jmg, double animate_speed = 0.1);
 
   /**
@@ -269,7 +269,7 @@ public:
    * \param ee_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
    * \param animate_speed - how fast the gripper approach is animated, optional
    */
-  bool publishAnimatedGrasps(const std::vector<moveit_msgs::Grasp>& possible_grasps,
+  bool publishAnimatedGrasps(const std::vector<moveit_msgs::msg::Grasp>& possible_grasps,
                              const moveit::core::JointModelGroup* ee_jmg, double animate_speed = 0.01);
 
   /**
@@ -280,7 +280,7 @@ public:
    * \param animate_speed - how fast the gripper approach is animated
    * \return true on sucess
    */
-  bool publishAnimatedGrasp(const moveit_msgs::Grasp& grasp, const moveit::core::JointModelGroup* ee_jmg,
+  bool publishAnimatedGrasp(const moveit_msgs::msg::Grasp& grasp, const moveit::core::JointModelGroup* ee_jmg,
                             double animate_speed);
 
   /**
@@ -290,7 +290,7 @@ public:
    * \param arm_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
    * \param display_time - amount of time to sleep between sending trajectories, optional
    */
-  bool publishIKSolutions(const std::vector<trajectory_msgs::JointTrajectoryPoint>& ik_solutions,
+  bool publishIKSolutions(const std::vector<trajectory_msgs::msg::JointTrajectoryPoint>& ik_solutions,
                           const moveit::core::JointModelGroup* arm_jmg, double display_time = 0.4);
 
   /**
@@ -331,7 +331,7 @@ public:
    * \return true on success
    */
   bool publishCollisionFloor(double z = 0.0, const std::string& plane_name = "Floor",
-                             const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
+                             const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Create a MoveIt Collision block at the given pose
@@ -341,9 +341,9 @@ public:
    * \param color to display the collision object with
    * \return true on sucess
    **/
-  bool publishCollisionBlock(const geometry_msgs::Pose& block_pose, const std::string& block_name = "block",
+  bool publishCollisionBlock(const geometry_msgs::msg::Pose& block_pose, const std::string& block_name = "block",
                              double block_size = 0.1,
-                             const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
+                             const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Create a MoveIt collision rectangular cuboid at the given pose
@@ -354,10 +354,10 @@ public:
    * \return true on sucess
    **/
   bool publishCollisionCuboid(const Eigen::Vector3d& point1, const Eigen::Vector3d& point2, const std::string& name,
-                              const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
-  bool publishCollisionCuboid(const geometry_msgs::Point& point1, const geometry_msgs::Point& point2,
+                              const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
+  bool publishCollisionCuboid(const geometry_msgs::msg::Point& point1, const geometry_msgs::msg::Point& point2,
                               const std::string& name,
-                              const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
+                              const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Create a MoveIt collision rectangular cuboid at the given pose
@@ -370,10 +370,10 @@ public:
    * \return true on sucess
    **/
   bool publishCollisionCuboid(const Eigen::Isometry3d& pose, double width, double depth, double height,
-                              const std::string& name, const rviz_visual_tools::colors& color);
+                              const std::string& name, const rviz_visual_tools::Colors& color);
 
-  bool publishCollisionCuboid(const geometry_msgs::Pose& pose, double width, double depth, double height,
-                              const std::string& name, const rviz_visual_tools::colors& color);
+  bool publishCollisionCuboid(const geometry_msgs::msg::Pose& pose, double width, double depth, double height,
+                              const std::string& name, const rviz_visual_tools::Colors& color);
 
   /**
    * \brief Create a MoveIt collision rectangular cuboid at the given pose
@@ -384,12 +384,12 @@ public:
    * \return true on sucess
    **/
   bool publishCollisionCuboid(const Eigen::Isometry3d& pose, const Eigen::Vector3d& size, const std::string& name,
-                              const rviz_visual_tools::colors& color)
+                              const rviz_visual_tools::Colors& color)
   {
     return publishCollisionCuboid(pose, size.x(), size.y(), size.z(), name, color);
   }
-  bool publishCollisionCuboid(const geometry_msgs::Pose& pose, const geometry_msgs::Vector3& size,
-                              const std::string& name, const rviz_visual_tools::colors& color)
+  bool publishCollisionCuboid(const geometry_msgs::msg::Pose& pose, const geometry_msgs::msg::Vector3& size,
+                              const std::string& name, const rviz_visual_tools::Colors& color)
   {
     return publishCollisionCuboid(pose, size.x, size.y, size.z, name, color);
   }
@@ -403,11 +403,11 @@ public:
    * \param color to display the collision object with
    * \return true on sucess
    */
-  bool publishCollisionCylinder(const geometry_msgs::Point& a, const geometry_msgs::Point& b,
+  bool publishCollisionCylinder(const geometry_msgs::msg::Point& a, const geometry_msgs::msg::Point& b,
                                 const std::string& object_name, double radius,
-                                const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
+                                const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
   bool publishCollisionCylinder(const Eigen::Vector3d& a, const Eigen::Vector3d& b, const std::string& object_name,
-                                double radius, const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
+                                double radius, const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Create a MoveIt Collision cylinder with a center point pose
@@ -419,9 +419,9 @@ public:
    * \return true on sucess
    */
   bool publishCollisionCylinder(const Eigen::Isometry3d& object_pose, const std::string& object_name, double radius,
-                                double height, const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
-  bool publishCollisionCylinder(const geometry_msgs::Pose& object_pose, const std::string& object_name, double radius,
-                                double height, const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
+                                double height, const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
+  bool publishCollisionCylinder(const geometry_msgs::msg::Pose& object_pose, const std::string& object_name, double radius,
+                                double height, const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Create a collision object using a mesh
@@ -431,18 +431,18 @@ public:
    * \param color to display the collision object with
    * \return true on success
    */
-  bool publishCollisionMesh(const geometry_msgs::Pose& object_pose, const std::string& object_name,
+  bool publishCollisionMesh(const geometry_msgs::msg::Pose& object_pose, const std::string& object_name,
                             const std::string& mesh_path,
-                            const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
+                            const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
   bool publishCollisionMesh(const Eigen::Isometry3d& object_pose, const std::string& object_name,
                             const std::string& mesh_path,
-                            const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
+                            const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
   bool publishCollisionMesh(const Eigen::Isometry3d& object_pose, const std::string& object_name,
-                            const shape_msgs::Mesh& mesh_msg,
-                            const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
-  bool publishCollisionMesh(const geometry_msgs::Pose& object_pose, const std::string& object_name,
-                            const shape_msgs::Mesh& mesh_msg,
-                            const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
+                            const shape_msgs::msg::Mesh& mesh_msg,
+                            const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
+  bool publishCollisionMesh(const geometry_msgs::msg::Pose& object_pose, const std::string& object_name,
+                            const shape_msgs::msg::Mesh& mesh_msg,
+                            const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Publish a connected birectional graph
@@ -452,13 +452,13 @@ public:
    * \return true on sucess
    */
   bool publishCollisionGraph(const graph_msgs::GeometryGraph& graph, const std::string& object_name, double radius,
-                             const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
+                             const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Helper for publishCollisionWall
    */
   void getCollisionWallMsg(double x, double y, double z, double angle, double width, double height,
-                           const std::string& name, moveit_msgs::CollisionObject& collision_obj);
+                           const std::string& name, moveit_msgs::msg::CollisionObject& collision_obj);
 
   /**
    * \brief Publish a typical room wall
@@ -473,10 +473,10 @@ public:
    */
   bool publishCollisionWall(double x, double y, double angle = 0.0, double width = 2.0, double height = 1.5,
                             const std::string& name = "wall",
-                            const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
+                            const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
   bool publishCollisionWall(double x, double y, double z, double angle = 0.0, double width = 2.0, double height = 1.5,
                             const std::string& name = "wall",
-                            const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
+                            const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Publish a typical room table
@@ -492,7 +492,7 @@ public:
    */
   bool publishCollisionTable(double x, double y, double z, double angle, double width, double height, double depth,
                              const std::string& name,
-                             const rviz_visual_tools::colors& color = rviz_visual_tools::GREEN);
+                             const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Load a planning scene to a planning_scene_monitor from file
@@ -508,7 +508,7 @@ public:
    * \param display bounds of workspace
    * \return true on sucess
    */
-  bool publishWorkspaceParameters(const moveit_msgs::WorkspaceParameters& params);
+  bool publishWorkspaceParameters(const moveit_msgs::msg::WorkspaceParameters& params);
 
   /**
    * \brief Check if the robot state is in collision inside the planning scene and visualize the result.
@@ -522,8 +522,8 @@ public:
    */
   bool checkAndPublishCollision(const moveit::core::RobotState& robot_state,
                                 const planning_scene::PlanningScene* planning_scene,
-                                const rviz_visual_tools::colors& highlight_link_color = rviz_visual_tools::RED,
-                                const rviz_visual_tools::colors& contact_point_color = rviz_visual_tools::PURPLE);
+                                const rviz_visual_tools::Colors& highlight_link_color = rviz_visual_tools::RED,
+                                const rviz_visual_tools::Colors& contact_point_color = rviz_visual_tools::PURPLE);
 
   /**
    * \brief Given a planning scene and robot state, publish any collisions
@@ -534,7 +534,7 @@ public:
    */
   bool publishContactPoints(const moveit::core::RobotState& robot_state,
                             const planning_scene::PlanningScene* planning_scene,
-                            const rviz_visual_tools::colors& color = rviz_visual_tools::RED);
+                            const rviz_visual_tools::Colors& color = rviz_visual_tools::RED);
 
   /**
    * \brief Given a contact map and planning scene, publish the contact points
@@ -545,7 +545,7 @@ public:
    */
   bool publishContactPoints(const collision_detection::CollisionResult::ContactMap& contacts,
                             const planning_scene::PlanningScene* planning_scene,
-                            const rviz_visual_tools::colors& color = rviz_visual_tools::RED);
+                            const rviz_visual_tools::Colors& color = rviz_visual_tools::RED);
 
   /**
    * \brief Move a joint group in MoveIt for visualization
@@ -558,7 +558,7 @@ public:
    * \param display_time - amount of time for the trajectory to "execute"
    * \return true on success
    */
-  bool publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
+  bool publishTrajectoryPoint(const trajectory_msgs::msg::JointTrajectoryPoint& trajectory_pt,
                               const std::string& planning_group, double display_time = 0.1);
 
   /**
@@ -573,13 +573,13 @@ public:
                              const moveit::core::JointModelGroup* jmg, double speed = 0.01, bool blocking = false);
   bool publishTrajectoryPath(const robot_trajectory::RobotTrajectoryPtr& trajectory, bool blocking = false);
   bool publishTrajectoryPath(const robot_trajectory::RobotTrajectory& trajectory, bool blocking = false);
-  bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg,
+  bool publishTrajectoryPath(const moveit_msgs::msg::RobotTrajectory& trajectory_msg,
                              const moveit::core::RobotStateConstPtr& robot_state, bool blocking = false);
-  bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg,
+  bool publishTrajectoryPath(const moveit_msgs::msg::RobotTrajectory& trajectory_msg,
                              const moveit::core::RobotState& robot_state, bool blocking = false);
-  bool publishTrajectoryPath(const moveit_msgs::RobotTrajectory& trajectory_msg,
-                             const moveit_msgs::RobotState& robot_state, bool blocking = false);
-  void publishTrajectoryPath(const moveit_msgs::DisplayTrajectory& display_trajectory_msg);
+  bool publishTrajectoryPath(const moveit_msgs::msg::RobotTrajectory& trajectory_msg,
+                             const moveit_msgs::msg::RobotState& robot_state, bool blocking = false);
+  void publishTrajectoryPath(const moveit_msgs::msg::DisplayTrajectory& display_trajectory_msg);
 
   /**
    * \brief Display a line of the end effector path from a robot trajectory path
@@ -589,16 +589,16 @@ public:
    * \param color - display color of markers
    * \return true on success
    */
-  bool publishTrajectoryLine(const moveit_msgs::RobotTrajectory& trajectory_msg,
+  bool publishTrajectoryLine(const moveit_msgs::msg::RobotTrajectory& trajectory_msg,
                              const moveit::core::LinkModel* ee_parent_link,
                              const moveit::core::JointModelGroup* arm_jmg,
-                             const rviz_visual_tools::colors& color = rviz_visual_tools::LIME_GREEN);
+                             const rviz_visual_tools::Colors& color = rviz_visual_tools::LIME_GREEN);
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
                              const moveit::core::LinkModel* ee_parent_link,
-                             const rviz_visual_tools::colors& color = rviz_visual_tools::LIME_GREEN);
+                             const rviz_visual_tools::Colors& color = rviz_visual_tools::LIME_GREEN);
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectory& robot_trajectory,
                              const moveit::core::LinkModel* ee_parent_link,
-                             const rviz_visual_tools::colors& color = rviz_visual_tools::LIME_GREEN);
+                             const rviz_visual_tools::Colors& color = rviz_visual_tools::LIME_GREEN);
 
   /**
    * \brief Display a line of the end effector(s) path(s) from a robot trajectory path
@@ -608,15 +608,15 @@ public:
    * \param color - display color of markers
    * \return true on success
    */
-  bool publishTrajectoryLine(const moveit_msgs::RobotTrajectory& trajectory_msg,
+  bool publishTrajectoryLine(const moveit_msgs::msg::RobotTrajectory& trajectory_msg,
                              const moveit::core::JointModelGroup* arm_jmg,
-                             const rviz_visual_tools::colors& color = rviz_visual_tools::LIME_GREEN);
+                             const rviz_visual_tools::Colors& color = rviz_visual_tools::LIME_GREEN);
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
                              const moveit::core::JointModelGroup* arm_jmg,
-                             const rviz_visual_tools::colors& color = rviz_visual_tools::LIME_GREEN);
+                             const rviz_visual_tools::Colors& color = rviz_visual_tools::LIME_GREEN);
   bool publishTrajectoryLine(const robot_trajectory::RobotTrajectory& robot_trajectory,
                              const moveit::core::JointModelGroup* arm_jmg,
-                             const rviz_visual_tools::colors& color = rviz_visual_tools::LIME_GREEN);
+                             const rviz_visual_tools::Colors& color = rviz_visual_tools::LIME_GREEN);
 
   /**
    * \brief Display trajectory as series of end effector position points
@@ -626,7 +626,7 @@ public:
    */
   bool publishTrajectoryPoints(const std::vector<moveit::core::RobotStatePtr>& robot_state_trajectory,
                                const moveit::core::LinkModel* ee_parent_link,
-                               const rviz_visual_tools::colors& color = rviz_visual_tools::YELLOW);
+                               const rviz_visual_tools::Colors& color = rviz_visual_tools::YELLOW);
 
   /** \brief All published robot states will have their virtual joint moved by offset */
   void enableRobotStateRootOffet(const Eigen::Isometry3d& offset);
@@ -641,9 +641,9 @@ public:
    * \param color - how to highlight the robot (solid-ly) if desired, default keeps color as specified in URDF
    * \return true on success
    */
-  bool publishRobotState(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
+  bool publishRobotState(const trajectory_msgs::msg::JointTrajectoryPoint& trajectory_pt,
                          const moveit::core::JointModelGroup* jmg,
-                         const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT);
+                         const rviz_visual_tools::Colors& color = rviz_visual_tools::DEFAULT);
 
   /**
    * \brief Publish a MoveIt robot state to a topic that the Rviz "RobotState" display can show
@@ -653,7 +653,7 @@ public:
    * \return true on success
    */
   bool publishRobotState(const std::vector<double>& joint_positions, const moveit::core::JointModelGroup* jmg,
-                         const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT);
+                         const rviz_visual_tools::Colors& color = rviz_visual_tools::DEFAULT);
 
   /**
    * \brief Publish a complete robot state to Rviz
@@ -664,12 +664,12 @@ public:
    * By default (empty) all links are highlighted.
    */
   bool publishRobotState(const moveit::core::RobotState& robot_state,
-                         const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT,
+                         const rviz_visual_tools::Colors& color = rviz_visual_tools::DEFAULT,
                          const std::vector<std::string>& highlight_links = {});
   bool publishRobotState(const moveit::core::RobotStatePtr& robot_state,
-                         const rviz_visual_tools::colors& color = rviz_visual_tools::DEFAULT,
+                         const rviz_visual_tools::Colors& color = rviz_visual_tools::DEFAULT,
                          const std::vector<std::string>& highlight_links = {});
-  void publishRobotState(const moveit_msgs::DisplayRobotState& display_robot_state_msg);
+  void publishRobotState(const moveit_msgs::msg::DisplayRobotState& display_robot_state_msg);
 
   /**
    * \brief Hide robot in RobotState display in Rviz
@@ -711,20 +711,20 @@ protected:
   std::string planning_scene_topic_;
 
   // ROS publishers
-  ros::Publisher pub_display_path_;  // for MoveIt trajectories
-  ros::Publisher pub_robot_state_;   // publish a RobotState message
+  rclcpp::Publisher pub_display_path_;  // for MoveIt trajectories
+  rclcpp::Publisher pub_robot_state_;   // publish a RobotState message
 
   robot_model_loader::RobotModelLoaderPtr rm_loader_;  // so that we can specify our own options
 
   // End Effector Markers
-  std::map<const moveit::core::JointModelGroup*, visualization_msgs::MarkerArray> ee_markers_map_;
+  std::map<const moveit::core::JointModelGroup*, visualization_msgs::msg::MarkerArray> ee_markers_map_;
   std::map<const moveit::core::JointModelGroup*, EigenSTL::vector_Isometry3d> ee_poses_map_;
   std::map<const moveit::core::JointModelGroup*, std::vector<double> > ee_joint_pos_map_;
 
   // Cached robot state marker - cache the colored links.
   // Note: Only allows colors provided in rviz_visual_tools to prevent too many robot state messages from being loaded
   // and ensuring efficiency
-  std::map<rviz_visual_tools::colors, moveit_msgs::DisplayRobotState> display_robot_msgs_;
+  std::map<rviz_visual_tools::Colors, moveit_msgs::msg::DisplayRobotState> display_robot_msgs_;
 
   // Pointer to the robot model
   moveit::core::RobotModelConstPtr robot_model_;
