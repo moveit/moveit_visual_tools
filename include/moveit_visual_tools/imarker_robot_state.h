@@ -146,9 +146,6 @@ protected:
   // The short name of this class
   std::string name_;
 
-  // A shared node handle
-  ros::NodeHandle nh_;
-
   // State
   moveit::core::RobotStatePtr imarker_state_;
 

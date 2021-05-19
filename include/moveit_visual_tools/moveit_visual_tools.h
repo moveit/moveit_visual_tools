@@ -53,9 +53,11 @@
 #include <moveit_msgs/msg/display_robot_state.hpp>
 #include <moveit_msgs/msg/workspace_parameters.hpp>
 #include <moveit_msgs/msg/display_robot_state.hpp>
+#include <moveit_msgs/msg/display_trajectory.hpp>
 
 // ROS Messages
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
+#include <graph_msgs/msg/geometry_graph.hpp>
 
 // C++
 #include <map>
@@ -82,7 +84,7 @@ public:
    * All Markers will be rendered in the planning frame of the model ROBOT_DESCRIPTION
    * and are published to rviz_visual_tools::RVIZ_MARKER_TOPIC
    */
-  MoveItVisualTools();
+  MoveItVisualTools(const rclcpp::Node::SharedPtr& node);
 
   /**
    * \brief Constructor
@@ -91,7 +93,7 @@ public:
    * \param planning_scene_monitor - optionally pass in a pre-loaded planning scene monitor to
    *        avoid having to re-load the URDF, kinematic solvers, etc
    */
-  MoveItVisualTools(const std::string& base_frame, const std::string& marker_topic,
+  MoveItVisualTools(const rclcpp::Node::SharedPtr& node, const std::string& base_frame, const std::string& marker_topic,
                     planning_scene_monitor::PlanningSceneMonitorPtr psm);
 
   /**
@@ -100,7 +102,7 @@ public:
    * \param marker_topic - rostopic to publish markers to - your Rviz display should match
    * \param robot_model - load robot model pointer so that we don't have do re-parse it here
    */
-  MoveItVisualTools(const std::string& base_frame,
+  MoveItVisualTools(const rclcpp::Node::SharedPtr& node, const std::string& base_frame,
                     const std::string& marker_topic = rviz_visual_tools::RVIZ_MARKER_TOPIC,
                     moveit::core::RobotModelConstPtr robot_model = moveit::core::RobotModelConstPtr());
 
@@ -451,7 +453,7 @@ public:
    * \param color to display the collision object with
    * \return true on sucess
    */
-  bool publishCollisionGraph(const graph_msgs::GeometryGraph& graph, const std::string& object_name, double radius,
+  bool publishCollisionGraph(const graph_msgs::msg::GeometryGraph& graph, const std::string& object_name, double radius,
                              const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
 
   /**
@@ -692,6 +694,12 @@ public:
    */
   planning_scene_monitor::PlanningSceneMonitorPtr getPlanningSceneMonitor();
 
+  /**
+   * @brief Get the Executor object
+   * 
+   */
+  rclcpp::executors::SingleThreadedExecutor::SharedPtr getExecutor();
+
 private:
   /**
    * \brief Error check that the robot's SRDF was properly setup with a virtual joint that was named a certain way
@@ -711,8 +719,12 @@ protected:
   std::string planning_scene_topic_;
 
   // ROS publishers
-  rclcpp::Publisher pub_display_path_;  // for MoveIt trajectories
-  rclcpp::Publisher pub_robot_state_;   // publish a RobotState message
+  rclcpp::Publisher<moveit_msgs::msg::DisplayTrajectory>::SharedPtr  pub_display_path_;  // for MoveIt trajectories
+  rclcpp::Publisher<moveit_msgs::msg::DisplayRobotState>::SharedPtr pub_robot_state_;   // publish a RobotState message
+
+  // ROS Node
+  rclcpp::Node::SharedPtr node_;
+  rclcpp::executors::SingleThreadedExecutor::SharedPtr executor_;
 
   robot_model_loader::RobotModelLoaderPtr rm_loader_;  // so that we can specify our own options
 
