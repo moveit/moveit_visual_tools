@@ -46,7 +46,7 @@
 
 // MoveIt
 #include <moveit/robot_state/robot_state.h>
-#include <moveit_visual_tools/moveit_visual_tools.h>
+#include <moveit_visual_tools/moveit_visual_tools.hpp>
 
 // C++
 #include <string>
@@ -57,7 +57,10 @@ namespace moveit_visual_tools
 using visualization_msgs::msg::InteractiveMarkerControl;
 using visualization_msgs::msg::InteractiveMarkerFeedback;
 
-typedef std::function<void(const visualization_msgs::msg::InteractiveMarkerFeedback&, const Eigen::Isometry3d&)>
+// typedef std::function<void(const visualization_msgs::msg::InteractiveMarkerFeedback&, const Eigen::Isometry3d&)>
+//     IMarkerCallback;
+typedef std::function<void(
+    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr&, const Eigen::Isometry3d)>
     IMarkerCallback;
 
 typedef std::shared_ptr<interactive_markers::InteractiveMarkerServer> InteractiveMarkerServerPtr;
@@ -85,8 +88,23 @@ public:
   /**
    * \brief Constructor
    */
-  IMarkerRobotState(planning_scene_monitor::PlanningSceneMonitorPtr psm, const std::string& imarker_name,
+  IMarkerRobotState(rclcpp::Node::SharedPtr node, planning_scene_monitor::PlanningSceneMonitorPtr psm, const std::string& imarker_name,
                     std::vector<ArmData> arm_datas, rviz_visual_tools::Colors color, const std::string& package_path);
+  // IMarkerRobotState(rclcpp::Node::SharedPtr node, planning_scene_monitor::PlanningSceneMonitorPtr psm, const std::string& imarker_name,
+  //                   std::vector<ArmData> arm_datas, rviz_visual_tools::Colors color, const std::string& package_path) :
+  // IMarkerRobotState(node->get_node_base_interface(), node->get_node_clock_interface(),
+  //                   node->get_node_logging_interface(), node->get_node_topics_interface(),
+  //                   node->get_node_services_interface(), psm, imarker_name, arm_datas, color, package_path)
+  // {
+  // }
+
+  // IMarkerRobotState(const rclcpp::node_interfaces::NodeBaseInterface::SharedPtr& node_base_interface,
+  //               const rclcpp::node_interfaces::NodeClockInterface::SharedPtr& clock_interface,
+  //               const rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr& logging_interface,
+  //               const rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr& topics_interface,
+  //               const rclcpp::node_interfaces::NodeServicesInterface::SharedPtr& services_interface,
+  //               planning_scene_monitor::PlanningSceneMonitorPtr psm, const std::string& imarker_name,
+  //               std::vector<ArmData> arm_datas, rviz_visual_tools::Colors color, const std::string& package_path);
 
   ~IMarkerRobotState()
   {

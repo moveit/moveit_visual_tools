@@ -694,12 +694,6 @@ public:
    */
   planning_scene_monitor::PlanningSceneMonitorPtr getPlanningSceneMonitor();
 
-  /**
-   * @brief Get the Executor object
-   * 
-   */
-  rclcpp::executors::SingleThreadedExecutor::SharedPtr getExecutor();
-
 private:
   /**
    * \brief Error check that the robot's SRDF was properly setup with a virtual joint that was named a certain way
@@ -722,9 +716,11 @@ protected:
   rclcpp::Publisher<moveit_msgs::msg::DisplayTrajectory>::SharedPtr  pub_display_path_;  // for MoveIt trajectories
   rclcpp::Publisher<moveit_msgs::msg::DisplayRobotState>::SharedPtr pub_robot_state_;   // publish a RobotState message
 
+  // Pointer to the robot model
+  moveit::core::RobotModelConstPtr robot_model_;
+
   // ROS Node
   rclcpp::Node::SharedPtr node_;
-  rclcpp::executors::SingleThreadedExecutor::SharedPtr executor_;
 
   robot_model_loader::RobotModelLoaderPtr rm_loader_;  // so that we can specify our own options
 
@@ -737,9 +733,6 @@ protected:
   // Note: Only allows colors provided in rviz_visual_tools to prevent too many robot state messages from being loaded
   // and ensuring efficiency
   std::map<rviz_visual_tools::Colors, moveit_msgs::msg::DisplayRobotState> display_robot_msgs_;
-
-  // Pointer to the robot model
-  moveit::core::RobotModelConstPtr robot_model_;
 
   // Note: call loadSharedRobotState() before using this
   moveit::core::RobotStatePtr shared_robot_state_;

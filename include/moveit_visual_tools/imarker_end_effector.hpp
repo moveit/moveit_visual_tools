@@ -50,8 +50,8 @@
 #include <moveit/robot_state/robot_state.h>
 
 // this package
-#include <moveit_visual_tools/moveit_visual_tools.h>
-#include <moveit_visual_tools/imarker_robot_state.h>
+#include <moveit_visual_tools/moveit_visual_tools.hpp>
+#include <moveit_visual_tools/imarker_robot_state.hpp>
 
 // C++
 #include <string>
@@ -64,7 +64,11 @@ namespace moveit_visual_tools
 using visualization_msgs::msg::InteractiveMarkerControl;
 using visualization_msgs::msg::InteractiveMarkerFeedback;
 
-typedef std::function<void(const visualization_msgs::msg::InteractiveMarkerFeedback&, const Eigen::Isometry3d&)>
+// typedef std::function<void(const visualization_msgs::msg::InteractiveMarkerFeedback&, const Eigen::Isometry3d&)>
+//     IMarkerCallback;
+
+typedef std::function<void(
+    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr&, const Eigen::Isometry3d)>
     IMarkerCallback;
 
 class IMarkerRobotState;
@@ -87,7 +91,8 @@ public:
 
   bool setPoseFromRobotState();
 
-  void iMarkerCallback(const visualization_msgs::msg::InteractiveMarkerFeedback& feedback);
+  void iMarkerCallback(
+      const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback);
 
   void solveIK(Eigen::Isometry3d& pose);
 
@@ -156,7 +161,7 @@ private:
   // interactive_markers::MenuHandler menu_handler_;
   visualization_msgs::msg::InteractiveMarker int_marker_;
   bool imarker_ready_to_process_ = true;
-  boost::mutex imarker_mutex_;
+  std::mutex imarker_mutex_;
 
   InteractiveMarkerServerPtr imarker_server_;
 

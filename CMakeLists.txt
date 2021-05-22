@@ -29,11 +29,6 @@ find_package(rclcpp_components REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED system)
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-if(NOT DEFINED BUILD_SHARED_LIBS)
-  option(BUILD_SHARED_LIBS "Build dynamically-linked binaries" ON)
-endif()
-
 ## Build
 # include_directories(include)
 # include_directories(SYSTEM
@@ -49,8 +44,11 @@ add_library(${PROJECT_NAME}
 )
 # set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
 # add_dependencies(${PROJECT_NAME} graph_msgs_generate_messages_cpp)
-target_link_libraries(${PROJECT_NAME}
+# message("rviz_visual_tools_LIBRARIES=${rviz_visual_tools_LIBRARIES}")
+target_link_libraries(
+  ${PROJECT_NAME}
   ${Boost_LIBRARIES}
+  ${rviz_visual_tools_LIBRARIES}
 )
 target_include_directories(${PROJECT_NAME}
   PUBLIC
@@ -69,6 +67,9 @@ ament_target_dependencies(${PROJECT_NAME}
   graph_msgs
   std_msgs
   trajectory_msgs
+)
+ament_export_dependencies(
+  rviz_visual_tools
 )
 
 # Demo executable

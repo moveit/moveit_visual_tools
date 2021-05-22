@@ -46,8 +46,8 @@
 #include <tf2_eigen/tf2_eigen.h>
 
 // this package
-#include <moveit_visual_tools/imarker_robot_state.h>
-#include <moveit_visual_tools/imarker_end_effector.h>
+#include <moveit_visual_tools/imarker_robot_state.hpp>
+#include <moveit_visual_tools/imarker_end_effector.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("imarker_end_effector");
 
@@ -144,9 +144,9 @@ bool IMarkerEndEffector::setPoseFromRobotState()
   return true;
 }
 
-void IMarkerEndEffector::iMarkerCallback(const visualization_msgs::msg::InteractiveMarkerFeedback& feedback)
+void IMarkerEndEffector::iMarkerCallback(const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
 {
-  if (feedback.event_type == visualization_msgs::msg::InteractiveMarkerFeedback::MOUSE_UP)
+  if (feedback->event_type == visualization_msgs::msg::InteractiveMarkerFeedback::MOUSE_UP)
   {
     // Save pose to file if its been long enough
     double save_every_sec = 0.1;
@@ -159,7 +159,7 @@ void IMarkerEndEffector::iMarkerCallback(const visualization_msgs::msg::Interact
   }
 
   // Ignore if not pose update
-  if (feedback.event_type != visualization_msgs::msg::InteractiveMarkerFeedback::POSE_UPDATE)
+  if (feedback->event_type != visualization_msgs::msg::InteractiveMarkerFeedback::POSE_UPDATE)
     return;
 
   // Only allow one feedback to be processed at a time
@@ -174,7 +174,7 @@ void IMarkerEndEffector::iMarkerCallback(const visualization_msgs::msg::Interact
 
   // Convert
   Eigen::Isometry3d robot_ee_pose;
-  tf2::fromMsg(feedback.pose, robot_ee_pose);
+  tf2::fromMsg(feedback->pose, robot_ee_pose);
 
   // Update robot
   solveIK(robot_ee_pose);
@@ -299,8 +299,11 @@ void IMarkerEndEffector::make6DofMarker(const geometry_msgs::msg::Pose& pose)
   control.interaction_mode = InteractiveMarkerControl::MOVE_AXIS;
   int_marker_.controls.push_back(control);
 
-  imarker_server_->insert(int_marker_);
-  imarker_server_->setCallback(int_marker_.name, boost::bind(&IMarkerEndEffector::iMarkerCallback, this, _1));
+  imarker_server_->insert(int_marker_,
+                        std::bind(&IMarkerEndEffector::iMarkerCallback, this, std::placeholders::_1));
+  // imarker_server_->insert(int_marker_);
+  // imarker_server_->setCallback(int_marker_.name, std::bind(&IMarkerEndEffector::iMarkerCallback, this, _1));
+
   // menu_handler_.apply(*imarker_server_, int_marker_.name);
 }
 

@@ -41,8 +41,8 @@
 #include <moveit/transforms/transforms.h>
 
 // this package
-#include <moveit_visual_tools/imarker_robot_state.h>
-#include <moveit_visual_tools/imarker_end_effector.h>
+#include <moveit_visual_tools/imarker_robot_state.hpp>
+#include <moveit_visual_tools/imarker_end_effector.hpp>
 
 // C++
 #include <string>
@@ -114,9 +114,8 @@ bool isIKStateValid(const planning_scene::PlanningScene* planning_scene, bool ve
 
 namespace moveit_visual_tools
 {
-IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonitorPtr psm,
-                                     const std::string& imarker_name, std::vector<ArmData> arm_datas,
-                                     rviz_visual_tools::Colors color, const std::string& package_path)
+IMarkerRobotState::IMarkerRobotState(rclcpp::Node::SharedPtr node, planning_scene_monitor::PlanningSceneMonitorPtr psm, const std::string& imarker_name,
+                    std::vector<ArmData> arm_datas, rviz_visual_tools::Colors color, const std::string& package_path)
   : name_(imarker_name)
   , arm_datas_(std::move(arm_datas))
   , psm_(std::move(psm))
@@ -124,8 +123,9 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
   , package_path_(package_path)
 {
   // Load Visual tools with respect to Eigen memory alignment
+  // ! Add node here
   visual_tools_ = std::allocate_shared<moveit_visual_tools::MoveItVisualTools>(
-      Eigen::aligned_allocator<moveit_visual_tools::MoveItVisualTools>(), psm_->getRobotModel()->getModelFrame(), "/" + imarker_name, psm_);
+      Eigen::aligned_allocator<moveit_visual_tools::MoveItVisualTools>(), node, psm_->getRobotModel()->getModelFrame(), "/" + imarker_name, psm_);
 
   // visual_tools_->setPlanningSceneMonitor(psm_);
   visual_tools_->loadRobotStatePub("/imarker_" + imarker_name + "_state");
@@ -136,7 +136,10 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
 
   // Create Marker Server
   const std::string imarker_topic = "/" + imarker_name + "_imarker";
-  imarker_server_ = std::make_shared<interactive_markers::InteractiveMarkerServer>(imarker_topic, "", false);
+  // ! Add node here
+  // imarker_server_ = std::make_shared<interactive_markers::InteractiveMarkerServer>(imarker_topic, "", false);
+  // TODO: Check topic ns or imarker_topic
+  imarker_server_ = std::make_shared<interactive_markers::InteractiveMarkerServer>("", node);
 
   // Get file name
   if (!getFilePath(file_path_, "imarker_" + name_ + ".csv", "config/imarkers"))

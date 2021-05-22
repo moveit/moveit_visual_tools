@@ -35,7 +35,7 @@
 // Author: Dave Coleman
 // Desc:   Simple tools for showing parts of a robot in Rviz, such as the gripper or arm
 
-#include <moveit_visual_tools/moveit_visual_tools.h>
+#include <moveit_visual_tools/moveit_visual_tools.hpp>
 
 // MoveIt Messages
 #include <moveit_msgs/msg/collision_object.hpp>
@@ -77,7 +77,6 @@ MoveItVisualTools::MoveItVisualTools(const rclcpp::Node::SharedPtr& node)
 {
   loadSharedRobotState();
   setBaseFrame(robot_model_->getModelFrame());
-  executor_->add_node(node_);
 }
 
 MoveItVisualTools::MoveItVisualTools(const rclcpp::Node::SharedPtr& node, const std::string& base_frame, const std::string& marker_topic,
@@ -88,7 +87,6 @@ MoveItVisualTools::MoveItVisualTools(const rclcpp::Node::SharedPtr& node, const 
   , planning_scene_topic_(PLANNING_SCENE_TOPIC)
   , node_(node)
 {
-  executor_->add_node(node_);
 }
 
 MoveItVisualTools::MoveItVisualTools(const rclcpp::Node::SharedPtr& node, const std::string& base_frame, const std::string& marker_topic,
@@ -97,7 +95,6 @@ MoveItVisualTools::MoveItVisualTools(const rclcpp::Node::SharedPtr& node, const 
   , robot_model_(std::move(robot_model))
   , node_(node)
 {
-  executor_->add_node(node_);
 }
 
 bool MoveItVisualTools::loadPlanningSceneMonitor()
@@ -112,15 +109,19 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
   RCLCPP_DEBUG_STREAM(LOGGER, "Loading planning scene monitor");
 
   // Create tf transform buffer and listener
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>();
-  std::shared_ptr<tf2_ros::TransformListener> tf_listener = std::make_shared<tf2_ros::TransformListener>(*tf_buffer);
+  // std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>();
+  // std::shared_ptr<tf2_ros::TransformListener> tf_listener = std::make_shared<tf2_ros::TransformListener>(*tf_buffer);
+
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer =
+      std::make_shared<tf2_ros::Buffer>(node_->get_clock(), tf2::durationFromSec(10.0));
+  std::shared_ptr<tf2_ros::TransformListener> tfl = std::make_shared<tf2_ros::TransformListener>(*tf_buffer);
 
   // Regular version b/c the other one causes problems with recognizing end effectors
   psm_.reset(new planning_scene_monitor::PlanningSceneMonitor(node_, ROBOT_DESCRIPTION, tf_buffer, "visual_tools_scene"));
 
-  executor_->spin_once();
+  rclcpp::spin_some(node_);
   rclcpp::sleep_for(std::chrono::milliseconds(100));
-  executor_->spin_once();
+  rclcpp::spin_some(node_);
 
   if (psm_->getPlanningScene())
   {
@@ -356,8 +357,11 @@ void MoveItVisualTools::loadTrajectoryPub(const std::string& display_planned_pat
   RCLCPP_DEBUG_STREAM(LOGGER, "Publishing MoveIt trajectory on topic " << pub_display_path_->get_topic_name());
 
   // Wait for topic to be ready
+  // ! Uncomment this
   if (blocking)
-    waitForSubscriber(pub_display_path_);
+    rviz_visual_tools::RvizVisualTools::waitForSubscriber(pub_display_path_);
+    // waitForSubscriber(pub_display_path_, 5.0);
+
 }
 
 void MoveItVisualTools::loadRobotStatePub(const std::string& robot_state_topic, bool blocking)
@@ -374,8 +378,11 @@ void MoveItVisualTools::loadRobotStatePub(const std::string& robot_state_topic, 
   RCLCPP_DEBUG_STREAM(LOGGER, "Publishing MoveIt robot state on topic " << pub_robot_state_->get_topic_name());
 
   // Wait for topic to be ready
+  // ! Uncomment this
   if (blocking)
-    waitForSubscriber(pub_robot_state_);
+    rviz_visual_tools::RvizVisualTools::waitForSubscriber(pub_robot_state_);
+    // waitForSubscriber(pub_robot_state_, 5.0);
+
 }
 
 bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::msg::Pose& pose, const moveit::core::JointModelGroup* ee_jmg,
@@ -1297,7 +1304,7 @@ void MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::msg::DisplayTra
   // Publish message
   loadTrajectoryPub();  // always call this before publishing
   pub_display_path_->publish(display_trajectory_msg);
-  executor_->spin_once();
+  rclcpp::spin_some(node_);
 }
 
 bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::msg::RobotTrajectory& trajectory_msg,
@@ -1539,7 +1546,7 @@ void MoveItVisualTools::publishRobotState(const moveit_msgs::msg::DisplayRobotSt
 {
   loadRobotStatePub();
   pub_robot_state_->publish(robot_state_msg);
-  executor_->spin_once();
+  rclcpp::spin_some(node_);
 }
 
 bool MoveItVisualTools::hideRobot()
@@ -1616,7 +1623,7 @@ planning_scene_monitor::PlanningSceneMonitorPtr MoveItVisualTools::getPlanningSc
   {
     RCLCPP_INFO_STREAM(LOGGER, "No planning scene passed into moveit_visual_tools, creating one.");
     loadPlanningSceneMonitor();
-    executor_->spin_once();
+    rclcpp::spin_some(node_);
     rclcpp::sleep_for(std::chrono::milliseconds(1000));  // TODO: is this necessary?
   }
   return psm_;
@@ -1677,9 +1684,5 @@ bool MoveItVisualTools::applyVirtualJointTransform(moveit::core::RobotState& rob
   return true;
 }
 
-rclcpp::executors::SingleThreadedExecutor::SharedPtr MoveItVisualTools::getExecutor()
-{
-  return executor_;
-}
 
 }  // namespace moveit_visual_tools

@@ -42,7 +42,7 @@
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
 // For visualizing things in rviz
-#include <moveit_visual_tools/moveit_visual_tools.h>
+#include <moveit_visual_tools/moveit_visual_tools.hpp>
 
 // MoveIt
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
@@ -81,7 +81,7 @@ public:
     jmg_ = robot_state_->getJointModelGroup(PLANNING_GROUP_NAME);
 
     // Allow time to publish messages
-    visual_tools_->getExecutor()->spin_once();
+    rclcpp::spin_some(node);
     rclcpp::sleep_for(std::chrono::milliseconds(100));
 
     // Clear collision objects and markers
@@ -318,7 +318,10 @@ int main(int argc, char** argv)
   moveit_visual_tools::VisualToolsDemo demo(node);
 
   // Asyncspinner ?
-  rclcpp::spin(node);
+  // rclcpp::spin(node);
+  rclcpp::executors::MultiThreadedExecutor executor;
+  executor.add_node(node);
+  std::thread executor_thread(std::bind(&rclcpp::executors::MultiThreadedExecutor::spin, &executor));
 
   RCLCPP_INFO_STREAM(LOGGER, "Shutting down.");
 
