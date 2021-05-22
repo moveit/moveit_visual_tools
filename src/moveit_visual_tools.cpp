@@ -358,8 +358,9 @@ void MoveItVisualTools::loadTrajectoryPub(const std::string& display_planned_pat
 
   // Wait for topic to be ready
   // ! Uncomment this
+  std::string dp_topic_name = pub_display_path_->get_topic_name();
   if (blocking)
-    rviz_visual_tools::RvizVisualTools::waitForSubscriber(pub_display_path_);
+    rviz_visual_tools::RvizVisualTools::waitForSubscriber(dp_topic_name);
     // waitForSubscriber(pub_display_path_, 5.0);
 
 }
@@ -379,8 +380,9 @@ void MoveItVisualTools::loadRobotStatePub(const std::string& robot_state_topic, 
 
   // Wait for topic to be ready
   // ! Uncomment this
+  std::string rb_topic_name = pub_robot_state_->get_topic_name();
   if (blocking)
-    rviz_visual_tools::RvizVisualTools::waitForSubscriber(pub_robot_state_);
+    rviz_visual_tools::RvizVisualTools::waitForSubscriber(rb_topic_name);
     // waitForSubscriber(pub_robot_state_, 5.0);
 
 }

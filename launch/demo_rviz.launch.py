@@ -26,16 +26,16 @@ def generate_launch_description():
     robot_description = {"robot_description": robot_description_config}
 
     robot_description_semantic_config = load_file(
-        "moveit_resources_panda_moveit_config", "config/panda.srdf"
+        "moveit_visual_tools", "resources/rrbot.srdf"
     )
     robot_description_semantic = {
         "robot_description_semantic": robot_description_semantic_config
     }
 
     # Start the demo
-    moveit_visual_tools_node = Node(
+    moveit_visual_tools_demo = Node(
         package="moveit_visual_tools",
-        executable="moveit_visual_tools_node",
+        executable="moveit_visual_tools_demo",
         output="screen",
         parameters=[
             robot_description,
@@ -74,6 +74,6 @@ def generate_launch_description():
         [
             rviz_node,
             static_tf,
-            moveit_visual_tools_node
+            moveit_visual_tools_demo
         ]
     )
