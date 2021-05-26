@@ -351,11 +351,8 @@ void MoveItVisualTools::loadTrajectoryPub(const std::string& display_planned_pat
   RCLCPP_DEBUG_STREAM(LOGGER, "Publishing MoveIt trajectory on topic " << pub_display_path_->get_topic_name());
 
   // Wait for topic to be ready
-  // ! Uncomment this
-  std::string dp_topic_name = pub_display_path_->get_topic_name();
   if (blocking)
     waitForSubscriber(pub_display_path_, 5.0);
-    // rviz_visual_tools::RvizVisualTools::waitForSubscriber(dp_topic_name);
 
 }
 
@@ -373,11 +370,8 @@ void MoveItVisualTools::loadRobotStatePub(const std::string& robot_state_topic, 
   RCLCPP_DEBUG_STREAM(LOGGER, "Publishing MoveIt robot state on topic " << pub_robot_state_->get_topic_name());
 
   // Wait for topic to be ready
-  // ! Uncomment this
-  std::string rb_topic_name = pub_robot_state_->get_topic_name();
   if (blocking)
     waitForSubscriber(pub_robot_state_, 5.0);
-    // rviz_visual_tools::RvizVisualTools::waitForSubscriber(rb_topic_name);
 
 }
 
