@@ -29,22 +29,13 @@ find_package(rclcpp_components REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED system)
 
-## Build
-# include_directories(include)
-# include_directories(SYSTEM
-#   ${catkin_INCLUDE_DIRS}
-#   ${EIGEN3_INCLUDE_DIRS}
-# )
-
 # Visualization Tools Library
 add_library(${PROJECT_NAME}
   src/${PROJECT_NAME}.cpp
   src/imarker_robot_state.cpp
   src/imarker_end_effector.cpp
 )
-# set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
-# add_dependencies(${PROJECT_NAME} graph_msgs_generate_messages_cpp)
-# message("rviz_visual_tools_LIBRARIES=${rviz_visual_tools_LIBRARIES}")
+
 target_link_libraries(
   ${PROJECT_NAME}
   ${Boost_LIBRARIES}
