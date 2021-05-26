@@ -708,6 +708,9 @@ protected:
   // Prevent the planning scene from always auto-pushing, but rather do it manually
   bool mannual_trigger_update_ = false;
 
+  // Pointer to the robot model
+  moveit::core::RobotModelConstPtr robot_model_;
+
   // ROS topic names to use when starting publishers
   std::string robot_state_topic_;
   std::string planning_scene_topic_;
@@ -716,8 +719,6 @@ protected:
   rclcpp::Publisher<moveit_msgs::msg::DisplayTrajectory>::SharedPtr  pub_display_path_;  // for MoveIt trajectories
   rclcpp::Publisher<moveit_msgs::msg::DisplayRobotState>::SharedPtr pub_robot_state_;   // publish a RobotState message
 
-  // Pointer to the robot model
-  moveit::core::RobotModelConstPtr robot_model_;
 
   // ROS Node
   rclcpp::Node::SharedPtr node_;

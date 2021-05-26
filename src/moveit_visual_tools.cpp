@@ -93,6 +93,7 @@ MoveItVisualTools::MoveItVisualTools(const rclcpp::Node::SharedPtr& node, const 
                                      moveit::core::RobotModelConstPtr robot_model)
   : RvizVisualTools::RvizVisualTools(base_frame, marker_topic, node)
   , robot_model_(std::move(robot_model))
+  , planning_scene_topic_(PLANNING_SCENE_TOPIC)
   , node_(node)
 {
 }
@@ -106,7 +107,7 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
                                    "already been set for Visual Tools");
     return false;
   }
-  RCLCPP_DEBUG_STREAM(LOGGER, "Loading planning scene monitor");
+  RCLCPP_INFO_STREAM(LOGGER, "Loading planning scene monitor");
 
   // Create tf transform buffer and listener
   // std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>();
@@ -129,10 +130,9 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
     // psm_->startWorldGeometryMonitor();
     // psm_->startSceneMonitor("/move_group/monitored_planning_scene");
     // psm_->startStateMonitor("/joint_states", "/attached_collision_object");
-
     psm_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
                                        planning_scene_topic_);
-    RCLCPP_DEBUG_STREAM(LOGGER, "Publishing planning scene on " << planning_scene_topic_);
+    RCLCPP_INFO_STREAM(LOGGER, "Publishing planning scene on " << planning_scene_topic_);
 
     planning_scene_monitor::LockedPlanningSceneRW planning_scene(psm_);
     planning_scene->setName("visual_tools_scene");
@@ -157,10 +157,7 @@ bool MoveItVisualTools::processCollisionObjectMsg(const moveit_msgs::msg::Collis
     scene->setObjectColor(msg.id, getColor(color));
   }
   // Trigger an update
-  if (!mannual_trigger_update_)
-  {
-    triggerPlanningSceneUpdate();
-  }
+  triggerPlanningSceneUpdate();
 
   return true;
 }
@@ -201,8 +198,6 @@ bool MoveItVisualTools::moveCollisionObject(const geometry_msgs::msg::Pose& pose
   collision_obj.primitive_poses.resize(1);
   collision_obj.primitive_poses[0] = pose;
 
-  // RCLCPP_INFO_STREAM(LOGGER,"CollisionObject: \n " << collision_obj);
-  // RCLCPP_DEBUG_STREAM(LOGGER,"Published collision object " << name);
   return processCollisionObjectMsg(collision_obj, color);
 }
 
@@ -257,7 +252,7 @@ moveit::core::RobotModelConstPtr MoveItVisualTools::getRobotModel()
 }
 
 bool MoveItVisualTools::loadEEMarker(const moveit::core::JointModelGroup* ee_jmg,
-                                     const std::vector<double>& ee_joint_pos)
+                                    const std::vector<double>& ee_joint_pos)
 {
   // Get joint state group
   if (ee_jmg == nullptr)  // make sure EE_GROUP exists
@@ -304,7 +299,7 @@ bool MoveItVisualTools::loadEEMarker(const moveit::core::JointModelGroup* ee_jmg
 
   // Get EE link markers for Rviz
   shared_robot_state_->getRobotMarkers(ee_markers_map_[ee_jmg], ee_link_names, marker_color, ee_jmg->getName(),
-                                       rclcpp::Duration(0)); // TODO: Is this true?
+                                       rclcpp::Duration(0));
   RCLCPP_DEBUG_STREAM(LOGGER, "Number of rviz markers in end effector: " << ee_markers_map_[ee_jmg].markers.size());
 
   // Error check
@@ -316,7 +311,6 @@ bool MoveItVisualTools::loadEEMarker(const moveit::core::JointModelGroup* ee_jmg
   }
 
   const std::string& ee_parent_link_name = ee_jmg->getEndEffectorParentGroup().second;
-  // RCLCPP_DEBUG_STREAM(LOGGER,"EE Parent link: " << ee_parent_link_name);
   const moveit::core::LinkModel* ee_parent_link = robot_model_->getLinkModel(ee_parent_link_name);
 
   Eigen::Isometry3d ee_marker_global_transform = shared_robot_state_->getGlobalLinkTransform(ee_parent_link);

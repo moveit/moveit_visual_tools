@@ -37,6 +37,8 @@ def generate_launch_description():
         package="moveit_visual_tools",
         executable="moveit_visual_tools_demo",
         output="screen",
+        # prefix=['xterm -e gdb -ex run --arsgs'],
+        # prefix=['xterm -e'],
         parameters=[
             robot_description,
             robot_description_semantic,
@@ -44,7 +46,7 @@ def generate_launch_description():
     )
 
     # RViz
-    # TODO: Config this file
+    # TODO: Configure this file
     rviz_config_file = (
         get_package_share_directory("moveit_visual_tools") + "/launch/demo.rviz"
     )
@@ -53,7 +55,7 @@ def generate_launch_description():
         executable="rviz2",
         name="rviz2",
         output="log",
-        # arguments=["-d", rviz_config_file],
+        arguments=["-d", rviz_config_file],
         parameters=[
             robot_description,
             robot_description_semantic,
