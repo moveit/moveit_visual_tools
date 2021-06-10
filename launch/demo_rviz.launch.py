@@ -14,15 +14,17 @@ def load_file(package_name, file_path):
     except EnvironmentError:  # parent of IOError, OSError *and* WindowsError where available
         return None
 
+
 def generate_launch_description():
 
-    robot_description_config = open(os.path.join(
+    robot_description_config = open(
+        os.path.join(
             get_package_share_directory("moveit_visual_tools"),
             "resources",
             "rrbot.urdf",
         )
     ).read()
-    
+
     robot_description = {"robot_description": robot_description_config}
 
     robot_description_semantic_config = load_file(
@@ -71,11 +73,4 @@ def generate_launch_description():
         arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "base"],
     )
 
-
-    return LaunchDescription(
-        [
-            rviz_node,
-            static_tf,
-            moveit_visual_tools_demo
-        ]
-    )
+    return LaunchDescription([rviz_node, static_tf, moveit_visual_tools_demo])
