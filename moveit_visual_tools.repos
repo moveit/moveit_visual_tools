@@ -1,5 +1,9 @@
 repositories:
   rviz_visual_tools:
     type: git
-    url: https://github.com/PickNikRobotics/rviz_visual_tools.git
+    url: https://github.com/PickNikRobotics/rviz_visual_tools
     version: foxy-devel
+  graph_msgs:
+    type: git
+    url: https://github.com/vatanaksoytezer/graph_msgs
+    version: ros2
