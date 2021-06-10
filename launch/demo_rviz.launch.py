@@ -39,8 +39,6 @@ def generate_launch_description():
         package="moveit_visual_tools",
         executable="moveit_visual_tools_demo",
         output="screen",
-        # prefix=['xterm -e gdb -ex run --arsgs'],
-        # prefix=['xterm -e'],
         parameters=[
             robot_description,
             robot_description_semantic,
