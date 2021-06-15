@@ -45,8 +45,6 @@
 
 // MoveIt
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-// #include <moveit/macros/deprecation.h>
-// #include <rviz_visual_tools/deprecation.h>
 
 // MoveIt Messages
 #include <moveit_msgs/msg/grasp.hpp>

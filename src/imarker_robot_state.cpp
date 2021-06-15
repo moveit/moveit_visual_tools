@@ -41,8 +41,8 @@
 #include <moveit/transforms/transforms.h>
 
 // this package
-#include <moveit_visual_tools/imarker_robot_state.hpp>
-#include <moveit_visual_tools/imarker_end_effector.hpp>
+#include <moveit_visual_tools/imarker_robot_state.h>
+#include <moveit_visual_tools/imarker_end_effector.h>
 
 // C++
 #include <string>
@@ -123,22 +123,17 @@ IMarkerRobotState::IMarkerRobotState(rclcpp::Node::SharedPtr node, planning_scen
   , package_path_(package_path)
 {
   // Load Visual tools with respect to Eigen memory alignment
-  // ! Add node here
   visual_tools_ = std::allocate_shared<moveit_visual_tools::MoveItVisualTools>(
-      Eigen::aligned_allocator<moveit_visual_tools::MoveItVisualTools>(), node, psm_->getRobotModel()->getModelFrame(), "/" + imarker_name, psm_);
+      Eigen::aligned_allocator<moveit_visual_tools::MoveItVisualTools>(), node, psm_->getRobotModel()->getModelFrame(), imarker_name, psm_);
 
   // visual_tools_->setPlanningSceneMonitor(psm_);
-  visual_tools_->loadRobotStatePub("/imarker_" + imarker_name + "_state");
+  visual_tools_->loadRobotStatePub("imarker_" + imarker_name + "_state");
 
   // Load robot state
   imarker_state_ = std::make_shared<moveit::core::RobotState>(psm_->getRobotModel());
   imarker_state_->setToDefaultValues();
 
   // Create Marker Server
-  const std::string imarker_topic = "/" + imarker_name + "_imarker";
-  // ! Add node here
-  // imarker_server_ = std::make_shared<interactive_markers::InteractiveMarkerServer>(imarker_topic, "", false);
-  // TODO: Check topic ns or imarker_topic
   imarker_server_ = std::make_shared<interactive_markers::InteractiveMarkerServer>("", node);
 
   // Get file name

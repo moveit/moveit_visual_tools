@@ -35,7 +35,7 @@
 // Author: Dave Coleman
 // Desc:   Simple tools for showing parts of a robot in Rviz, such as the gripper or arm
 
-#include <moveit_visual_tools/moveit_visual_tools.hpp>
+#include <moveit_visual_tools/moveit_visual_tools.h>
 
 // MoveIt Messages
 #include <moveit_msgs/msg/collision_object.hpp>
@@ -65,10 +65,8 @@
 #include <iomanip>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_visual_tools");
-
 namespace moveit_visual_tools
 {
-
 MoveItVisualTools::MoveItVisualTools(const rclcpp::Node::SharedPtr& node)
   : RvizVisualTools("", rviz_visual_tools::RVIZ_MARKER_TOPIC, node)
   , robot_state_topic_(DISPLAY_ROBOT_STATE_TOPIC)
@@ -109,20 +107,14 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
   }
   RCLCPP_INFO_STREAM(LOGGER, "Loading planning scene monitor");
 
+  // TODO: Remove listener when https://github.com/ros-planning/moveit2/pull/310/ is merged
   // Create tf transform buffer and listener
-  // std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>();
-  // std::shared_ptr<tf2_ros::TransformListener> tf_listener = std::make_shared<tf2_ros::TransformListener>(*tf_buffer);
-
   std::shared_ptr<tf2_ros::Buffer> tf_buffer =
       std::make_shared<tf2_ros::Buffer>(node_->get_clock(), tf2::durationFromSec(10.0));
   std::shared_ptr<tf2_ros::TransformListener> tfl = std::make_shared<tf2_ros::TransformListener>(*tf_buffer);
 
   // Regular version b/c the other one causes problems with recognizing end effectors
   psm_.reset(new planning_scene_monitor::PlanningSceneMonitor(node_, ROBOT_DESCRIPTION, tf_buffer, "visual_tools_scene"));
-
-  rclcpp::spin_some(node_);
-  rclcpp::sleep_for(std::chrono::milliseconds(100));
-  rclcpp::spin_some(node_);
 
   if (psm_->getPlanningScene())
   {
@@ -190,7 +182,7 @@ bool MoveItVisualTools::moveCollisionObject(const geometry_msgs::msg::Pose& pose
                                             const rviz_visual_tools::Colors& color)
 {
   moveit_msgs::msg::CollisionObject collision_obj;
-  collision_obj.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
+  collision_obj.header.stamp = node_->now();
   collision_obj.header.frame_id = base_frame_;
   collision_obj.id = name;
   collision_obj.operation = moveit_msgs::msg::CollisionObject::MOVE;
@@ -352,7 +344,7 @@ void MoveItVisualTools::loadTrajectoryPub(const std::string& display_planned_pat
 
   // Wait for topic to be ready
   if (blocking)
-    waitForSubscriber(pub_display_path_, 5.0);
+    waitForSubscriber(pub_display_path_, 5.0 /* seconds */);
 
 }
 
@@ -371,7 +363,7 @@ void MoveItVisualTools::loadRobotStatePub(const std::string& robot_state_topic, 
 
   // Wait for topic to be ready
   if (blocking)
-    waitForSubscriber(pub_robot_state_, 5.0);
+    waitForSubscriber(pub_robot_state_, 5.0 /* seconds */);
 
 }
 
@@ -401,7 +393,7 @@ bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::msg::Pose& pose, c
       break;
 
     // Header
-    ee_markers_map_[ee_jmg].markers[i].header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
+    ee_markers_map_[ee_jmg].markers[i].header.stamp = node_->now();
 
     // Namespace
     ee_markers_map_[ee_jmg].markers[i].ns = ns;
@@ -575,7 +567,7 @@ bool MoveItVisualTools::publishIKSolutions(const std::vector<trajectory_msgs::ms
   for (std::size_t i = 0; i < ik_solutions.size(); ++i)
   {
     trajectory_pt_timed = ik_solutions[i];
-    trajectory_pt_timed.time_from_start = rclcpp::Duration(running_time);
+    trajectory_pt_timed.time_from_start = rclcpp::Duration::from_seconds(running_time);
     trajectory_msg.joint_trajectory.points.push_back(trajectory_pt_timed);
 
     running_time += display_time;
@@ -604,7 +596,7 @@ bool MoveItVisualTools::cleanupCO(const std::string& name)
 {
   // Clean up old collision objects
   moveit_msgs::msg::CollisionObject co;
-  co.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
+  co.header.stamp = node_->now();
   co.header.frame_id = base_frame_;
   co.id = name;
   co.operation = moveit_msgs::msg::CollisionObject::REMOVE;
@@ -616,7 +608,7 @@ bool MoveItVisualTools::cleanupACO(const std::string& /*name*/)
 {
   // Clean up old attached collision object
   moveit_msgs::msg::AttachedCollisionObject aco;
-  aco.object.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
+  aco.object.header.stamp = node_->now();
   aco.object.header.frame_id = base_frame_;
 
   // aco.object.id = name;
@@ -629,7 +621,7 @@ bool MoveItVisualTools::attachCO(const std::string& name, const std::string& ee_
 {
   // Attach a collision object
   moveit_msgs::msg::AttachedCollisionObject aco;
-  aco.object.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
+  aco.object.header.stamp = node_->now();
   aco.object.header.frame_id = base_frame_;
 
   aco.object.id = name;
@@ -645,7 +637,7 @@ bool MoveItVisualTools::publishCollisionBlock(const geometry_msgs::msg::Pose& bl
                                               double block_size, const rviz_visual_tools::Colors& color)
 {
   moveit_msgs::msg::CollisionObject collision_obj;
-  collision_obj.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
+  collision_obj.header.stamp = node_->now();
   collision_obj.header.frame_id = base_frame_;
   collision_obj.id = name;
   collision_obj.operation = moveit_msgs::msg::CollisionObject::ADD;
@@ -675,7 +667,7 @@ bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::msg::Point& 
                                                const std::string& name, const rviz_visual_tools::Colors& color)
 {
   moveit_msgs::msg::CollisionObject collision_obj;
-  collision_obj.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
+  collision_obj.header.stamp = node_->now();
   collision_obj.header.frame_id = base_frame_;
   collision_obj.id = name;
   collision_obj.operation = moveit_msgs::msg::CollisionObject::ADD;
@@ -719,7 +711,7 @@ bool MoveItVisualTools::publishCollisionCuboid(const geometry_msgs::msg::Pose& p
                                                const rviz_visual_tools::Colors& color)
 {
   moveit_msgs::msg::CollisionObject collision_obj;
-  collision_obj.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
+  collision_obj.header.stamp = node_->now();
   collision_obj.header.frame_id = base_frame_;
   collision_obj.id = name;
   collision_obj.operation = moveit_msgs::msg::CollisionObject::ADD;
@@ -805,7 +797,7 @@ bool MoveItVisualTools::publishCollisionCylinder(const geometry_msgs::msg::Pose&
                                                  double radius, double height, const rviz_visual_tools::Colors& color)
 {
   moveit_msgs::msg::CollisionObject collision_obj;
-  collision_obj.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
+  collision_obj.header.stamp = node_->now();
   collision_obj.header.frame_id = base_frame_;
   collision_obj.id = object_name;
   collision_obj.operation = moveit_msgs::msg::CollisionObject::ADD;
@@ -857,7 +849,7 @@ bool MoveItVisualTools::publishCollisionMesh(const geometry_msgs::msg::Pose& obj
 {
   // Create collision message
   moveit_msgs::msg::CollisionObject collision_obj;
-  collision_obj.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
+  collision_obj.header.stamp = node_->now();
   collision_obj.header.frame_id = base_frame_;
   collision_obj.id = object_name;
   collision_obj.operation = moveit_msgs::msg::CollisionObject::ADD;
@@ -876,7 +868,7 @@ bool MoveItVisualTools::publishCollisionGraph(const graph_msgs::msg::GeometryGra
 
   // The graph is one collision object with many primitives
   moveit_msgs::msg::CollisionObject collision_obj;
-  collision_obj.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
+  collision_obj.header.stamp = node_->now();
   collision_obj.header.frame_id = base_frame_;
   collision_obj.id = object_name;
   collision_obj.operation = moveit_msgs::msg::CollisionObject::ADD;
@@ -943,7 +935,7 @@ bool MoveItVisualTools::publishCollisionGraph(const graph_msgs::msg::GeometryGra
 void MoveItVisualTools::getCollisionWallMsg(double x, double y, double z, double angle, double width, double height,
                                             const std::string& name, moveit_msgs::msg::CollisionObject& collision_obj)
 {
-  collision_obj.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
+  collision_obj.header.stamp = node_->now();
   collision_obj.header.frame_id = base_frame_;
   collision_obj.operation = moveit_msgs::msg::CollisionObject::ADD;
   collision_obj.primitives.resize(1);
@@ -1014,7 +1006,7 @@ bool MoveItVisualTools::publishCollisionTable(double x, double y, double z, doub
   table_pose.orientation.w = quat.w();
 
   moveit_msgs::msg::CollisionObject collision_obj;
-  collision_obj.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
+  collision_obj.header.stamp = node_->now();
   collision_obj.header.frame_id = base_frame_;
   collision_obj.id = name;
   collision_obj.operation = moveit_msgs::msg::CollisionObject::ADD;
@@ -1613,8 +1605,6 @@ planning_scene_monitor::PlanningSceneMonitorPtr MoveItVisualTools::getPlanningSc
   {
     RCLCPP_INFO_STREAM(LOGGER, "No planning scene passed into moveit_visual_tools, creating one.");
     loadPlanningSceneMonitor();
-    rclcpp::spin_some(node_);
-    rclcpp::sleep_for(std::chrono::milliseconds(1000));  // TODO: is this necessary?
   }
   return psm_;
 }

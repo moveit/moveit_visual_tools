@@ -50,8 +50,8 @@
 #include <moveit/robot_state/robot_state.h>
 
 // this package
-#include <moveit_visual_tools/moveit_visual_tools.hpp>
-#include <moveit_visual_tools/imarker_robot_state.hpp>
+#include <moveit_visual_tools/moveit_visual_tools.h>
+#include <moveit_visual_tools/imarker_robot_state.h>
 
 // C++
 #include <string>
@@ -64,11 +64,8 @@ namespace moveit_visual_tools
 using visualization_msgs::msg::InteractiveMarkerControl;
 using visualization_msgs::msg::InteractiveMarkerFeedback;
 
-// typedef std::function<void(const visualization_msgs::msg::InteractiveMarkerFeedback&, const Eigen::Isometry3d&)>
-//     IMarkerCallback;
-
 typedef std::function<void(
-    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr&, const Eigen::Isometry3d)>
+    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr&, const Eigen::Isometry3d&)>
     IMarkerCallback;
 
 class IMarkerRobotState;
@@ -121,7 +118,7 @@ public:
     use_collision_checking_ = use_collision_checking;
   }
 
-  void setIMarkerCallback(IMarkerCallback callback)
+  void setIMarkerCallback(const IMarkerCallback& callback)
   {
     imarker_callback_ = std::move(callback);
   }

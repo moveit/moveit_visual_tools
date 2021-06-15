@@ -1,17 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(moveit_visual_tools)
 
-# Default to C++14
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-W -Wall -Wextra
-    -Wwrite-strings -Wunreachable-code -Wpointer-arith
-    -Winit-self -Wredundant-decls
-    -Wno-unused-parameter -Wno-unused-function)
-endif()
+find_package(moveit_common REQUIRED)
+moveit_package()
 
 # Load  all dependencies required for this package
 find_package(rviz_visual_tools REQUIRED)
@@ -29,6 +20,21 @@ find_package(rclcpp_components REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED system)
 
+set(THIS_PACKAGE_INCLUDE_DEPENDS
+  Boost
+  geometry_msgs
+  graph_msgs
+  moveit_core
+  moveit_ros_planning
+  rclcpp
+  rviz_visual_tools
+  std_msgs
+  tf2_eigen
+  tf2_ros
+  trajectory_msgs
+  visualization_msgs
+)
+
 # Visualization Tools Library
 add_library(${PROJECT_NAME}
   src/${PROJECT_NAME}.cpp
@@ -44,23 +50,20 @@ target_link_libraries(
 target_include_directories(${PROJECT_NAME}
   PUBLIC
     include
-    ${Boost_INCLUDE_DIRS}
 )
 ament_target_dependencies(${PROJECT_NAME}
+  Boost
+  geometry_msgs
+  graph_msgs
+  moveit_core
+  moveit_ros_planning
   rclcpp
+  rviz_visual_tools
+  std_msgs
   tf2_eigen
   tf2_ros
-  rviz_visual_tools
-  moveit_ros_planning
-  moveit_core
-  geometry_msgs
-  visualization_msgs
-  graph_msgs
-  std_msgs
   trajectory_msgs
-)
-ament_export_dependencies(
-  rviz_visual_tools
+  visualization_msgs
 )
 
 # Demo executable
@@ -71,17 +74,18 @@ target_link_libraries(${PROJECT_NAME}_demo
   ${PROJECT_NAME}
 )
 ament_target_dependencies(${PROJECT_NAME}_demo
+  Boost
+  geometry_msgs
+  graph_msgs
+  moveit_core
+  moveit_ros_planning
   rclcpp
+  rviz_visual_tools
+  std_msgs
   tf2_eigen
   tf2_ros
-  rviz_visual_tools
-  moveit_ros_planning
-  moveit_core
-  geometry_msgs
-  visualization_msgs
-  graph_msgs
-  std_msgs
   trajectory_msgs
+  visualization_msgs
 )
 
 
@@ -94,10 +98,10 @@ install(
   TARGETS
     ${PROJECT_NAME}
   EXPORT
-    ${PROJECT_NAME}
+    export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
 # Install header files
@@ -112,5 +116,20 @@ install(TARGETS ${PROJECT_NAME}_demo
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
 )
+
+# Exports
+# ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_dependencies(
+  ${THIS_PACKAGE_INCLUDE_DEPENDS}
+)
+
+#############
+## Testing ##
+#############
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
 
 ament_package()

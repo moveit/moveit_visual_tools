@@ -42,7 +42,7 @@
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
 // For visualizing things in rviz
-#include <moveit_visual_tools/moveit_visual_tools.hpp>
+#include <moveit_visual_tools/moveit_visual_tools.h>
 
 // MoveIt
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
@@ -103,7 +103,6 @@ public:
 
   void publishLabelHelper(const Eigen::Isometry3d& pose, const std::string& label)
   {
-    // TODO: Fix labels not pusblisshing
     Eigen::Isometry3d pose_copy = pose;
     pose_copy.translation().x() -= 0.2;
     visual_tools_->publishText(pose_copy, label, rvt::WHITE, rvt::XLARGE, false);

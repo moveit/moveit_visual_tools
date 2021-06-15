@@ -46,8 +46,8 @@
 #include <tf2_eigen/tf2_eigen.h>
 
 // this package
-#include <moveit_visual_tools/imarker_robot_state.hpp>
-#include <moveit_visual_tools/imarker_end_effector.hpp>
+#include <moveit_visual_tools/imarker_robot_state.h>
+#include <moveit_visual_tools/imarker_end_effector.h>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("imarker_end_effector");
 
@@ -301,8 +301,6 @@ void IMarkerEndEffector::make6DofMarker(const geometry_msgs::msg::Pose& pose)
 
   imarker_server_->insert(int_marker_,
                         std::bind(&IMarkerEndEffector::iMarkerCallback, this, std::placeholders::_1));
-  // imarker_server_->insert(int_marker_);
-  // imarker_server_->setCallback(int_marker_.name, std::bind(&IMarkerEndEffector::iMarkerCallback, this, _1));
 
   // menu_handler_.apply(*imarker_server_, int_marker_.name);
 }
