@@ -48,23 +48,10 @@ target_link_libraries(
   ${rviz_visual_tools_LIBRARIES}
 )
 target_include_directories(${PROJECT_NAME}
-  PUBLIC
-    include
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PUBLIC $<INSTALL_INTERFACE:include>
 )
-ament_target_dependencies(${PROJECT_NAME}
-  Boost
-  geometry_msgs
-  graph_msgs
-  moveit_core
-  moveit_ros_planning
-  rclcpp
-  rviz_visual_tools
-  std_msgs
-  tf2_eigen
-  tf2_ros
-  trajectory_msgs
-  visualization_msgs
-)
+ament_target_dependencies(${PROJECT_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Demo executable
 add_executable(${PROJECT_NAME}_demo
@@ -73,21 +60,12 @@ add_executable(${PROJECT_NAME}_demo
 target_link_libraries(${PROJECT_NAME}_demo
   ${PROJECT_NAME}
 )
-ament_target_dependencies(${PROJECT_NAME}_demo
-  Boost
-  geometry_msgs
-  graph_msgs
-  moveit_core
-  moveit_ros_planning
-  rclcpp
-  rviz_visual_tools
-  std_msgs
-  tf2_eigen
-  tf2_ros
-  trajectory_msgs
-  visualization_msgs
-)
+ament_target_dependencies(${PROJECT_NAME}_demo ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
+
+# Exports
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 #############
 ## Install ##
@@ -115,12 +93,6 @@ install(TARGETS ${PROJECT_NAME}_demo
   RUNTIME DESTINATION lib/${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
-)
-
-# Exports
-# ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
-ament_export_dependencies(
-  ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 
 #############
