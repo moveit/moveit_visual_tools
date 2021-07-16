@@ -81,7 +81,7 @@ install(
 )
 
 # Install header files
-install(DIRECTORY include DESTINATION include)
+install(DIRECTORY include/ DESTINATION include)
 
 # Install shared resources
 install(DIRECTORY launch resources DESTINATION share/${PROJECT_NAME})
