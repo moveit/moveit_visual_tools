@@ -1248,6 +1248,9 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
     ROS_WARN_STREAM_NAMED(LOGNAME, "Unable to publish trajectory path because trajectory has zero points");
     return false;
   }
+  
+  // Ensure that the robot name is available.
+  loadSharedRobotState();
 
   // Create the message
   moveit_msgs::DisplayTrajectory display_trajectory_msg;
