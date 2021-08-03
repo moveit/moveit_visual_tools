@@ -123,20 +123,21 @@ IMarkerRobotState::IMarkerRobotState(rclcpp::Node::SharedPtr node, planning_scen
   , color_(color)
   , package_path_(package_path)
 {
+  const std::string node_namespace(node->get_namespace());
   // Load Visual tools with respect to Eigen memory alignment
   visual_tools_ = std::allocate_shared<moveit_visual_tools::MoveItVisualTools>(
       Eigen::aligned_allocator<moveit_visual_tools::MoveItVisualTools>(), node, psm_->getRobotModel()->getModelFrame(),
       imarker_name, psm_);
 
   // visual_tools_->setPlanningSceneMonitor(psm_);
-  visual_tools_->loadRobotStatePub("imarker_" + imarker_name + "_state");
+  visual_tools_->loadRobotStatePub(node_namespace + "imarker_" + imarker_name + "_state");
 
   // Load robot state
   imarker_state_ = std::make_shared<moveit::core::RobotState>(psm_->getRobotModel());
   imarker_state_->setToDefaultValues();
 
   // Create Marker Server
-  imarker_server_ = std::make_shared<interactive_markers::InteractiveMarkerServer>("", node);
+  imarker_server_ = std::make_shared<interactive_markers::InteractiveMarkerServer>(node_namespace, node);
 
   // Get file name
   if (!getFilePath(file_path_, "imarker_" + name_ + ".csv", "config/imarkers"))
