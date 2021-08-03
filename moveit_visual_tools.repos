@@ -5,5 +5,5 @@ repositories:
     version: foxy-devel
   graph_msgs:
     type: git
-    url: https://github.com/vatanaksoytezer/graph_msgs
+    url: https://github.com/PickNikRobotics/graph_msgs
     version: ros2

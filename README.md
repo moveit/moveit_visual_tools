@@ -76,7 +76,7 @@ moveit_visual_tools::MoveItVisualToolsPtr visual_tools_;
 
 In your class' constructor add:
 ```
-visual_tools_.reset(new moveit_visual_tools::MoveItVisualTools(node_, "world", "/moveit_visual_tools"));
+visual_tools_.reset(std::make_shared<moveit_visual_tools::MoveItVisualTools>(node_, "world", "/moveit_visual_tools"));
 ```
 
 ### Collision Object Functions
