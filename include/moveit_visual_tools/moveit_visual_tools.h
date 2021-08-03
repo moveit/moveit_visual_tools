@@ -420,8 +420,9 @@ public:
    */
   bool publishCollisionCylinder(const Eigen::Isometry3d& object_pose, const std::string& object_name, double radius,
                                 double height, const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
-  bool publishCollisionCylinder(const geometry_msgs::msg::Pose& object_pose, const std::string& object_name, double radius,
-                                double height, const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
+  bool publishCollisionCylinder(const geometry_msgs::msg::Pose& object_pose, const std::string& object_name,
+                                double radius, double height,
+                                const rviz_visual_tools::Colors& color = rviz_visual_tools::GREEN);
 
   /**
    * \brief Create a collision object using a mesh
@@ -714,9 +715,8 @@ protected:
   std::string planning_scene_topic_;
 
   // ROS publishers
-  rclcpp::Publisher<moveit_msgs::msg::DisplayTrajectory>::SharedPtr  pub_display_path_;  // for MoveIt trajectories
+  rclcpp::Publisher<moveit_msgs::msg::DisplayTrajectory>::SharedPtr pub_display_path_;  // for MoveIt trajectories
   rclcpp::Publisher<moveit_msgs::msg::DisplayRobotState>::SharedPtr pub_robot_state_;   // publish a RobotState message
-
 
   // ROS Node
   rclcpp::Node::SharedPtr node_;

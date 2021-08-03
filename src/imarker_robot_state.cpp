@@ -114,8 +114,9 @@ bool isIKStateValid(const planning_scene::PlanningScene* planning_scene, bool ve
 
 namespace moveit_visual_tools
 {
-IMarkerRobotState::IMarkerRobotState(rclcpp::Node::SharedPtr node, planning_scene_monitor::PlanningSceneMonitorPtr psm, const std::string& imarker_name,
-                    std::vector<ArmData> arm_datas, rviz_visual_tools::Colors color, const std::string& package_path)
+IMarkerRobotState::IMarkerRobotState(rclcpp::Node::SharedPtr node, planning_scene_monitor::PlanningSceneMonitorPtr psm,
+                                     const std::string& imarker_name, std::vector<ArmData> arm_datas,
+                                     rviz_visual_tools::Colors color, const std::string& package_path)
   : name_(imarker_name)
   , arm_datas_(std::move(arm_datas))
   , psm_(std::move(psm))
@@ -124,7 +125,8 @@ IMarkerRobotState::IMarkerRobotState(rclcpp::Node::SharedPtr node, planning_scen
 {
   // Load Visual tools with respect to Eigen memory alignment
   visual_tools_ = std::allocate_shared<moveit_visual_tools::MoveItVisualTools>(
-      Eigen::aligned_allocator<moveit_visual_tools::MoveItVisualTools>(), node, psm_->getRobotModel()->getModelFrame(), imarker_name, psm_);
+      Eigen::aligned_allocator<moveit_visual_tools::MoveItVisualTools>(), node, psm_->getRobotModel()->getModelFrame(),
+      imarker_name, psm_);
 
   // visual_tools_->setPlanningSceneMonitor(psm_);
   visual_tools_->loadRobotStatePub("imarker_" + imarker_name + "_state");
@@ -281,7 +283,7 @@ bool IMarkerRobotState::setToRandomState(double clearance)
   }
 
   RCLCPP_ERROR_STREAM(LOGGER,
-                         "Unable to find valid random robot state for imarker after " << MAX_ATTEMPTS << " attempts");
+                      "Unable to find valid random robot state for imarker after " << MAX_ATTEMPTS << " attempts");
 
   return false;
 }

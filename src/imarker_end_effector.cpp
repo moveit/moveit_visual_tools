@@ -126,8 +126,8 @@ IMarkerEndEffector::IMarkerEndEffector(IMarkerRobotState* imarker_parent, const 
   // Create imarker
   initializeInteractiveMarkers();
 
-  RCLCPP_INFO_STREAM(LOGGER, "IMarkerEndEffector " << name_ << " tracking ee link '"
-                                                      << arm_data_.ee_link_->getName() << "' ready.");
+  RCLCPP_INFO_STREAM(LOGGER, "IMarkerEndEffector " << name_ << " tracking ee link '" << arm_data_.ee_link_->getName()
+                                                   << "' ready.");
 }
 
 void IMarkerEndEffector::getPose(Eigen::Isometry3d& pose)
@@ -144,7 +144,8 @@ bool IMarkerEndEffector::setPoseFromRobotState()
   return true;
 }
 
-void IMarkerEndEffector::iMarkerCallback(const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
+void IMarkerEndEffector::iMarkerCallback(
+    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
 {
   if (feedback->event_type == visualization_msgs::msg::InteractiveMarkerFeedback::MOUSE_UP)
   {
@@ -299,8 +300,7 @@ void IMarkerEndEffector::make6DofMarker(const geometry_msgs::msg::Pose& pose)
   control.interaction_mode = InteractiveMarkerControl::MOVE_AXIS;
   int_marker_.controls.push_back(control);
 
-  imarker_server_->insert(int_marker_,
-                        std::bind(&IMarkerEndEffector::iMarkerCallback, this, std::placeholders::_1));
+  imarker_server_->insert(int_marker_, std::bind(&IMarkerEndEffector::iMarkerCallback, this, std::placeholders::_1));
 
   // menu_handler_.apply(*imarker_server_, int_marker_.name);
 }

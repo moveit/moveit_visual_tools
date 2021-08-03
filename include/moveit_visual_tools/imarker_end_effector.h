@@ -64,8 +64,8 @@ namespace moveit_visual_tools
 using visualization_msgs::msg::InteractiveMarkerControl;
 using visualization_msgs::msg::InteractiveMarkerFeedback;
 
-typedef std::function<void(
-    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr&, const Eigen::Isometry3d&)>
+typedef std::function<void(const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr&,
+                           const Eigen::Isometry3d&)>
     IMarkerCallback;
 
 class IMarkerRobotState;
@@ -88,8 +88,7 @@ public:
 
   bool setPoseFromRobotState();
 
-  void iMarkerCallback(
-      const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback);
+  void iMarkerCallback(const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback);
 
   void solveIK(Eigen::Isometry3d& pose);
 

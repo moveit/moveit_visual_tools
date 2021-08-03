@@ -57,8 +57,8 @@ namespace moveit_visual_tools
 using visualization_msgs::msg::InteractiveMarkerControl;
 using visualization_msgs::msg::InteractiveMarkerFeedback;
 
-typedef std::function<void(
-    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr&, const Eigen::Isometry3d&)>
+typedef std::function<void(const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr&,
+                           const Eigen::Isometry3d&)>
     IMarkerCallback;
 
 typedef std::shared_ptr<interactive_markers::InteractiveMarkerServer> InteractiveMarkerServerPtr;
@@ -86,8 +86,9 @@ public:
   /**
    * \brief Constructor
    */
-  IMarkerRobotState(rclcpp::Node::SharedPtr node, planning_scene_monitor::PlanningSceneMonitorPtr psm, const std::string& imarker_name,
-                    std::vector<ArmData> arm_datas, rviz_visual_tools::Colors color, const std::string& package_path);
+  IMarkerRobotState(rclcpp::Node::SharedPtr node, planning_scene_monitor::PlanningSceneMonitorPtr psm,
+                    const std::string& imarker_name, std::vector<ArmData> arm_datas, rviz_visual_tools::Colors color,
+                    const std::string& package_path);
 
   ~IMarkerRobotState()
   {

@@ -68,8 +68,7 @@ public:
   /**
    * \brief Constructor
    */
-  VisualToolsDemo(const rclcpp::Node::SharedPtr& node)
-  : node_(node)
+  VisualToolsDemo(const rclcpp::Node::SharedPtr& node) : node_(node)
   {
     visual_tools_.reset(new moveit_visual_tools::MoveItVisualTools(node_, "world", "/moveit_visual_tools"));
     visual_tools_->loadPlanningSceneMonitor();
@@ -177,7 +176,7 @@ public:
     double table_height = 1;
     double table_depth = 1;
     visual_tools_->publishCollisionTable(table_x, table_y, table_z, common_angle, table_width, table_height,
-                                        table_depth, "Table", rvt::BLUE);
+                                         table_depth, "Table", rvt::BLUE);
     rclcpp::sleep_for(std::chrono::milliseconds(1000));
 
     // Send ROS messages
