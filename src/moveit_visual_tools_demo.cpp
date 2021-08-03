@@ -72,7 +72,7 @@ public:
    */
   VisualToolsDemo(const rclcpp::Node::SharedPtr& node) : node_(node)
   {
-    visual_tools_.reset(new moveit_visual_tools::MoveItVisualTools(node_, "world", "/moveit_visual_tools"));
+    visual_tools_ = std::make_shared<moveit_visual_tools::MoveItVisualTools>(node_, "world", "/moveit_visual_tools");
     visual_tools_->loadPlanningSceneMonitor();
     visual_tools_->loadMarkerPub(true);
     visual_tools_->loadRobotStatePub("display_robot_state");
