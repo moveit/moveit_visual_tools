@@ -53,6 +53,8 @@
 // Boost
 #include <boost/lexical_cast.hpp>
 
+using namespace std::literals;
+
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_visual_tools_demo");
 
 namespace rvt = rviz_visual_tools;
@@ -80,13 +82,13 @@ public:
     jmg_ = robot_state_->getJointModelGroup(PLANNING_GROUP_NAME);
     // Allow time to publish messages
     rclcpp::spin_some(node);
-    rclcpp::sleep_for(std::chrono::milliseconds(1000));
+    rclcpp::sleep_for(1000ms);
 
     // Clear collision objects and markers
     visual_tools_->deleteAllMarkers();
     visual_tools_->removeAllCollisionObjects();
     visual_tools_->triggerPlanningSceneUpdate();
-    rclcpp::sleep_for(std::chrono::milliseconds(1000));
+    rclcpp::sleep_for(1000ms);
 
     // Show message
     Eigen::Isometry3d text_pose = Eigen::Isometry3d::Identity();
@@ -116,7 +118,7 @@ public:
     {
       robot_state_->setToRandomPositions(jmg_);
       visual_tools_->publishRobotState(robot_state_, rvt::DEFAULT);
-      rclcpp::sleep_for(std::chrono::milliseconds(1000));
+      rclcpp::sleep_for(1000ms);
     }
 
     // Show 5 robot state in different colors
@@ -125,18 +127,18 @@ public:
     {
       robot_state_->setToRandomPositions(jmg_);
       visual_tools_->publishRobotState(robot_state_, visual_tools_->getRandColor());
-      rclcpp::sleep_for(std::chrono::milliseconds(1000));
+      rclcpp::sleep_for(1000ms);
     }
 
     // Hide the robot
     RCLCPP_INFO(LOGGER, "Hiding the robot");
     visual_tools_->hideRobot();
-    rclcpp::sleep_for(std::chrono::milliseconds(1000));
+    rclcpp::sleep_for(1000ms);
 
     // Show the robot
     RCLCPP_INFO(LOGGER, "Showing the robot");
     visual_tools_->publishRobotState(robot_state_, rvt::DEFAULT);
-    rclcpp::sleep_for(std::chrono::milliseconds(1000));
+    rclcpp::sleep_for(1000ms);
   }
 
   void runDeskTest()
@@ -151,12 +153,12 @@ public:
     robot_pose.translation().x() = x_offset;
     visual_tools_->applyVirtualJointTransform(*robot_state_, robot_pose);
     visual_tools_->publishRobotState(robot_state_, rvt::DEFAULT);
-    rclcpp::sleep_for(std::chrono::milliseconds(1000));
+    rclcpp::sleep_for(1000ms);
 
     // --------------------------------------------------------------------
     RCLCPP_INFO_STREAM(LOGGER, "Publishing Collision Floor");
     visual_tools_->publishCollisionFloor(-0.5, "Floor", rvt::GREY);
-    rclcpp::sleep_for(std::chrono::milliseconds(1000));
+    rclcpp::sleep_for(1000ms);
 
     // --------------------------------------------------------------------
     RCLCPP_INFO_STREAM(LOGGER, "Publishing Collision Wall");
@@ -165,7 +167,7 @@ public:
     double wall_width = 6.0;
     double wall_height = 4;
     visual_tools_->publishCollisionWall(wall_x, wall_y, common_angle, wall_width, wall_height, "Wall", rvt::GREEN);
-    rclcpp::sleep_for(std::chrono::milliseconds(1000));
+    rclcpp::sleep_for(1000ms);
 
     // --------------------------------------------------------------------
     RCLCPP_INFO_STREAM(LOGGER, "Publishing Collision Table");
@@ -177,7 +179,7 @@ public:
     double table_depth = 1;
     visual_tools_->publishCollisionTable(table_x, table_y, table_z, common_angle, table_width, table_height,
                                          table_depth, "Table", rvt::BLUE);
-    rclcpp::sleep_for(std::chrono::milliseconds(1000));
+    rclcpp::sleep_for(1000ms);
 
     // Send ROS messages
     visual_tools_->triggerPlanningSceneUpdate();
@@ -188,7 +190,7 @@ public:
     {
       robot_state_->setToRandomPositions(jmg_);
       visual_tools_->publishRobotState(robot_state_, rvt::DEFAULT);
-      rclcpp::sleep_for(std::chrono::milliseconds(1000));
+      rclcpp::sleep_for(1000ms);
     }
   }
 
@@ -219,7 +221,7 @@ public:
         publishLabelHelper(pose1, "Mesh");
       pose1.translation().x() += step;
     }
-    rclcpp::sleep_for(std::chrono::milliseconds(1000));
+    rclcpp::sleep_for(1000ms);
 
     // --------------------------------------------------------------------
     RCLCPP_INFO_STREAM(LOGGER, "Publishing Collision Block");
@@ -237,7 +239,7 @@ public:
         publishLabelHelper(pose1, "Block");
       pose1.translation().x() += step;
     }
-    rclcpp::sleep_for(std::chrono::milliseconds(1000));
+    rclcpp::sleep_for(1000ms);
 
     // --------------------------------------------------------------------
     RCLCPP_INFO_STREAM(LOGGER, "Publishing Collision Rectanglular Cuboid");
@@ -261,7 +263,7 @@ public:
         publishLabelHelper(pose1, "Cuboid");
       pose1.translation().x() += step;
     }
-    rclcpp::sleep_for(std::chrono::milliseconds(1000));
+    rclcpp::sleep_for(1000ms);
 
     // --------------------------------------------------------------------
     RCLCPP_INFO_STREAM(LOGGER, "Publishing Collision Cylinder");
@@ -297,7 +299,7 @@ public:
 
     // Send ROS messages
     visual_tools_->triggerPlanningSceneUpdate();
-    rclcpp::sleep_for(std::chrono::milliseconds(1000));
+    rclcpp::sleep_for(1000ms);
   }
 
 private:
