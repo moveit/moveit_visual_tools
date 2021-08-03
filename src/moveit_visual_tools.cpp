@@ -151,7 +151,11 @@ bool MoveItVisualTools::processCollisionObjectMsg(const moveit_msgs::msg::Collis
     scene->setObjectColor(msg.id, getColor(color));
   }
   // Trigger an update
-  triggerPlanningSceneUpdate();
+
+  if(!manual_trigger_update_)
+  {
+    triggerPlanningSceneUpdate();
+  }
 
   return true;
 }
@@ -166,7 +170,7 @@ bool MoveItVisualTools::processAttachedCollisionObjectMsg(const moveit_msgs::msg
   }
 
   // Trigger an update
-  if (!mannual_trigger_update_)
+  if (!manual_trigger_update_)
   {
     triggerPlanningSceneUpdate();
   }

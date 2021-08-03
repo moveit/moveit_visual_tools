@@ -156,7 +156,7 @@ public:
                            const rviz_visual_tools::Colors& color);
 
   /**
-   * \brief When mannual_trigger_update_ is true, use this to tell the planning scene to send
+   * \brief When manual_trigger_update_ is true, use this to tell the planning scene to send
    *        an update out. Do not use otherwise
    */
   bool triggerPlanningSceneUpdate();
@@ -218,7 +218,7 @@ public:
    */
   void setManualSceneUpdating(bool enable_manual = true)
   {
-    mannual_trigger_update_ = enable_manual;
+    manual_trigger_update_ = enable_manual;
   }
 
   /**
@@ -705,7 +705,7 @@ protected:
   planning_scene_monitor::PlanningSceneMonitorPtr psm_;
 
   // Prevent the planning scene from always auto-pushing, but rather do it manually
-  bool mannual_trigger_update_ = false;
+  bool manual_trigger_update_ = false;
 
   // Pointer to the robot model
   moveit::core::RobotModelConstPtr robot_model_;
