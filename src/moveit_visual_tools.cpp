@@ -346,7 +346,18 @@ void MoveItVisualTools::loadTrajectoryPub(const std::string& display_planned_pat
 
   // Wait for topic to be ready
   if (blocking)
-    waitForSubscriber(pub_display_path_, 5.0 /* seconds */);
+  {
+    const bool subscribed = waitForSubscriber(pub_display_path_, 5.0 /* seconds */);
+    if (subscribed)
+    {
+      RCLCPP_DEBUG_STREAM(LOGGER, "Subscribed to display trajectory topic: " << display_planned_path_topic);
+    }
+    else
+    {
+      RCLCPP_WARN_STREAM(LOGGER, "Cannot subsribe to display trajectory topic: " << display_planned_path_topic);
+    }
+  }
+    
 }
 
 void MoveItVisualTools::loadRobotStatePub(const std::string& robot_state_topic, bool blocking)
@@ -364,7 +375,17 @@ void MoveItVisualTools::loadRobotStatePub(const std::string& robot_state_topic, 
 
   // Wait for topic to be ready
   if (blocking)
-    waitForSubscriber(pub_robot_state_, 5.0 /* seconds */);
+  {
+    const bool subscribed = waitForSubscriber(pub_robot_state_, 5.0 /* seconds */);
+    if (subscribed)
+    {
+      RCLCPP_DEBUG_STREAM(LOGGER, "Subscribed to robot state topic: " << robot_state_topic);
+    }
+    else
+    {
+      RCLCPP_WARN_STREAM(LOGGER, "Cannot subscribe to robot state topic: " << robot_state_topic);
+    }
+  }
 }
 
 bool MoveItVisualTools::publishEEMarkers(const geometry_msgs::msg::Pose& pose,
