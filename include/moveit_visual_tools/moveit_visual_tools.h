@@ -257,31 +257,31 @@ public:
    * \brief Show grasps generated from moveit_simple_grasps or other MoveIt Grasp message sources
    * \param possible_grasps - a set of grasp positions to visualize
    * \param ee_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
-   * \param animate_speed - how fast the gripper approach is animated, optional
+   * \param animate_speed - how fast the gripper approach is animated in seconds, optional
    */
   bool publishGrasps(const std::vector<moveit_msgs::msg::Grasp>& possible_grasps,
-                     const moveit::core::JointModelGroup* ee_jmg, double animate_speed = 0.1);
+                     const moveit::core::JointModelGroup* ee_jmg, double animate_speed = 0.1 /* seconds */);
 
   /**
    * \brief Display an animated vector of grasps including its approach movement in Rviz
    *        Note this function calls publish() automatically in order to achieve animations
    * \param possible_grasps - a set of grasp positions to visualize
    * \param ee_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
-   * \param animate_speed - how fast the gripper approach is animated, optional
+   * \param animate_speed - how fast the gripper approach is animated in seconds, optional
    */
   bool publishAnimatedGrasps(const std::vector<moveit_msgs::msg::Grasp>& possible_grasps,
-                             const moveit::core::JointModelGroup* ee_jmg, double animate_speed = 0.01);
+                             const moveit::core::JointModelGroup* ee_jmg, double animate_speed = 0.01 /* seconds */);
 
   /**
    * \brief Animate a single grasp in its movement direction
    *        Note this function calls publish() automatically in order to achieve animations
    * \param grasp
    * \param ee_jmg - the set of joints to use, e.g. the MoveIt planning group, e.g. "left_arm"
-   * \param animate_speed - how fast the gripper approach is animated
+   * \param animate_speed - how fast the gripper approach is animated in seconds
    * \return true on sucess
    */
   bool publishAnimatedGrasp(const moveit_msgs::msg::Grasp& grasp, const moveit::core::JointModelGroup* ee_jmg,
-                            double animate_speed);
+                            double animate_speed /* seconds */);
 
   /**
    * \brief Display an vector of inverse kinematic solutions for the IK service in Rviz
