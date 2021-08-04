@@ -152,7 +152,7 @@ bool MoveItVisualTools::processCollisionObjectMsg(const moveit_msgs::msg::Collis
   }
   // Trigger an update
 
-  if(!manual_trigger_update_)
+  if (!manual_trigger_update_)
   {
     triggerPlanningSceneUpdate();
   }
@@ -361,7 +361,6 @@ void MoveItVisualTools::loadTrajectoryPub(const std::string& display_planned_pat
       RCLCPP_WARN_STREAM(LOGGER, "Cannot subsribe to display trajectory topic: " << display_planned_path_topic);
     }
   }
-    
 }
 
 void MoveItVisualTools::loadRobotStatePub(const std::string& robot_state_topic, bool blocking)
