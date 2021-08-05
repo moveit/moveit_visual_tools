@@ -64,6 +64,8 @@
 #include <limits>
 #include <iomanip>
 
+using namespace std::literals::chrono_literals;
+
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_visual_tools");
 namespace moveit_visual_tools
 {
@@ -1291,22 +1293,21 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::msg::RobotTraje
   // Wait the duration of the trajectory
   if (blocking)
   {
-    double duration = trajectory_msg.joint_trajectory.points.back().time_from_start.sec;
-
-    // If trajectory has not been parameterized, assume each waypoint takes 0.05 seconds (based on Rviz)
-    if (duration < std::numeric_limits<double>::epsilon())
+    auto duration = std::chrono::milliseconds(1000 * trajectory_msg.joint_trajectory.points.back().time_from_start.sec);
+    // If trajectory has not been parameterized, assume each waypoint takes 50 milliseconds (based on Rviz)
+    if (duration.count() < std::numeric_limits<double>::epsilon() * 1000 /* ms */)
     {
-      duration = 0.05 * trajectory_msg.joint_trajectory.points.size();
+      duration = std::chrono::milliseconds(50 * trajectory_msg.joint_trajectory.points.size());
     }
-    RCLCPP_DEBUG_STREAM(LOGGER, "Waiting for trajectory animation " << duration << " seconds");
+    RCLCPP_DEBUG_STREAM(LOGGER, "Waiting for trajectory animation " << duration.count() << " seconds");
 
     // Check if ROS is ok in intervals
-    double counter = 0;
-    static const double CHECK_TIME_INTERVAL = 0.25;  // check every fourth second
+    std::chrono::milliseconds counter = 0ms;
+    const std::chrono::milliseconds CHECK_TIME_INTERVAL = 250ms;  // check every fourth second
     while (rclcpp::ok() && counter <= duration)
     {
       counter += CHECK_TIME_INTERVAL;
-      rclcpp::sleep_for(std::chrono::milliseconds(int(CHECK_TIME_INTERVAL * 1000)));
+      rclcpp::sleep_for(CHECK_TIME_INTERVAL);
     }
   }
 
