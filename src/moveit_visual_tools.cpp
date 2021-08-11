@@ -1145,6 +1145,9 @@ bool MoveItVisualTools::publishContactPoints(const collision_detection::Collisio
 bool MoveItVisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTrajectoryPoint& trajectory_pt,
                                                const std::string& planning_group, double display_time)
 {
+  // Ensure robot_model_ is available
+  loadSharedRobotState();
+
   // Get joint state group
   const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(planning_group);
 
@@ -1171,6 +1174,9 @@ bool MoveItVisualTools::publishTrajectoryPoint(const trajectory_msgs::JointTraje
 bool MoveItVisualTools::publishTrajectoryPath(const std::vector<moveit::core::RobotStatePtr>& trajectory,
                                               const moveit::core::JointModelGroup* jmg, double speed, bool blocking)
 {
+  // Ensure robot_model_ is available
+  loadSharedRobotState();
+
   // Copy the vector of RobotStates to a RobotTrajectory
   robot_trajectory::RobotTrajectoryPtr robot_trajectory(
       new robot_trajectory::RobotTrajectory(robot_model_, jmg->getName()));
@@ -1248,7 +1254,7 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::RobotTrajectory
     ROS_WARN_STREAM_NAMED(LOGNAME, "Unable to publish trajectory path because trajectory has zero points");
     return false;
   }
-  
+
   // Ensure that the robot name is available.
   loadSharedRobotState();
 
@@ -1549,7 +1555,7 @@ bool MoveItVisualTools::hideRobot()
 
 void MoveItVisualTools::showJointLimits(const moveit::core::RobotStatePtr& robot_state)
 {
-  const std::vector<const moveit::core::JointModel*>& joints = robot_model_->getActiveJointModels();
+  const std::vector<const moveit::core::JointModel*>& joints = robot_state->getRobotModel()->getActiveJointModels();
 
   // Loop through joints
   for (std::size_t i = 0; i < joints.size(); ++i)
