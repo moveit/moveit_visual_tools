@@ -312,10 +312,7 @@ IMarkerEndEffector::makeBoxControl(visualization_msgs::InteractiveMarker& msg)
   marker.scale.x = msg.scale * 0.3;   // x direction
   marker.scale.y = msg.scale * 0.10;  // y direction
   marker.scale.z = msg.scale * 0.10;  // height
-  marker.color.r = 0.5;
-  marker.color.g = 0.5;
-  marker.color.b = 0.5;
-  marker.color.a = 1.0;
+  marker.color = visual_tools_->getColor(color_);
 
   control.markers.push_back(marker);
   msg.controls.push_back(control);

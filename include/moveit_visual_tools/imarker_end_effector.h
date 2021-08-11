@@ -76,7 +76,7 @@ public:
    * \brief Constructor
    */
   IMarkerEndEffector(IMarkerRobotState* imarker_parent, const std::string& imarker_name, ArmData arm_data,
-                     rviz_visual_tools::colors color);
+                     rviz_visual_tools::colors color = rviz_visual_tools::PURPLE);
 
   ~IMarkerEndEffector()
   {
@@ -147,7 +147,7 @@ private:
 
   // Settings
   ArmData arm_data_;
-  rviz_visual_tools::colors color_ = rviz_visual_tools::PURPLE;
+  rviz_visual_tools::colors color_;
 
   // File saving
   ros::Time time_since_last_save_;
