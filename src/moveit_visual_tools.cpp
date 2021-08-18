@@ -46,10 +46,10 @@
 #include <moveit/macros/console_colors.h>
 
 // Conversions
-#if __has_include (<tf2_eigen/tf2_eigen.hpp>)
-  #include <tf2_eigen/tf2_eigen.hpp>
+#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <tf2_eigen/tf2_eigen.hpp>
 #else
-  #include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.h>
 #endif
 
 // Transforms
@@ -1243,7 +1243,8 @@ bool MoveItVisualTools::publishTrajectoryPath(const robot_trajectory::RobotTraje
   // Add time from start if none specified
   if (trajectory_msg.joint_trajectory.points.size() > 1)
   {
-    if (trajectory_msg.joint_trajectory.points[1].time_from_start == rclcpp::Duration::from_seconds(0))  // assume no timestamps exist
+    if (trajectory_msg.joint_trajectory.points[1].time_from_start ==
+        rclcpp::Duration::from_seconds(0))  // assume no timestamps exist
     {
       for (std::size_t i = 0; i < trajectory_msg.joint_trajectory.points.size(); ++i)
       {

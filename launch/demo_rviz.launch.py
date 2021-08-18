@@ -17,9 +17,7 @@ def load_file(package_name, file_path):
 
 def generate_launch_description():
 
-    robot_description_config = load_file(
-        "moveit_visual_tools", "resources/rrbot.urdf"
-    )
+    robot_description_config = load_file("moveit_visual_tools", "resources/rrbot.urdf")
 
     robot_description = {"robot_description": robot_description_config}
 
