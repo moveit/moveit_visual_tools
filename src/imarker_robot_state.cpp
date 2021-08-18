@@ -53,6 +53,7 @@
 #include <boost/filesystem.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("imarker_end_effector");
+static rclcpp::Clock steady_clock(RCL_STEADY_TIME);
 
 namespace
 {
@@ -103,7 +104,6 @@ bool isIKStateValid(const planning_scene::PlanningScene* planning_scene, bool ve
     visual_tools->publishRobotState(*robot_state, rviz_visual_tools::RED);
     planning_scene->isStateColliding(*robot_state, group->getName(), true);
     visual_tools->publishContactPoints(*robot_state, planning_scene);
-    rclcpp::Clock steady_clock(RCL_STEADY_TIME);
     RCLCPP_WARN_THROTTLE(LOGGER, steady_clock, 2000, "Collision in IK CC callback");
   }
 

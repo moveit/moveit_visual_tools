@@ -17,13 +17,9 @@ def load_file(package_name, file_path):
 
 def generate_launch_description():
 
-    robot_description_config = open(
-        os.path.join(
-            get_package_share_directory("moveit_visual_tools"),
-            "resources",
-            "rrbot.urdf",
-        )
-    ).read()
+    robot_description_config = load_file(
+        "moveit_visual_tools", "resources/rrbot.urdf"
+    )
 
     robot_description = {"robot_description": robot_description_config}
 

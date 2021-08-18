@@ -43,14 +43,18 @@
 #include <string>
 
 // Conversions
-#include <tf2_eigen/tf2_eigen.h>
+#if __has_include (<tf2_eigen/tf2_eigen.hpp>)
+  #include <tf2_eigen/tf2_eigen.hpp>
+#else
+  #include <tf2_eigen/tf2_eigen.h>
+#endif
 
 // this package
 #include <moveit_visual_tools/imarker_robot_state.h>
 #include <moveit_visual_tools/imarker_end_effector.h>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("imarker_end_effector");
-
+static rclcpp::Clock steady_clock(RCL_STEADY_TIME);
 namespace
 {
 bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verbose, bool only_check_self_collision,
@@ -100,7 +104,6 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verb
     planning_scene->isStateColliding(*robot_state, group->getName(), true);
     visual_tools->publishContactPoints(*robot_state, planning_scene);
   }
-  rclcpp::Clock steady_clock(RCL_STEADY_TIME);
   RCLCPP_WARN_THROTTLE(LOGGER, steady_clock, 2000, "Collision");
   return false;
 }
@@ -119,6 +122,7 @@ IMarkerEndEffector::IMarkerEndEffector(IMarkerRobotState* imarker_parent, const 
   , arm_data_(arm_data)
   , color_(color)
   , imarker_server_(imarker_parent_->imarker_server_)
+  , clock_(RCL_ROS_TIME)
 {
   // Get pose from robot state
   imarker_pose_ = imarker_state_->getGlobalLinkTransform(arm_data_.ee_link_);
@@ -151,10 +155,10 @@ void IMarkerEndEffector::iMarkerCallback(
   {
     // Save pose to file if its been long enough
     double save_every_sec = 0.1;
-    if (time_since_last_save_ < rclcpp::Clock(RCL_ROS_TIME).now() - rclcpp::Duration(save_every_sec))
+    if (time_since_last_save_ < clock_.now() - rclcpp::Duration::from_seconds(save_every_sec))
     {
       imarker_parent_->saveToFile();
-      time_since_last_save_ = rclcpp::Clock(RCL_ROS_TIME).now();
+      time_since_last_save_ = clock_.now();
     }
     return;
   }

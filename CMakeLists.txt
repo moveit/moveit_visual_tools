@@ -66,10 +66,9 @@ ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 ## Install ##
 #############
 
-# Install libraries
+# Install libraries and executables
 install(
-  TARGETS
-    ${PROJECT_NAME}
+  TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_demo
   EXPORT
     export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
@@ -82,13 +81,6 @@ install(DIRECTORY include/ DESTINATION include)
 
 # Install shared resources
 install(DIRECTORY launch resources DESTINATION share/${PROJECT_NAME})
-
-# Install executables
-install(TARGETS ${PROJECT_NAME}_demo
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-)
 
 #############
 ## Testing ##

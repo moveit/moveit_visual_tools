@@ -169,6 +169,9 @@ private:
   // Hook to parent class
   IMarkerCallback imarker_callback_;
 
+  // Clock
+  rclcpp::Clock clock_;
+
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };  // end class

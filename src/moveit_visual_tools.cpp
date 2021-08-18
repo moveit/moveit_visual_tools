@@ -46,7 +46,11 @@
 #include <moveit/macros/console_colors.h>
 
 // Conversions
-#include <tf2_eigen/tf2_eigen.h>
+#if __has_include (<tf2_eigen/tf2_eigen.hpp>)
+  #include <tf2_eigen/tf2_eigen.hpp>
+#else
+  #include <tf2_eigen/tf2_eigen.h>
+#endif
 
 // Transforms
 #include <tf2_ros/transform_listener.h>
@@ -299,7 +303,7 @@ bool MoveItVisualTools::loadEEMarker(const moveit::core::JointModelGroup* ee_jmg
 
   // Get EE link markers for Rviz
   shared_robot_state_->getRobotMarkers(ee_markers_map_[ee_jmg], ee_link_names, marker_color, ee_jmg->getName(),
-                                       rclcpp::Duration(0));
+                                       rclcpp::Duration::from_seconds(0));
   RCLCPP_DEBUG_STREAM(LOGGER, "Number of rviz markers in end effector: " << ee_markers_map_[ee_jmg].markers.size());
 
   // Error check
@@ -602,7 +606,7 @@ bool MoveItVisualTools::publishIKSolutions(const std::vector<trajectory_msgs::ms
 
   // Re-add final position so the last point is displayed fully
   trajectory_pt_timed = trajectory_msg.joint_trajectory.points.back();
-  trajectory_pt_timed.time_from_start = rclcpp::Duration(running_time);
+  trajectory_pt_timed.time_from_start = rclcpp::Duration::from_seconds(running_time);
   trajectory_msg.joint_trajectory.points.push_back(trajectory_pt_timed);
 
   return publishTrajectoryPath(trajectory_msg, shared_robot_state_, true);
@@ -1188,7 +1192,7 @@ bool MoveItVisualTools::publishTrajectoryPoint(const trajectory_msgs::msg::Joint
 
   // Apply the time to the trajectory
   trajectory_msgs::msg::JointTrajectoryPoint trajectory_pt_timed = trajectory_pt;
-  trajectory_pt_timed.time_from_start = rclcpp::Duration(display_time);
+  trajectory_pt_timed.time_from_start = rclcpp::Duration::from_seconds(display_time);
 
   // Create a trajectory with one point
   moveit_msgs::msg::RobotTrajectory trajectory_msg;
@@ -1239,11 +1243,11 @@ bool MoveItVisualTools::publishTrajectoryPath(const robot_trajectory::RobotTraje
   // Add time from start if none specified
   if (trajectory_msg.joint_trajectory.points.size() > 1)
   {
-    if (trajectory_msg.joint_trajectory.points[1].time_from_start == rclcpp::Duration(0))  // assume no timestamps exist
+    if (trajectory_msg.joint_trajectory.points[1].time_from_start == rclcpp::Duration::from_seconds(0))  // assume no timestamps exist
     {
       for (std::size_t i = 0; i < trajectory_msg.joint_trajectory.points.size(); ++i)
       {
-        trajectory_msg.joint_trajectory.points[i].time_from_start = rclcpp::Duration(i * 2);  // 1 hz
+        trajectory_msg.joint_trajectory.points[i].time_from_start = rclcpp::Duration::from_seconds(i * 2);  // 1 hz
       }
     }
   }
@@ -1299,11 +1303,11 @@ bool MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::msg::RobotTraje
     {
       duration = std::chrono::milliseconds(50 * trajectory_msg.joint_trajectory.points.size());
     }
-    RCLCPP_DEBUG_STREAM(LOGGER, "Waiting for trajectory animation " << duration.count() << " seconds");
+    RCLCPP_DEBUG_STREAM(LOGGER, "Waiting for trajectory animation " << duration.count() * 1000 << " seconds");
 
     // Check if ROS is ok in intervals
-    std::chrono::milliseconds counter = 0ms;
-    const std::chrono::milliseconds CHECK_TIME_INTERVAL = 250ms;  // check every fourth second
+    auto counter = 0ms;
+    const auto CHECK_TIME_INTERVAL = 250ms;  // check every fourth second
     while (rclcpp::ok() && counter <= duration)
     {
       counter += CHECK_TIME_INTERVAL;
