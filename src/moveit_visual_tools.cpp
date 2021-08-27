@@ -270,7 +270,7 @@ bool MoveItVisualTools::loadEEMarker(const moveit::core::JointModelGroup* ee_jmg
                                           << ee_jmg->getName() << "(" << ee_jmg->getActiveJointModels().size() << ")");
       return false;
     }
-    shared_robot_state_->setJointGroupPositions(ee_jmg, ee_joint_pos);
+    shared_robot_state_->setJointGroupActivePositions(ee_jmg, ee_joint_pos);
     shared_robot_state_->update(true);
   }
 
