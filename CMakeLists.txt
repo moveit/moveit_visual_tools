@@ -36,7 +36,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 )
 
 # Visualization Tools Library
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} SHARED
   src/${PROJECT_NAME}.cpp
   src/imarker_robot_state.cpp
   src/imarker_end_effector.cpp
