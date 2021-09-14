@@ -1,6 +1,6 @@
 # MoveIt Visual Tools
 
-Helper functions for displaying and debugging MoveIt data in Rviz via published markers, trajectories, and MoveIt collision objects. It is sometimes hard to understand everything that is going on internally with MoveIt, but using these quick convenience functions allows one to easily visualize their code. This package is built in top of [rviz_visual_tools](https://github.com/davetcoleman/rviz_visual_tools) and all those features are included via class inheritance.
+Helper functions for displaying and debugging MoveIt data in Rviz via published markers, trajectories, and MoveIt collision objects. It is sometimes hard to understand everything that is going on internally with MoveIt, but using these quick convenience functions allows one to easily visualize their code. This package is built in top of [rviz_visual_tools](https://github.com/PickNikRobotics/rviz_visual_tools) and all those features are included via class inheritance.
 
 This package helps you visualize:
 
@@ -17,37 +17,41 @@ This open source project was developed at [PickNik Robotics](https://picknik.ai/
 
 ## Status:
 
+### ROS:
 * [![Build Status](https://travis-ci.org/ros-planning/moveit_visual_tools.svg)](https://travis-ci.org/ros-planning/moveit_visual_tools) Travis CI
 * [![Build Status](http://build.ros.org/buildStatus/icon?job=Kbin_uX64__moveit_visual_tools__ubuntu_xenial_amd64__binary)](http://build.ros.org/view/Kbin_uX64/job/Kbin_uX64__moveit_visual_tools__ubuntu_xenial_amd64__binary/) ROS Buildfarm - AMD64 Xenial Debian Build - Ubuntu 16.04 LTS
 * [![Build Status](http://build.ros.org/buildStatus/icon?job=Kdev__moveit_visual_tools__ubuntu_xenial_amd64)](http://build.ros.org/view/Kdev/job/Kdev__moveit_visual_tools__ubuntu_xenial_amd64/) ROS Buildfarm - AMD64 Xenial Devel Build - Ubuntu 16.04 LTS
 * [![Build Status](http://build.ros.org/buildStatus/icon?job=Msrc_uB__moveit_visual_tools__ubuntu_bionic__source)](http://build.ros.org/job/Msrc_uB__moveit_visual_tools__ubuntu_bionic__source/) ROS Buildfarm - AMD64 Bionic Source Build - Ubuntu 18.04 LTS
 * [![Build Status](http://build.ros.org/buildStatus/icon?job=Mdev__moveit_visual_tools__ubuntu_bionic_amd64)](http://build.ros.org/job/Mdev__moveit_visual_tools__ubuntu_bionic_amd64/) ROS Buildfarm - AMD64 Bionic Devel Build - Ubuntu 18.04 LTS
 
+### ROS2:
+- [![Build and Test](https://github.com/ros-planning/moveit_visual_tools/actions/workflows/build_and_test.yaml/badge.svg?branch=ros2)](https://github.com/ros-planning/moveit_visual_tools/actions/workflows/build_and_test.yaml?query=branch%3Aros2) Github Actions - AMD64 Focal Source Build - Ubuntu 20.04 LTS
+- [![Formatting(pre-commit)](https://github.com/ros-planning/moveit_visual_tools/actions/workflows/format.yaml/badge.svg?branch=ros2)](https://github.com/ros-planning/moveit_visual_tools/actions/workflows/format.yaml?query=branch%3Aros2) Formatting(pre-commit)
+
 ![](resources/screenshot.png)
 
 ![](resources/demo.png)
 
-## Install
-
-### Ubuntu Debian
-
-    sudo apt-get install ros-kinetic-moveit-visual-tools
+## ROS2 Install
 
 ### Install From Source
 
-Clone this repository into a catkin workspace, then use the rosdep install tool to automatically download its dependencies. Depending on your current version of ROS, use:
 
-    rosdep install --from-paths src --ignore-src --rosdistro kinetic
+Install moveit2 following the instructions [here](https://moveit.ros.org/install-moveit2/source/). After sourcing the moveit workspace clone this repository into a colcon workspace, import and install dependencies and build:
+
+    source ~/ws_moveit/install/setup.bash
+    cd $COLCON_WS/src
+    git clone -b ros2 https://github.com/ros-planning/moveit_visual_tools
+    vcs import < moveit_visual_tools/moveit_visual_tools.repos
+    rosdep install -r --from-paths . --ignore-src --rosdistro foxy -y
+    cd $COLCON_WS
+    colcon build --event-handlers desktop_notification- status- --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 ## Quick Start Demo
 
-First launch Rviz:
+To run some demos displaying robot states and collision objects:
 
-    roslaunch moveit_visual_tools demo_rviz.launch
-
-Then run some demos displaying robot states and collision objects:
-
-    roslaunch moveit_visual_tools demo.launch
+    ros2 launch moveit_visual_tools demo_rviz.launch
 
 ## Code API
 
@@ -72,7 +76,7 @@ moveit_visual_tools::MoveItVisualToolsPtr visual_tools_;
 
 In your class' constructor add:
 ```
-visual_tools_.reset(new moveit_visual_tools::MoveItVisualTools("base_frame","/moveit_visual_markers"));
+visual_tools_ = std::make_shared<moveit_visual_tools::MoveItVisualTools>(node_, "world", "/moveit_visual_tools");
 ```
 
 ### Collision Object Functions
@@ -108,29 +112,29 @@ These functions are a little more complicated
 
 ## Parent Class
 
-This class is built on top of [rviz_visual_tools](https://github.com/davetcoleman/rviz_visual_tools) so all features and documentation for that package apply here as well.
+This class is built on top of [rviz_visual_tools](https://github.com/PickNikRobotics/rviz_visual_tools) so all features and documentation for that package apply here as well.
 
 ## Developers Notes
 
 Useful notes for anyone wanting to dig in deeper:
 
  -  All poses are published with respect to the world frame e.g. /world, /odom, or maybe /base
- -  All publish() ROS topics should be followed by a ``ros::spinOnce();`` but no sleep
+ -  All publish() ROS topics should be followed by a ``rclcpp::spin_some(node);`` but no sleep
  -  Do not want to load any features/publishers until they are actually needed since this library contains so many components
 
-## Testing and Linting
+## Linting (pre-commit)
 
-To run [roslint](http://wiki.ros.org/roslint), use the following command with [catkin-tools](https://catkin-tools.readthedocs.org/):
+pre-commit is a tool that is used in moveit2_tutorials to check and apply style guidelines automatically. To install pre-commit into your system:
 
-    catkin build --no-status --no-deps --this --make-args roslint
+    pip3 install pre-commit
 
-To run [catkin lint](https://pypi.python.org/pypi/catkin_lint), use the following command with [catkin-tools](https://catkin-tools.readthedocs.org/):
+Then under moveit2_tutorials directory install the git hooks like this:
 
-    catkin lint -W2
+    cd $COLCON_WS/src/moveit2_tutorials && pre-commit install
 
-Use the following command with [catkin-tools](https://catkin-tools.readthedocs.org/) to run the small amount of available tests:
+With this pre-commit will automatically run and check a list of styling including clang-format, end of files and trailing whitespaces whenever you run `git commit`. To run pre-commit any time other than `git commit`:
 
-    catkin run_tests --no-deps --this -i
+    cd $COLCON_WS/src/moveit2_tutorials && pre-commit run -a
 
 ## Contribute
 

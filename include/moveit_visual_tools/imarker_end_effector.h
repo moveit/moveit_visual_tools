@@ -40,11 +40,11 @@
 #define MOVEIT_VISUAL_TOOLS_IMARKER_END_EFFECTOR_H
 
 // ROS
-#include <ros/ros.h>
-#include <interactive_markers/interactive_marker_server.h>
-#include <visualization_msgs/InteractiveMarkerFeedback.h>
-#include <visualization_msgs/InteractiveMarker.h>
-#include <interactive_markers/menu_handler.h>
+#include <rclcpp/rclcpp.hpp>
+#include <interactive_markers/interactive_marker_server.hpp>
+#include <visualization_msgs/msg/interactive_marker_feedback.hpp>
+#include <visualization_msgs/msg/interactive_marker.hpp>
+#include <interactive_markers/menu_handler.hpp>
 
 // MoveIt
 #include <moveit/robot_state/robot_state.h>
@@ -61,10 +61,11 @@
 
 namespace moveit_visual_tools
 {
-using visualization_msgs::InteractiveMarkerControl;
-using visualization_msgs::InteractiveMarkerFeedback;
+using visualization_msgs::msg::InteractiveMarkerControl;
+using visualization_msgs::msg::InteractiveMarkerFeedback;
 
-typedef std::function<void(const visualization_msgs::InteractiveMarkerFeedbackConstPtr&, const Eigen::Isometry3d&)>
+typedef std::function<void(const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr&,
+                           const Eigen::Isometry3d&)>
     IMarkerCallback;
 
 class IMarkerRobotState;
@@ -76,7 +77,7 @@ public:
    * \brief Constructor
    */
   IMarkerEndEffector(IMarkerRobotState* imarker_parent, const std::string& imarker_name, ArmData arm_data,
-                     rviz_visual_tools::colors color);
+                     rviz_visual_tools::Colors color);
 
   ~IMarkerEndEffector()
   {
@@ -87,7 +88,7 @@ public:
 
   bool setPoseFromRobotState();
 
-  void iMarkerCallback(const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback);
+  void iMarkerCallback(const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback);
 
   void solveIK(Eigen::Isometry3d& pose);
 
@@ -97,9 +98,9 @@ public:
 
   void sendUpdatedIMarkerPose();
 
-  void make6DofMarker(const geometry_msgs::Pose& pose);
+  void make6DofMarker(const geometry_msgs::msg::Pose& pose);
 
-  visualization_msgs::InteractiveMarkerControl& makeBoxControl(visualization_msgs::InteractiveMarker& msg);
+  visualization_msgs::msg::InteractiveMarkerControl& makeBoxControl(visualization_msgs::msg::InteractiveMarker& msg);
 
   void setCollisionCheckingVerbose(bool collision_checking_verbose)
   {
@@ -116,7 +117,7 @@ public:
     use_collision_checking_ = use_collision_checking;
   }
 
-  void setIMarkerCallback(IMarkerCallback callback)
+  void setIMarkerCallback(const IMarkerCallback& callback)
   {
     imarker_callback_ = std::move(callback);
   }
@@ -147,16 +148,16 @@ private:
 
   // Settings
   ArmData arm_data_;
-  rviz_visual_tools::colors color_ = rviz_visual_tools::PURPLE;
+  rviz_visual_tools::Colors color_ = rviz_visual_tools::PURPLE;
 
   // File saving
-  ros::Time time_since_last_save_;
+  rclcpp::Time time_since_last_save_;
 
   // Interactive markers
   // interactive_markers::MenuHandler menu_handler_;
-  visualization_msgs::InteractiveMarker int_marker_;
+  visualization_msgs::msg::InteractiveMarker int_marker_;
   bool imarker_ready_to_process_ = true;
-  boost::mutex imarker_mutex_;
+  std::mutex imarker_mutex_;
 
   InteractiveMarkerServerPtr imarker_server_;
 
@@ -167,6 +168,9 @@ private:
 
   // Hook to parent class
   IMarkerCallback imarker_callback_;
+
+  // Clock
+  rclcpp::Clock clock_;
 
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW

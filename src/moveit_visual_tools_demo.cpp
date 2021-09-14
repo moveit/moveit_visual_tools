@@ -38,7 +38,8 @@
 */
 
 // ROS
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
+#include <ament_index_cpp/get_package_share_directory.hpp>
 
 // For visualizing things in rviz
 #include <moveit_visual_tools/moveit_visual_tools.h>
@@ -48,6 +49,13 @@
 
 // C++
 #include <string>
+
+// Boost
+#include <boost/lexical_cast.hpp>
+
+using namespace std::literals;
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_visual_tools_demo");
 
 namespace rvt = rviz_visual_tools;
 
@@ -62,9 +70,9 @@ public:
   /**
    * \brief Constructor
    */
-  VisualToolsDemo()
+  VisualToolsDemo(const rclcpp::Node::SharedPtr& node) : node_(node)
   {
-    visual_tools_.reset(new moveit_visual_tools::MoveItVisualTools("world", "/moveit_visual_tools"));
+    visual_tools_ = std::make_shared<moveit_visual_tools::MoveItVisualTools>(node_, "world", "/moveit_visual_tools");
     visual_tools_->loadPlanningSceneMonitor();
     visual_tools_->loadMarkerPub(true);
     visual_tools_->loadRobotStatePub("display_robot_state");
@@ -72,16 +80,15 @@ public:
 
     robot_state_ = visual_tools_->getSharedRobotState();
     jmg_ = robot_state_->getJointModelGroup(PLANNING_GROUP_NAME);
-
     // Allow time to publish messages
-    ros::spinOnce();
-    ros::Duration(0.1).sleep();
+    rclcpp::spin_some(node);
+    rclcpp::sleep_for(1000ms);
 
     // Clear collision objects and markers
     visual_tools_->deleteAllMarkers();
     visual_tools_->removeAllCollisionObjects();
     visual_tools_->triggerPlanningSceneUpdate();
-    ros::Duration(0.1).sleep();
+    rclcpp::sleep_for(1000ms);
 
     // Show message
     Eigen::Isometry3d text_pose = Eigen::Isometry3d::Identity();
@@ -99,34 +106,39 @@ public:
   {
     Eigen::Isometry3d pose_copy = pose;
     pose_copy.translation().x() -= 0.2;
-    visual_tools_->publishText(pose_copy, label, rvt::WHITE, rvt::LARGE, false);
+    visual_tools_->publishText(pose_copy, label, rvt::WHITE, rvt::XLARGE, false);
+    visual_tools_->trigger();
   }
 
   void runRobotStateTests()
   {
     // Show 5 random robot states
+    RCLCPP_INFO(LOGGER, "Showing 5 random robot states");
     for (std::size_t i = 0; i < 5; ++i)
     {
       robot_state_->setToRandomPositions(jmg_);
       visual_tools_->publishRobotState(robot_state_, rvt::DEFAULT);
-      ros::Duration(0.1).sleep();
+      rclcpp::sleep_for(1000ms);
     }
 
     // Show 5 robot state in different colors
+    RCLCPP_INFO(LOGGER, "Showing 5 random robot states in different colors");
     for (std::size_t i = 0; i < 5; ++i)
     {
       robot_state_->setToRandomPositions(jmg_);
       visual_tools_->publishRobotState(robot_state_, visual_tools_->getRandColor());
-      ros::Duration(0.1).sleep();
+      rclcpp::sleep_for(1000ms);
     }
 
     // Hide the robot
+    RCLCPP_INFO(LOGGER, "Hiding the robot");
     visual_tools_->hideRobot();
-    ros::Duration(0.1).sleep();
+    rclcpp::sleep_for(1000ms);
 
     // Show the robot
+    RCLCPP_INFO(LOGGER, "Showing the robot");
     visual_tools_->publishRobotState(robot_state_, rvt::DEFAULT);
-    ros::Duration(0.1).sleep();
+    rclcpp::sleep_for(1000ms);
   }
 
   void runDeskTest()
@@ -135,27 +147,30 @@ public:
     double x_offset = -3.0;
 
     // --------------------------------------------------------------------
-    ROS_INFO_STREAM_NAMED("visual_tools", "Moving robot");
+    RCLCPP_INFO_STREAM(LOGGER, "Moving the robot");
     Eigen::Isometry3d robot_pose = Eigen::Isometry3d::Identity();
     robot_pose = robot_pose * Eigen::AngleAxisd(common_angle, Eigen::Vector3d::UnitZ());
     robot_pose.translation().x() = x_offset;
     visual_tools_->applyVirtualJointTransform(*robot_state_, robot_pose);
     visual_tools_->publishRobotState(robot_state_, rvt::DEFAULT);
+    rclcpp::sleep_for(1000ms);
 
     // --------------------------------------------------------------------
-    ROS_INFO_STREAM_NAMED("visual_tools", "Publishing Collision Floor");
+    RCLCPP_INFO_STREAM(LOGGER, "Publishing Collision Floor");
     visual_tools_->publishCollisionFloor(-0.5, "Floor", rvt::GREY);
+    rclcpp::sleep_for(1000ms);
 
     // --------------------------------------------------------------------
-    ROS_INFO_STREAM_NAMED("visual_tools", "Publishing Collision Wall");
+    RCLCPP_INFO_STREAM(LOGGER, "Publishing Collision Wall");
     double wall_x = x_offset - 1.0;
     double wall_y = -1.0;
     double wall_width = 6.0;
     double wall_height = 4;
     visual_tools_->publishCollisionWall(wall_x, wall_y, common_angle, wall_width, wall_height, "Wall", rvt::GREEN);
+    rclcpp::sleep_for(1000ms);
 
     // --------------------------------------------------------------------
-    ROS_INFO_STREAM_NAMED("visual_tools", "Publishing Collision Table");
+    RCLCPP_INFO_STREAM(LOGGER, "Publishing Collision Table");
     double table_x = x_offset + 1.0;
     double table_y = 0;
     double table_z = 0;
@@ -164,16 +179,18 @@ public:
     double table_depth = 1;
     visual_tools_->publishCollisionTable(table_x, table_y, table_z, common_angle, table_width, table_height,
                                          table_depth, "Table", rvt::BLUE);
+    rclcpp::sleep_for(1000ms);
 
     // Send ROS messages
     visual_tools_->triggerPlanningSceneUpdate();
 
     // Show 5 random robot states
+    RCLCPP_INFO(LOGGER, "Showing 5 random robot states");
     for (std::size_t i = 0; i < 5; ++i)
     {
       robot_state_->setToRandomPositions(jmg_);
       visual_tools_->publishRobotState(robot_state_, rvt::DEFAULT);
-      ros::Duration(0.1).sleep();
+      rclcpp::sleep_for(1000ms);
     }
   }
 
@@ -182,18 +199,17 @@ public:
     // Create pose
     Eigen::Isometry3d pose1 = Eigen::Isometry3d::Identity();
     Eigen::Isometry3d pose2 = Eigen::Isometry3d::Identity();
-    // geometry_msgs::Pose pose1;
-    // geometry_msgs::Pose pose2;
 
     double space_between_rows = 0.2;
     double y = 0;
     double step;
 
     // --------------------------------------------------------------------
-    ROS_INFO_STREAM_NAMED("visual_tools", "Publishing Collision Mesh");
-    std::string file_path = "file://" + ros::package::getPath(THIS_PACKAGE);
+    RCLCPP_INFO_STREAM(LOGGER, "Publishing Collision Mesh");
+    // TODO: Catch exception
+    std::string file_path = "file://" + ament_index_cpp::get_package_share_directory(THIS_PACKAGE);
     if (file_path == "file://")
-      ROS_FATAL_STREAM_NAMED("visual_tools", "Unable to get " << THIS_PACKAGE << " package path ");
+      RCLCPP_FATAL_STREAM(LOGGER, "Unable to get " << THIS_PACKAGE << " package path ");
     file_path.append("/resources/demo_mesh.stl");
     step = 0.4;
     for (double i = 0; i <= 1.0; i += 0.1)
@@ -205,9 +221,10 @@ public:
         publishLabelHelper(pose1, "Mesh");
       pose1.translation().x() += step;
     }
+    rclcpp::sleep_for(1000ms);
 
     // --------------------------------------------------------------------
-    ROS_INFO_STREAM_NAMED("visual_tools", "Publishing Collision Block");
+    RCLCPP_INFO_STREAM(LOGGER, "Publishing Collision Block");
     pose1 = Eigen::Isometry3d::Identity();
     y += space_between_rows * 2.0;
     pose1.translation().y() = y;
@@ -222,9 +239,10 @@ public:
         publishLabelHelper(pose1, "Block");
       pose1.translation().x() += step;
     }
+    rclcpp::sleep_for(1000ms);
 
     // --------------------------------------------------------------------
-    ROS_INFO_STREAM_NAMED("visual_tools", "Publishing Collision Rectanglular Cuboid");
+    RCLCPP_INFO_STREAM(LOGGER, "Publishing Collision Rectanglular Cuboid");
     double cuboid_min_size = 0.05;
     double cuboid_max_size = 0.2;
     pose1 = Eigen::Isometry3d::Identity();
@@ -245,9 +263,10 @@ public:
         publishLabelHelper(pose1, "Cuboid");
       pose1.translation().x() += step;
     }
+    rclcpp::sleep_for(1000ms);
 
     // --------------------------------------------------------------------
-    ROS_INFO_STREAM_NAMED("visual_tools", "Publishing Collision Cylinder");
+    RCLCPP_INFO_STREAM(LOGGER, "Publishing Collision Cylinder");
     double cylinder_min_size = 0.01;
     double cylinder_max_size = 0.3;
     pose1 = Eigen::Isometry3d::Identity();
@@ -280,11 +299,12 @@ public:
 
     // Send ROS messages
     visual_tools_->triggerPlanningSceneUpdate();
+    rclcpp::sleep_for(1000ms);
   }
 
 private:
   // A shared node handle
-  ros::NodeHandle nh_;
+  rclcpp::Node::SharedPtr node_;
 
   // For visualizing things in rviz
   moveit_visual_tools::MoveItVisualToolsPtr visual_tools_;
@@ -301,16 +321,16 @@ private:
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "visual_tools_demo");
-  ROS_INFO_STREAM("Visual Tools Demo");
+  rclcpp::init(argc, argv);
+  rclcpp::NodeOptions node_options;
+  node_options.automatically_declare_parameters_from_overrides(true);
+  auto node = rclcpp::Node::make_shared("moveit_visual_tools_demo", node_options);
+  RCLCPP_INFO_STREAM(LOGGER, "Visual Tools Demo");
 
-  // Allow the action server to recieve and send ros messages
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
+  moveit_visual_tools::VisualToolsDemo demo(node);
 
-  moveit_visual_tools::VisualToolsDemo demoer;
-
-  ROS_INFO_STREAM("Shutting down.");
+  RCLCPP_INFO_STREAM(LOGGER, "Shutting down.");
+  rclcpp::shutdown();
 
   return 0;
 }

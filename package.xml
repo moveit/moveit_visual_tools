@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package format="2">
+<package format="3">
   <name>moveit_visual_tools</name>
   <version>3.6.0</version>
   <description>Helper functions for displaying and debugging MoveIt data in Rviz via published markers</description>
@@ -14,20 +14,23 @@
 
   <author email="dave@picknik.ai">Dave Coleman</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>rviz_visual_tools</depend>
-  <depend>tf2_eigen</depend>
   <depend>geometry_msgs</depend>
-  <depend>moveit_ros_planning</depend>
-  <depend>moveit_core</depend>
-  <depend>roscpp</depend>
-  <depend>tf2_ros</depend>
-  <depend>visualization_msgs</depend>
   <depend>graph_msgs</depend>
+  <depend>moveit_common</depend>
+  <depend>moveit_core</depend>
+  <depend>moveit_ros_planning</depend>
+  <depend>rclcpp</depend>
+  <depend>rviz_visual_tools</depend>
   <depend>std_msgs</depend>
+  <depend>tf2_eigen</depend>
+  <depend>tf2_ros</depend>
   <depend>trajectory_msgs</depend>
-  <depend>roslint</depend>
-  <depend>cmake_modules</depend>
+  <depend>visualization_msgs</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 
 </package>

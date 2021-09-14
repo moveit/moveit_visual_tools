@@ -49,6 +49,12 @@
 #include <utility>
 #include <vector>
 
+// Boost
+#include <boost/filesystem.hpp>
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("imarker_end_effector");
+static rclcpp::Clock steady_clock(RCL_STEADY_TIME);
+
 namespace
 {
 bool isIKStateValid(const planning_scene::PlanningScene* planning_scene, bool verbose, bool only_check_self_collision,
@@ -74,7 +80,7 @@ bool isIKStateValid(const planning_scene::PlanningScene* planning_scene, bool ve
 
   if (!planning_scene)
   {
-    ROS_ERROR_STREAM_NAMED("imarker_robot_state", "No planning scene provided");
+    RCLCPP_ERROR_STREAM(LOGGER, "No planning scene provided");
     return false;
   }
   if (only_check_self_collision)
@@ -98,7 +104,7 @@ bool isIKStateValid(const planning_scene::PlanningScene* planning_scene, bool ve
     visual_tools->publishRobotState(*robot_state, rviz_visual_tools::RED);
     planning_scene->isStateColliding(*robot_state, group->getName(), true);
     visual_tools->publishContactPoints(*robot_state, planning_scene);
-    ROS_WARN_STREAM_THROTTLE_NAMED(2.0, "imarker_robot_state", "Collision in IK CC callback");
+    RCLCPP_WARN_THROTTLE(LOGGER, steady_clock, 2000, "Collision in IK CC callback");
   }
 
   return false;
@@ -108,31 +114,30 @@ bool isIKStateValid(const planning_scene::PlanningScene* planning_scene, bool ve
 
 namespace moveit_visual_tools
 {
-IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonitorPtr psm,
+IMarkerRobotState::IMarkerRobotState(rclcpp::Node::SharedPtr node, planning_scene_monitor::PlanningSceneMonitorPtr psm,
                                      const std::string& imarker_name, std::vector<ArmData> arm_datas,
-                                     rviz_visual_tools::colors color, const std::string& package_path)
+                                     rviz_visual_tools::Colors color, const std::string& package_path)
   : name_(imarker_name)
-  , nh_("~")
   , arm_datas_(std::move(arm_datas))
   , psm_(std::move(psm))
   , color_(color)
   , package_path_(package_path)
 {
+  const std::string node_namespace(node->get_namespace());
   // Load Visual tools with respect to Eigen memory alignment
   visual_tools_ = std::allocate_shared<moveit_visual_tools::MoveItVisualTools>(
-      Eigen::aligned_allocator<moveit_visual_tools::MoveItVisualTools>(), psm_->getRobotModel()->getModelFrame(),
-      nh_.getNamespace() + "/" + imarker_name, psm_);
+      Eigen::aligned_allocator<moveit_visual_tools::MoveItVisualTools>(), node, psm_->getRobotModel()->getModelFrame(),
+      imarker_name, psm_);
 
   // visual_tools_->setPlanningSceneMonitor(psm_);
-  visual_tools_->loadRobotStatePub(nh_.getNamespace() + "/imarker_" + imarker_name + "_state");
+  visual_tools_->loadRobotStatePub(node_namespace + "imarker_" + imarker_name + "_state");
 
   // Load robot state
   imarker_state_ = std::make_shared<moveit::core::RobotState>(psm_->getRobotModel());
   imarker_state_->setToDefaultValues();
 
   // Create Marker Server
-  const std::string imarker_topic = nh_.getNamespace() + "/" + imarker_name + "_imarker";
-  imarker_server_ = std::make_shared<interactive_markers::InteractiveMarkerServer>(imarker_topic, "", false);
+  imarker_server_ = std::make_shared<interactive_markers::InteractiveMarkerServer>(node_namespace, node);
 
   // Get file name
   if (!getFilePath(file_path_, "imarker_" + name_ + ".csv", "config/imarkers"))
@@ -140,7 +145,7 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
 
   // Load previous pose from file
   if (!loadFromFile(file_path_))
-    ROS_INFO_STREAM_NAMED(name_, "Unable to find state from file, setting to default");
+    RCLCPP_INFO_STREAM(LOGGER, "Unable to find state from file, setting to default");
 
   // Show initial robot state loaded from file
   publishRobotState();
@@ -166,14 +171,14 @@ IMarkerRobotState::IMarkerRobotState(planning_scene_monitor::PlanningSceneMonito
   // After both end effectors have been added, apply on server
   imarker_server_->applyChanges();
 
-  ROS_DEBUG_STREAM_NAMED(name_, "IMarkerRobotState '" << name_ << "' Ready.");
+  RCLCPP_DEBUG_STREAM(LOGGER, "IMarkerRobotState '" << name_ << "' Ready.");
 }
 
 bool IMarkerRobotState::loadFromFile(const std::string& file_name)
 {
   if (!boost::filesystem::exists(file_name))
   {
-    ROS_WARN_STREAM_NAMED(name_, "File not found: " << file_name);
+    RCLCPP_WARN_STREAM(LOGGER, "File not found: " << file_name);
     return false;
   }
   std::ifstream input_file(file_name);
@@ -182,7 +187,7 @@ bool IMarkerRobotState::loadFromFile(const std::string& file_name)
 
   if (!std::getline(input_file, line))
   {
-    ROS_ERROR_STREAM_NAMED(name_, "Unable to read line");
+    RCLCPP_ERROR_STREAM(LOGGER, "Unable to read line");
     return false;
   }
 
@@ -261,7 +266,7 @@ bool IMarkerRobotState::setToRandomState(double clearance)
         }
       }
 
-      ROS_INFO_STREAM_NAMED(name_, "Found valid random robot state after " << attempt << " attempts");
+      RCLCPP_INFO_STREAM(LOGGER, "Found valid random robot state after " << attempt << " attempts");
 
       // Set updated pose from robot state
       for (std::size_t i = 0; i < arm_datas_.size(); ++i)
@@ -275,11 +280,11 @@ bool IMarkerRobotState::setToRandomState(double clearance)
     }
 
     if (attempt == 100)
-      ROS_WARN_STREAM_NAMED(name_, "Taking long time to find valid random state");
+      RCLCPP_WARN_STREAM(LOGGER, "Taking long time to find valid random state");
   }
 
-  ROS_ERROR_STREAM_NAMED(name_,
-                         "Unable to find valid random robot state for imarker after " << MAX_ATTEMPTS << " attempts");
+  RCLCPP_ERROR_STREAM(LOGGER,
+                      "Unable to find valid random robot state for imarker after " << MAX_ATTEMPTS << " attempts");
 
   return false;
 }
@@ -321,7 +326,7 @@ bool IMarkerRobotState::getFilePath(std::string& file_path, const std::string& f
   if (returnedError)
   {
     // did not successfully create directories
-    ROS_ERROR("Unable to create directory %s", subdirectory.c_str());
+    RCLCPP_ERROR(LOGGER, "Unable to create directory %s", subdirectory.c_str());
     return false;
   }
 
@@ -364,14 +369,14 @@ bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Isometry3d& poses,
   {
     if (!imarker_state_->setFromIK(group, poses, tips, timeout, constraint_fn))
     {
-      ROS_DEBUG_STREAM_NAMED(name_, "Failed to find dual arm pose, trying again");
+      RCLCPP_DEBUG_STREAM(LOGGER, "Failed to find dual arm pose, trying again");
 
       // Re-seed
       imarker_state_->setToRandomPositions(group);
     }
     else
     {
-      ROS_DEBUG_STREAM_NAMED(name_, "Found IK solution");
+      RCLCPP_DEBUG_STREAM(LOGGER, "Found IK solution");
 
       // Visualize robot
       publishRobotState();
@@ -384,7 +389,7 @@ bool IMarkerRobotState::setFromPoses(const EigenSTL::vector_Isometry3d& poses,
     }
   }
 
-  ROS_ERROR_STREAM_NAMED(name_, "Failed to find dual arm pose");
+  RCLCPP_ERROR_STREAM(LOGGER, "Failed to find dual arm pose");
   return false;
 }
 

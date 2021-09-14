@@ -1,96 +1,94 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.5)
 project(moveit_visual_tools)
 
-# C++ 11 required for OMPL
-add_compile_options(-std=c++11)
+find_package(moveit_common REQUIRED)
+moveit_package()
 
-# Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED COMPONENTS
-  rviz_visual_tools
-  tf2_eigen
-  geometry_msgs
-  moveit_ros_planning
-  moveit_core
-  roscpp
-  tf2_ros
-  visualization_msgs
-  graph_msgs
-  std_msgs
-  trajectory_msgs
-  cmake_modules
-  roslint
-)
-
-find_package(Eigen3 REQUIRED)
+# Load  all dependencies required for this package
 find_package(Boost REQUIRED system)
+find_package(Eigen3 REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(graph_msgs REQUIRED)
+find_package(moveit_core REQUIRED)
+find_package(moveit_ros_planning REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
+find_package(rviz_visual_tools REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(tf2_eigen REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(trajectory_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
 
-# Catkin
-catkin_package(
-  LIBRARIES
-    ${PROJECT_NAME}
-  CATKIN_DEPENDS
-    roscpp
-    rviz_visual_tools
-    moveit_ros_planning
-    moveit_core
-    geometry_msgs
-    visualization_msgs
-    graph_msgs
-    std_msgs
-    trajectory_msgs
-  INCLUDE_DIRS include
-)
-
-## Build
-include_directories(include)
-include_directories(SYSTEM
-  ${catkin_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIRS}
+set(THIS_PACKAGE_INCLUDE_DEPENDS
+  Boost
+  geometry_msgs
+  graph_msgs
+  moveit_core
+  moveit_ros_planning
+  rclcpp
+  rviz_visual_tools
+  std_msgs
+  tf2_eigen
+  tf2_ros
+  trajectory_msgs
+  visualization_msgs
 )
 
 # Visualization Tools Library
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} SHARED
   src/${PROJECT_NAME}.cpp
   src/imarker_robot_state.cpp
   src/imarker_end_effector.cpp
 )
-set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
-add_dependencies(${PROJECT_NAME} graph_msgs_generate_messages_cpp)
-target_link_libraries(${PROJECT_NAME}
-  ${catkin_LIBRARIES} ${Boost_LIBRARIES}
+
+target_include_directories(${PROJECT_NAME}
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PUBLIC $<INSTALL_INTERFACE:include>
 )
+ament_target_dependencies(${PROJECT_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Demo executable
-add_executable(${PROJECT_NAME}_demo src/${PROJECT_NAME}_demo.cpp)
-target_link_libraries(${PROJECT_NAME}_demo
-  ${catkin_LIBRARIES} ${PROJECT_NAME}
+add_executable(${PROJECT_NAME}_demo
+  src/${PROJECT_NAME}_demo.cpp
 )
+target_link_libraries(${PROJECT_NAME}_demo
+  ${PROJECT_NAME}
+)
+ament_target_dependencies(${PROJECT_NAME}_demo ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 
-#############
-## Testing ##
-#############
-
-## Test for correct C++ source code
-roslint_cpp()
+# Exports
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 #############
 ## Install ##
 #############
 
-# Install libraries
-install(TARGETS ${PROJECT_NAME}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+# Install libraries and executables
+install(
+  TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_demo
+  EXPORT
+    export_${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
+)
 
 # Install header files
-install(DIRECTORY include/${PROJECT_NAME}/   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+install(DIRECTORY include/ DESTINATION include)
 
 # Install shared resources
-install(DIRECTORY launch    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-install(DIRECTORY resources DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+install(DIRECTORY launch resources DESTINATION share/${PROJECT_NAME})
 
-# Install executables
-install(TARGETS ${PROJECT_NAME}_demo
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+#############
+## Testing ##
+#############
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
+ament_package()

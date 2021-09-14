@@ -43,12 +43,18 @@
 #include <string>
 
 // Conversions
+#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <tf2_eigen/tf2_eigen.hpp>
+#else
 #include <tf2_eigen/tf2_eigen.h>
+#endif
 
 // this package
 #include <moveit_visual_tools/imarker_robot_state.h>
 #include <moveit_visual_tools/imarker_end_effector.h>
 
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("imarker_end_effector");
+static rclcpp::Clock steady_clock(RCL_STEADY_TIME);
 namespace
 {
 bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verbose, bool only_check_self_collision,
@@ -63,9 +69,9 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verb
   const std::size_t num_collision_objects = planning_scene->getCollisionEnv()->getWorld()->size();
   if (num_collision_objects == 0)
   {
-    ROS_ERROR_STREAM_NAMED("cart_path_planner", "No collision objects exist in world, you need at least a table "
+    RCLCPP_ERROR(LOGGER, "No collision objects exist in world, you need at least a table "
                            "modeled for the controller to work");
-    ROS_ERROR_STREAM_NAMED("cart_path_planner", "To fix this, relaunch the teleop/head tracking/whatever MoveIt "
+    RCLCPP_ERROR(LOGGER, "To fix this, relaunch the teleop/head tracking/whatever MoveIt "
                            "node to publish the collision objects");
     return false;
   }
@@ -73,7 +79,7 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verb
 
   if (!planning_scene)
   {
-    ROS_ERROR_STREAM_NAMED("cart_path_planner", "No planning scene provided");
+    RCLCPP_ERROR(LOGGER, "No planning scene provided");
     return false;
   }
   if (only_check_self_collision)
@@ -98,7 +104,7 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verb
     planning_scene->isStateColliding(*robot_state, group->getName(), true);
     visual_tools->publishContactPoints(*robot_state, planning_scene);
   }
-  ROS_WARN_STREAM_THROTTLE_NAMED(2.0, "cart_path_planner", "Collision");
+  RCLCPP_WARN_THROTTLE(LOGGER, steady_clock, 2000, "Collision");
   return false;
 }
 
@@ -107,7 +113,7 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verb
 namespace moveit_visual_tools
 {
 IMarkerEndEffector::IMarkerEndEffector(IMarkerRobotState* imarker_parent, const std::string& imarker_name,
-                                       ArmData arm_data, rviz_visual_tools::colors color)
+                                       ArmData arm_data, rviz_visual_tools::Colors color)
   : name_(imarker_name)
   , imarker_parent_(imarker_parent)
   , imarker_state_(imarker_parent_->imarker_state_)
@@ -116,6 +122,7 @@ IMarkerEndEffector::IMarkerEndEffector(IMarkerRobotState* imarker_parent, const 
   , arm_data_(arm_data)
   , color_(color)
   , imarker_server_(imarker_parent_->imarker_server_)
+  , clock_(RCL_ROS_TIME)
 {
   // Get pose from robot state
   imarker_pose_ = imarker_state_->getGlobalLinkTransform(arm_data_.ee_link_);
@@ -123,8 +130,8 @@ IMarkerEndEffector::IMarkerEndEffector(IMarkerRobotState* imarker_parent, const 
   // Create imarker
   initializeInteractiveMarkers();
 
-  ROS_INFO_STREAM_NAMED(name_, "IMarkerEndEffector '" << name_ << "' tracking ee link '"
-                                                      << arm_data_.ee_link_->getName() << "' ready.");
+  RCLCPP_INFO_STREAM(LOGGER, "IMarkerEndEffector " << name_ << " tracking ee link '" << arm_data_.ee_link_->getName()
+                                                   << "' ready.");
 }
 
 void IMarkerEndEffector::getPose(Eigen::Isometry3d& pose)
@@ -141,22 +148,23 @@ bool IMarkerEndEffector::setPoseFromRobotState()
   return true;
 }
 
-void IMarkerEndEffector::iMarkerCallback(const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback)
+void IMarkerEndEffector::iMarkerCallback(
+    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
 {
-  if (feedback->event_type == visualization_msgs::InteractiveMarkerFeedback::MOUSE_UP)
+  if (feedback->event_type == visualization_msgs::msg::InteractiveMarkerFeedback::MOUSE_UP)
   {
     // Save pose to file if its been long enough
     double save_every_sec = 0.1;
-    if (time_since_last_save_ < ros::Time::now() - ros::Duration(save_every_sec))
+    if (time_since_last_save_ < clock_.now() - rclcpp::Duration::from_seconds(save_every_sec))
     {
       imarker_parent_->saveToFile();
-      time_since_last_save_ = ros::Time::now();
+      time_since_last_save_ = clock_.now();
     }
     return;
   }
 
   // Ignore if not pose update
-  if (feedback->event_type != visualization_msgs::InteractiveMarkerFeedback::POSE_UPDATE)
+  if (feedback->event_type != visualization_msgs::msg::InteractiveMarkerFeedback::POSE_UPDATE)
     return;
 
   // Only allow one feedback to be processed at a time
@@ -223,7 +231,7 @@ void IMarkerEndEffector::solveIK(Eigen::Isometry3d& pose)
 void IMarkerEndEffector::initializeInteractiveMarkers()
 {
   // Convert
-  const geometry_msgs::Pose pose_msg = tf2::toMsg(imarker_pose_);
+  const geometry_msgs::msg::Pose pose_msg = tf2::toMsg(imarker_pose_);
 
   // marker
   make6DofMarker(pose_msg);
@@ -239,15 +247,15 @@ void IMarkerEndEffector::updateIMarkerPose(const Eigen::Isometry3d& /*pose*/)
 void IMarkerEndEffector::sendUpdatedIMarkerPose()
 {
   // Convert
-  const geometry_msgs::Pose pose_msg = tf2::toMsg(imarker_pose_);
+  const geometry_msgs::msg::Pose pose_msg = tf2::toMsg(imarker_pose_);
 
   imarker_server_->setPose(int_marker_.name, pose_msg);
   imarker_server_->applyChanges();
 }
 
-void IMarkerEndEffector::make6DofMarker(const geometry_msgs::Pose& pose)
+void IMarkerEndEffector::make6DofMarker(const geometry_msgs::msg::Pose& pose)
 {
-  ROS_DEBUG_STREAM_NAMED(name_, "Making 6dof interactive marker named " << name_);
+  RCLCPP_DEBUG_STREAM(LOGGER, "Making 6dof interactive marker named " << name_);
 
   int_marker_.header.frame_id = "world";
   int_marker_.pose = pose;
@@ -296,19 +304,19 @@ void IMarkerEndEffector::make6DofMarker(const geometry_msgs::Pose& pose)
   control.interaction_mode = InteractiveMarkerControl::MOVE_AXIS;
   int_marker_.controls.push_back(control);
 
-  imarker_server_->insert(int_marker_);
-  imarker_server_->setCallback(int_marker_.name, boost::bind(&IMarkerEndEffector::iMarkerCallback, this, _1));
+  imarker_server_->insert(int_marker_, std::bind(&IMarkerEndEffector::iMarkerCallback, this, std::placeholders::_1));
+
   // menu_handler_.apply(*imarker_server_, int_marker_.name);
 }
 
-visualization_msgs::InteractiveMarkerControl&
-IMarkerEndEffector::makeBoxControl(visualization_msgs::InteractiveMarker& msg)
+visualization_msgs::msg::InteractiveMarkerControl&
+IMarkerEndEffector::makeBoxControl(visualization_msgs::msg::InteractiveMarker& msg)
 {
-  visualization_msgs::InteractiveMarkerControl control;
+  visualization_msgs::msg::InteractiveMarkerControl control;
   control.always_visible = true;
 
-  visualization_msgs::Marker marker;
-  marker.type = visualization_msgs::Marker::CUBE;
+  visualization_msgs::msg::Marker marker;
+  marker.type = visualization_msgs::msg::Marker::CUBE;
   marker.scale.x = msg.scale * 0.3;   // x direction
   marker.scale.y = msg.scale * 0.10;  // y direction
   marker.scale.z = msg.scale * 0.10;  // height
