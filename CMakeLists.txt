@@ -66,13 +66,18 @@ ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 ## Install ##
 #############
 
-# Install libraries and executables
+# Install libraries
 install(
-  TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_demo
+  TARGETS ${PROJECT_NAME}
   EXPORT
     export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
+)
+
+# Install executables
+install(
+  TARGETS ${PROJECT_NAME}_demo
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
