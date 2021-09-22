@@ -1324,7 +1324,6 @@ void MoveItVisualTools::publishTrajectoryPath(const moveit_msgs::msg::DisplayTra
   // Publish message
   loadTrajectoryPub();  // always call this before publishing
   pub_display_path_->publish(display_trajectory_msg);
-  rclcpp::spin_some(node_);
 }
 
 bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::msg::RobotTrajectory& trajectory_msg,
@@ -1566,7 +1565,6 @@ void MoveItVisualTools::publishRobotState(const moveit_msgs::msg::DisplayRobotSt
 {
   loadRobotStatePub();
   pub_robot_state_->publish(robot_state_msg);
-  rclcpp::spin_some(node_);
 }
 
 bool MoveItVisualTools::hideRobot()
