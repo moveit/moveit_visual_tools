@@ -27,7 +27,7 @@ jobs:
       AFTER_SETUP_UPSTREAM_WORKSPACE_EMBED: set +u && source ~/ws_moveit/install/setup.bash && set - u
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       BASEDIR: ${{ github.workspace }}/.work
-      CACHE_PREFIX: ${{ github.workspace }}/.ccache
+      CACHE_PREFIX: ${{ matrix.env.IMAGE }}
       CLANG_TIDY_BASE_REF: ${{ github.base_ref || github.ref }}
 
     name: ${{ matrix.env.IMAGE }}${{ matrix.env.CLANG_TIDY && ' + clang-tidy' || '' }}
