@@ -2,6 +2,12 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Port to ros2 (`#92 <https://github.com/ros-planning/moveit_visual_tools/issues/92>`_)
+* Fix typo in package.xml (`#87 <https://github.com/ros-planning/moveit_visual_tools/issues/87>`_)
+* Contributors: Davide Faconti, Felix von Drigalski, Vatan Aksoy Tezer
+
 3.6.0 (2020-10-09)
 ------------------
 * [feature] Unified collision environment used (`#54 <https://github.com/ros-planning/moveit_visual_tools/issues/54>`_)
