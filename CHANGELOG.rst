@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.0.0 (2021-09-27)
+------------------
 * Port to ros2 (`#92 <https://github.com/ros-planning/moveit_visual_tools/issues/92>`_)
 * Fix typo in package.xml (`#87 <https://github.com/ros-planning/moveit_visual_tools/issues/87>`_)
 * Contributors: Davide Faconti, Felix von Drigalski, Vatan Aksoy Tezer
