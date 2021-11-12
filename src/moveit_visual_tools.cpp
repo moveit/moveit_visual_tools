@@ -115,8 +115,7 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
   std::shared_ptr<tf2_ros::TransformListener> tfl = std::make_shared<tf2_ros::TransformListener>(*tf_buffer);
 
   // Regular version b/c the other one causes problems with recognizing end effectors
-  psm_.reset(
-      new planning_scene_monitor::PlanningSceneMonitor(node_, ROBOT_DESCRIPTION, tf_buffer, "visual_tools_scene"));
+  psm_.reset(new planning_scene_monitor::PlanningSceneMonitor(node_, ROBOT_DESCRIPTION, "visual_tools_scene"));
 
   if (psm_->getPlanningScene())
   {
