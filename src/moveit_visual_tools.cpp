@@ -108,12 +108,6 @@ bool MoveItVisualTools::loadPlanningSceneMonitor()
   }
   RCLCPP_INFO_STREAM(LOGGER, "Loading planning scene monitor");
 
-  // TODO: Remove listener when https://github.com/ros-planning/moveit2/pull/310/ is merged
-  // Create tf transform buffer and listener
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer =
-      std::make_shared<tf2_ros::Buffer>(node_->get_clock(), tf2::durationFromSec(10.0));
-  std::shared_ptr<tf2_ros::TransformListener> tfl = std::make_shared<tf2_ros::TransformListener>(*tf_buffer);
-
   // Regular version b/c the other one causes problems with recognizing end effectors
   psm_.reset(new planning_scene_monitor::PlanningSceneMonitor(node_, ROBOT_DESCRIPTION, "visual_tools_scene"));
 
