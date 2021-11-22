@@ -8,7 +8,7 @@ on:
   pull_request:
   push:
     branches:
-      - ros2
+      - foxy
 
 jobs:
   industrial_ci:
@@ -17,8 +17,6 @@ jobs:
         env:
           - IMAGE: foxy-source
             CLANG_TIDY: true
-          - IMAGE: galactic-source
-          - IMAGE: rolling-source
 
     env:
       DOCKER_IMAGE: moveit/moveit2:${{ matrix.env.IMAGE }}
