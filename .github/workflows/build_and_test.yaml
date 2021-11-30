@@ -15,9 +15,8 @@ jobs:
     strategy:
       matrix:
         env:
-          - IMAGE: foxy-source
-            CLANG_TIDY: true
           - IMAGE: galactic-source
+            CLANG_TIDY: true
           - IMAGE: rolling-source
 
     env:
