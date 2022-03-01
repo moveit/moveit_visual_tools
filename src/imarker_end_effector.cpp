@@ -202,7 +202,7 @@ void IMarkerEndEffector::solveIK(Eigen::Isometry3d& pose)
     boost::scoped_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls;
     ls.reset(new planning_scene_monitor::LockedPlanningSceneRO(psm_));
     constraint_fn = boost::bind(&isStateValid, static_cast<const planning_scene::PlanningSceneConstPtr&>(*ls).get(),
-                                collision_checking_verbose_, only_check_self_collision_, visual_tools_, _1, _2, _3);
+                                collision_checking_verbose_, only_check_self_collision_, visual_tools_, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3);
   }
 
   // Attempt to set robot to new pose
