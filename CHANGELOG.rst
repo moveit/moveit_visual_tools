@@ -2,6 +2,15 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update black version (`#117 <https://github.com/ros-planning/moveit_visual_tools/issues/117>`_)
+* Jammy fixes and clang-format-12 (`#116 <https://github.com/ros-planning/moveit_visual_tools/issues/116>`_)
+* Fixed deprecated call to PlanningSceneMonitor's constructor (`#108 <https://github.com/ros-planning/moveit_visual_tools/issues/108>`_)
+* Remove Foxy CI builds (`#111 <https://github.com/ros-planning/moveit_visual_tools/issues/111>`_)
+* Generate license using ament_copyright (`#105 <https://github.com/ros-planning/moveit_visual_tools/issues/105>`_)
+* Contributors: Jafar Abdi, Stephanie Eng, Vatan Aksoy Tezer
+
 4.0.0 (2021-09-27)
 ------------------
 * Port to ros2 (`#92 <https://github.com/ros-planning/moveit_visual_tools/issues/92>`_)
