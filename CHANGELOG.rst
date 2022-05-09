@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.1.0 (2022-05-09)
+------------------
 * Update black version (`#117 <https://github.com/ros-planning/moveit_visual_tools/issues/117>`_)
 * Jammy fixes and clang-format-12 (`#116 <https://github.com/ros-planning/moveit_visual_tools/issues/116>`_)
 * Fixed deprecated call to PlanningSceneMonitor's constructor (`#108 <https://github.com/ros-planning/moveit_visual_tools/issues/108>`_)
