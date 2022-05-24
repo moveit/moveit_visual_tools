@@ -17,6 +17,7 @@ jobs:
         env:
           - IMAGE: galactic-source
             CLANG_TIDY: true
+          - IMAGE: humble-source
           - IMAGE: rolling-source
 
     env:
