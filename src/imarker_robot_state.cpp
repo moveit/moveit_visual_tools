@@ -44,6 +44,8 @@
 #include <moveit_visual_tools/imarker_robot_state.h>
 #include <moveit_visual_tools/imarker_end_effector.h>
 
+#include <boost/filesystem.hpp>
+
 // C++
 #include <string>
 #include <utility>
