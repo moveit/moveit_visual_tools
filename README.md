@@ -51,7 +51,7 @@ Install moveit2 following the instructions [here](https://moveit.ros.org/install
 
 To run some demos displaying robot states and collision objects:
 
-    ros2 launch moveit_visual_tools demo_rviz.launch
+    ros2 launch moveit_visual_tools demo_rviz.launch.py
 
 ## Code API
 
