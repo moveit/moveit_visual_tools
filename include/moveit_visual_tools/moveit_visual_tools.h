@@ -145,7 +145,7 @@ public:
   bool processAttachedCollisionObjectMsg(const moveit_msgs::AttachedCollisionObject& msg);
 
   /**
-   * \brief Move an already published collision object to a new locaiton in space
+   * \brief Move an already published collision object to a new location in space
    * \param pose - location of center of object
    * \param name - semantic name of MoveIt collision object
    * \return true on success
