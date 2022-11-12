@@ -199,7 +199,7 @@ public:
 
   /**
    * \brief Allow a pre-configured planning scene monitor to be set for publishing collision objects, etc
-   * \param a pointer to a load planning scen
+   * \param a pointer to a load planning scene
    */
   void setPlanningSceneMonitor(planning_scene_monitor::PlanningSceneMonitorPtr psm)
   {
