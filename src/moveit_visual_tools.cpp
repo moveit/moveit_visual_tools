@@ -1390,16 +1390,9 @@ bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::msg::RobotTraje
   }
 
   std::vector<const moveit::core::LinkModel*> tips;
-  bool tips_ok = arm_jmg->getEndEffectorTips(tips);
-  if (!tips_ok)
+  if (!arm_jmg->getEndEffectorTips(tips) || tips.empty())
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Unable to get end effector tips from jmg");
-    return false;
-  }
-  if (tips.empty())
-  {
-    RCLCPP_WARN_STREAM(LOGGER, "Can't create trajectory line because the group '" << arm_jmg->getName()
-                                                                                  << "' doesn't define end-effectors");
     return false;
   }
 
@@ -1431,16 +1424,9 @@ bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTraje
   }
 
   std::vector<const moveit::core::LinkModel*> tips;
-  bool tips_ok = arm_jmg->getEndEffectorTips(tips);
-  if (!tips_ok)
+  if (!arm_jmg->getEndEffectorTips(tips) || tips.empty())
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Unable to get end effector tips from jmg");
-    return false;
-  }
-  if (tips.empty())
-  {
-    RCLCPP_WARN_STREAM(LOGGER, "Can't create trajectory line because the group '" << arm_jmg->getName()
-                                                                                  << "' doesn't define end-effectors");
     return false;
   }
 
