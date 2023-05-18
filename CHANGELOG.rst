@@ -2,6 +2,14 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.6.1 (2023-05-18)
+------------------
+* publishTrajectoryLine(): issue error when no end-effector tips are found (`#129 <https://github.com/ros-planning/moveit_visual_tools/issues/129>`_)
+* Fixed possible null-pointer segfault (`#95 <https://github.com/ros-planning/moveit_visual_tools/issues/95>`_)
+* Only set active joints (`#84 <https://github.com/ros-planning/moveit_visual_tools/issues/84>`_)
+* Use specified color for EndEffector marker (`#96 <https://github.com/ros-planning/moveit_visual_tools/issues/96>`_)
+* Contributors: Felix von Drigalski, Henning Kayser, Jochen Sprickerhof, Michael Görner, Robert Haschke, Simon Schmeisser, Stephanie Eng, Tyler Weaver, Vatan Aksoy Tezer, werner291
+
 3.6.0 (2020-10-09)
 ------------------
 * [feature] Unified collision environment used (`#54 <https://github.com/ros-planning/moveit_visual_tools/issues/54>`_)
