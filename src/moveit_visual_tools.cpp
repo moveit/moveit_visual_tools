@@ -1383,8 +1383,14 @@ bool MoveItVisualTools::publishTrajectoryLine(const moveit_msgs::msg::RobotTraje
                                               const moveit::core::JointModelGroup* arm_jmg,
                                               const rviz_visual_tools::Colors& color)
 {
+  if (!arm_jmg)
+  {
+    RCLCPP_FATAL_STREAM(LOGGER, "arm_jmg is NULL");
+    return false;
+  }
+
   std::vector<const moveit::core::LinkModel*> tips;
-  if (!arm_jmg->getEndEffectorTips(tips))
+  if (!arm_jmg->getEndEffectorTips(tips) || tips.empty())
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Unable to get end effector tips from jmg");
     return false;
@@ -1411,8 +1417,14 @@ bool MoveItVisualTools::publishTrajectoryLine(const robot_trajectory::RobotTraje
                                               const moveit::core::JointModelGroup* arm_jmg,
                                               const rviz_visual_tools::Colors& color)
 {
+  if (!arm_jmg)
+  {
+    RCLCPP_FATAL_STREAM(LOGGER, "arm_jmg is NULL");
+    return false;
+  }
+
   std::vector<const moveit::core::LinkModel*> tips;
-  if (!arm_jmg->getEndEffectorTips(tips))
+  if (!arm_jmg->getEndEffectorTips(tips) || tips.empty())
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Unable to get end effector tips from jmg");
     return false;
