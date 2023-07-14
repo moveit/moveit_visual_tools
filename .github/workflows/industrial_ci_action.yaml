@@ -54,7 +54,7 @@ jobs:
         uses: 'tylerjw/industrial_ci@clang-tidy-modified-filter'
         env: ${{ matrix.env }}
       - name: upload test artifacts (on failure)
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: test-results
