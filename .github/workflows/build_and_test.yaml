@@ -33,7 +33,7 @@ jobs:
     name: ${{ matrix.env.IMAGE }}${{ matrix.env.CLANG_TIDY && ' + clang-tidy' || '' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: cache upstream_ws
@@ -53,7 +53,7 @@ jobs:
           restore-keys: |
             target_ws-${{ env.CACHE_PREFIX }}-${{ hashFiles('**/CMakeLists.txt', '**/package.xml') }}
       - name: cache ccache
-        uses: pat-s/always-upload-cache@v2.1.5
+        uses: pat-s/always-upload-cache@v3
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-${{ env.CACHE_PREFIX }}-${{ github.sha }}-${{ github.run_id }}
