@@ -195,7 +195,7 @@ public:
    */
   void loadTrajectoryPub(const std::string& display_planned_path_topic = DISPLAY_PLANNED_PATH_TOPIC,
                          bool blocking = true);
-  void loadRobotStatePub(const std::string& robot_state_topic = "", bool blocking = true);
+  void loadRobotStatePub(const std::string& robot_state_topic = DISPLAY_ROBOT_STATE_TOPIC, bool blocking = true);
 
   /**
    * \brief Allow a pre-configured planning scene monitor to be set for publishing collision objects, etc
