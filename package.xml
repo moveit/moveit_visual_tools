@@ -29,6 +29,8 @@
   <depend>trajectory_msgs</depend>
   <depend>visualization_msgs</depend>
 
+  <build_depend>pybind11_vendor</build_depend>
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 

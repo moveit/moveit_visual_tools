@@ -31,6 +31,9 @@ import os
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
+from launch.conditions import IfCondition, UnlessCondition
+from launch.substitutions import LaunchConfiguration
+from launch.actions import DeclareLaunchArgument
 
 
 def load_file(package_name, file_path):
@@ -61,6 +64,18 @@ def generate_launch_description():
         package="moveit_visual_tools",
         executable="moveit_visual_tools_demo",
         output="screen",
+        condition=UnlessCondition(LaunchConfiguration("launch_python_demo")),
+        parameters=[
+            robot_description,
+            robot_description_semantic,
+        ],
+    )
+
+    moveit_visual_tools_demo_py = Node(
+        package="moveit_visual_tools",
+        executable="moveit_visual_tools_demo.py",
+        output="screen",
+        condition=IfCondition(LaunchConfiguration("launch_python_demo")),
         parameters=[
             robot_description,
             robot_description_semantic,
@@ -93,4 +108,16 @@ def generate_launch_description():
         arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "base"],
     )
 
-    return LaunchDescription([rviz_node, static_tf, moveit_visual_tools_demo])
+    return LaunchDescription(
+        [
+            DeclareLaunchArgument(
+                "launch_python_demo",
+                default_value="False",
+                description="Launch the Python demo",
+            ),
+            rviz_node,
+            static_tf,
+            moveit_visual_tools_demo,
+            moveit_visual_tools_demo_py,
+        ]
+    )
