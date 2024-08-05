@@ -36,7 +36,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: cache upstream_ws
-        uses: pat-s/always-upload-cache@v4
+        uses: pat-s/always-upload-cache@v3
         with:
           path: ${{ env.BASEDIR }}/upstream_ws
           key: upstream_ws-${{ env.CACHE_PREFIX }}-${{ hashFiles('moveit_visual_tools.repos') }}-${{ github.run_id }}
