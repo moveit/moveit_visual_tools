@@ -96,6 +96,7 @@ if(BUILD_TESTING)
   set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)
+  set(ament_cmake_flake8_CONFIG_FILE ".ament_flake8.ini")
   ament_lint_auto_find_test_dependencies()
 endif()
 
