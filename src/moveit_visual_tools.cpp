@@ -351,7 +351,7 @@ void MoveItVisualTools::loadTrajectoryPub(const std::string& display_planned_pat
     }
     else
     {
-      RCLCPP_WARN_STREAM(LOGGER, "Cannot subsribe to display trajectory topic: " << display_planned_path_topic);
+      RCLCPP_WARN_STREAM(LOGGER, "Cannot subscribe to display trajectory topic: " << display_planned_path_topic);
     }
   }
 }
