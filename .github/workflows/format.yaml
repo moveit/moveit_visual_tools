@@ -8,14 +8,14 @@ on:
   pull_request:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   pre-commit:
     name: Format
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install clang-format-10
         run: sudo apt-get install clang-format-10
       - name: Install catkin-lint
@@ -29,4 +29,4 @@ jobs:
           rosdep update
           sudo apt-get -q install catkin-lint
           export ROS_DISTRO=noetic
-      - uses: pre-commit/action@v3.0.0
+      - uses: pre-commit/action@v3.0.1
