@@ -54,8 +54,8 @@ add_executable(${PROJECT_NAME}_demo
 )
 target_link_libraries(${PROJECT_NAME}_demo
   ${PROJECT_NAME}
+  PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 )
-target_link_libraries(${PROJECT_NAME}_demo PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 
 # Exports
