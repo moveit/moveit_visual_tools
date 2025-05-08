@@ -46,7 +46,7 @@ target_include_directories(${PROJECT_NAME}
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   PUBLIC $<INSTALL_INTERFACE:include>
 )
-ament_target_dependencies(${PROJECT_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Demo executable
 add_executable(${PROJECT_NAME}_demo
@@ -55,7 +55,7 @@ add_executable(${PROJECT_NAME}_demo
 target_link_libraries(${PROJECT_NAME}_demo
   ${PROJECT_NAME}
 )
-ament_target_dependencies(${PROJECT_NAME}_demo ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(${PROJECT_NAME}_demo PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 
 # Exports
