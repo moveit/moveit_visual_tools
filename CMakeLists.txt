@@ -46,7 +46,7 @@ target_include_directories(${PROJECT_NAME}
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   PUBLIC $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(${PROJECT_NAME} PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${geometry_msgs_TARGETS} ${std_msgs_TARGETS} ${trajectory_msgs_TARGETS} ${visualization_msgs_TARGETS} moveit_core::moveit_collision_detection moveit_ros_planning::kinematics_parameters moveit_ros_planning::moveit_collision_plugin_loader rclcpp::rclcpp tf2_eigen::tf2_eigen tf2_ros::tf2_ros)
 
 # Demo executable
 add_executable(${PROJECT_NAME}_demo
@@ -54,7 +54,7 @@ add_executable(${PROJECT_NAME}_demo
 )
 target_link_libraries(${PROJECT_NAME}_demo
   ${PROJECT_NAME}
-  PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
+PUBLIC ${geometry_msgs_TARGETS} ${std_msgs_TARGETS} ${trajectory_msgs_TARGETS} ${visualization_msgs_TARGETS} moveit_core::moveit_collision_detection moveit_ros_planning::kinematics_parameters moveit_ros_planning::moveit_collision_plugin_loader rclcpp::rclcpp tf2_eigen::tf2_eigen tf2_ros::tf2_ros
 )
 
 
