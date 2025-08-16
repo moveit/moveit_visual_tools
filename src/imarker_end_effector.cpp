@@ -266,7 +266,6 @@ void IMarkerEndEffector::make6DofMarker(const geometry_msgs::msg::Pose& pose)
   int_marker_.controls.push_back(control);
 
   imarker_server_->insert(int_marker_, std::bind(&IMarkerEndEffector::iMarkerCallback, this, std::placeholders::_1));
-
 }
 
 visualization_msgs::msg::InteractiveMarkerControl&
