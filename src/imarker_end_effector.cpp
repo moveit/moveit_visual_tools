@@ -59,18 +59,6 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene, bool verb
   robot_state->setJointGroupPositions(group, ik_solution);
   robot_state->update();
 
-#if 0  // Ensure there are objects in the planning scene
-  const std::size_t num_collision_objects = planning_scene->getCollisionEnv()->getWorld()->size();
-  if (num_collision_objects == 0)
-  {
-    RCLCPP_ERROR(LOGGER, "No collision objects exist in world, you need at least a table "
-                           "modeled for the controller to work");
-    RCLCPP_ERROR(LOGGER, "To fix this, relaunch the teleop/head tracking/whatever MoveIt "
-                           "node to publish the collision objects");
-    return false;
-  }
-#endif
-
   if (!planning_scene)
   {
     RCLCPP_ERROR(LOGGER, "No planning scene provided");
@@ -163,7 +151,6 @@ void IMarkerEndEffector::iMarkerCallback(
 
   // Only allow one feedback to be processed at a time
   {
-    // boost::unique_lock<boost::mutex> scoped_lock(imarker_mutex_);
     if (!imarker_ready_to_process_)
     {
       return;
@@ -183,10 +170,7 @@ void IMarkerEndEffector::iMarkerCallback(
     imarker_callback_(feedback, robot_ee_pose);
 
   // Allow next feedback to be processed
-  {
-    // boost::unique_lock<boost::mutex> scoped_lock(imarker_mutex_);
-    imarker_ready_to_process_ = true;
-  }
+  imarker_ready_to_process_ = true;
 }
 
 void IMarkerEndEffector::solveIK(Eigen::Isometry3d& pose)
@@ -210,16 +194,7 @@ void IMarkerEndEffector::solveIK(Eigen::Isometry3d& pose)
   if (imarker_state_->setFromIK(arm_data_.jmg_, pose, arm_data_.ee_link_->getName(), timeout, constraint_fn))
   {
     imarker_state_->update();
-    // if (psm_->getPlanningScene()->isStateValid(*imarker_state_))
-    //{
-    // ROS_INFO_STREAM_NAMED(name_, "Solved IK");
     imarker_parent_->publishRobotState();
-    //}
-    // else
-    // {
-    //   visual_tools_->publishRobotState(imarker_state_, rviz_visual_tools::RED);
-    //   exit(0);
-    // }
   }
 }
 
@@ -235,7 +210,6 @@ void IMarkerEndEffector::initializeInteractiveMarkers()
 void IMarkerEndEffector::updateIMarkerPose(const Eigen::Isometry3d& /*pose*/)
 {
   // Move marker to tip of fingers
-  // imarker_pose_ = pose * imarker_offset_.inverse();
   sendUpdatedIMarkerPose();
 }
 
@@ -255,15 +229,7 @@ void IMarkerEndEffector::make6DofMarker(const geometry_msgs::msg::Pose& pose)
   int_marker_.header.frame_id = "world";
   int_marker_.pose = pose;
   int_marker_.scale = 0.2;
-
   int_marker_.name = name_;
-  // int_marker_.description = "imarker_" + name_; // TODO: unsure, but I think this causes a caption in Rviz that I
-  // don't want
-
-  // insert a box
-  // makeBoxControl(int_marker_);
-
-  // int_marker_.controls[0].interaction_mode = InteractiveMarkerControl::MENU;
 
   InteractiveMarkerControl control;
   control.orientation.w = 1;
@@ -301,7 +267,6 @@ void IMarkerEndEffector::make6DofMarker(const geometry_msgs::msg::Pose& pose)
 
   imarker_server_->insert(int_marker_, std::bind(&IMarkerEndEffector::iMarkerCallback, this, std::placeholders::_1));
 
-  // menu_handler_.apply(*imarker_server_, int_marker_.name);
 }
 
 visualization_msgs::msg::InteractiveMarkerControl&
