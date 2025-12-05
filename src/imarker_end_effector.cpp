@@ -126,7 +126,6 @@ bool IMarkerEndEffector::setPoseFromRobotState()
   imarker_pose_ = imarker_state_->getGlobalLinkTransform(arm_data_.ee_link_);
 
   sendUpdatedIMarkerPose();
-
   return true;
 }
 
