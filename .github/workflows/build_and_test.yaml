@@ -33,11 +33,11 @@ jobs:
     name: ${{ matrix.env.IMAGE }}${{ matrix.env.CLANG_TIDY && ' + clang-tidy' || '' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: cache upstream_ws
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           save-always: true
           path: ${{ env.BASEDIR }}/upstream_ws
