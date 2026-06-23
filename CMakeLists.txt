@@ -5,7 +5,7 @@ find_package(moveit_common REQUIRED)
 moveit_package()
 
 # Load  all dependencies required for this package
-find_package(Boost REQUIRED system)
+find_package(Boost REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(graph_msgs REQUIRED)
