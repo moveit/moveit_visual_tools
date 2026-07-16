@@ -23,6 +23,7 @@
   <depend>moveit_ros_planning</depend>
   <depend>rclcpp</depend>
   <depend>rviz_visual_tools</depend>
+  <depend>interactive_markers</depend>
   <depend>std_msgs</depend>
   <depend>tf2_eigen</depend>
   <depend>tf2_ros</depend>
