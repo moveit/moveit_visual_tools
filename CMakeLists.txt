@@ -19,7 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(Eigen3 REQUIRED)
-find_package(Boost REQUIRED system)
+find_package(Boost REQUIRED filesystem)
 
 # Catkin
 catkin_package(
