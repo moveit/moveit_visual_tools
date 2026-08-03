@@ -60,7 +60,7 @@ target_link_libraries(${PROJECT_NAME}
     moveit_core::moveit_robot_state
     moveit_core::moveit_utils
     ${moveit_msgs_TARGETS}
-    moveit_ros_planning::moveit_ros_planning
+    moveit_ros_planning::moveit_planning_scene_monitor
     rclcpp::rclcpp
     rviz_visual_tools::rviz_visual_tools
     interactive_markers::interactive_markers
@@ -90,7 +90,7 @@ target_link_libraries(${PROJECT_NAME}_demo
   moveit_core::moveit_robot_state
   moveit_core::moveit_utils
   ${moveit_msgs_TARGETS}
-  moveit_ros_planning::moveit_ros_planning
+  moveit_ros_planning::moveit_planning_scene_monitor
   rclcpp::rclcpp
   rviz_visual_tools::rviz_visual_tools
   interactive_markers::interactive_markers
