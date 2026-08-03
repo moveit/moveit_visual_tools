@@ -2,8 +2,8 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.2.0 (2026-08-03)
+------------------
 * Fix Rolling build: replace ament_target_dependencies + guard the ament_index_cpp header rename (`#156 <https://github.com/moveit/moveit_visual_tools/issues/156>`_)
   Rolling removed ``ament_target_dependencies``; migrate the library and demo
   targets to ``target_link_libraries`` with imported targets. Along with it:
