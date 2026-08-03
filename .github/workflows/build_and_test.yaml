@@ -16,22 +16,41 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          - IMAGE: humble-source
-          - IMAGE: rolling-source
+          - ROS_DISTRO: humble
+            ROS_REPO: main
+          - ROS_DISTRO: jazzy
+            ROS_REPO: main
+          - ROS_DISTRO: kilted
+            ROS_REPO: main
             CLANG_TIDY: true
+          # moveit_core has no Resolute deb yet, so these two cannot pass until
+          # moveit2 is released for Resolute. Keep them non-blocking until then;
+          # they are the only jobs here that exercise Resolute at all.
+          - ROS_DISTRO: lyrical
+            ROS_REPO: main
+            OS_CODE_NAME: resolute
+            NONBLOCKING: true
+          - ROS_DISTRO: rolling
+            ROS_REPO: testing
+            OS_CODE_NAME: resolute
+            NONBLOCKING: true
 
     env:
-      DOCKER_IMAGE: moveit/moveit2:${{ matrix.env.IMAGE }}
       UPSTREAM_WORKSPACE: moveit_visual_tools.repos
+      # upstream_ws is restored from cache with different ownership than the
+      # container user, so vcs trips git's dubious-ownership check. The moveit2
+      # images set this at build time; bare OS images do not. Written directly
+      # because git is not installed yet at this point.
+      AFTER_INIT: printf '[safe]\n\tdirectory = *\n' >> ~/.gitconfig
       AFTER_SETUP_UPSTREAM_WORKSPACE: vcs pull $BASEDIR/upstream_ws/src
-      AFTER_SETUP_UPSTREAM_WORKSPACE_EMBED: set +u && source ~/ws_moveit/install/setup.bash && set - u
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       BASEDIR: ${{ github.workspace }}/.work
-      CACHE_PREFIX: ${{ matrix.env.IMAGE }}
+      CACHE_PREFIX: ${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
       CLANG_TIDY_BASE_REF: ${{ github.base_ref || github.ref }}
 
-    name: ${{ matrix.env.IMAGE }}${{ matrix.env.CLANG_TIDY && ' + clang-tidy' || '' }}
+    name: ${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}${{ matrix.env.CLANG_TIDY && ' + clang-tidy' || '' }}
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.env.NONBLOCKING || false }}
     steps:
       - uses: actions/checkout@v4
         with:
