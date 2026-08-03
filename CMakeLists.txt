@@ -5,16 +5,20 @@ find_package(moveit_common REQUIRED)
 moveit_package()
 
 # Load  all dependencies required for this package
+find_package(ament_index_cpp REQUIRED)
 find_package(Boost REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(geometric_shapes REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(graph_msgs REQUIRED)
 find_package(moveit_core REQUIRED)
+find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_occupancy_map_monitor REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(rviz_visual_tools REQUIRED)
+find_package(interactive_markers REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(tf2_ros REQUIRED)
@@ -26,9 +30,11 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   geometry_msgs
   graph_msgs
   moveit_core
+  moveit_msgs
   moveit_ros_planning
   rclcpp
   rviz_visual_tools
+  interactive_markers
   std_msgs
   tf2_eigen
   tf2_ros
@@ -47,7 +53,30 @@ target_include_directories(${PROJECT_NAME}
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   PUBLIC $<INSTALL_INTERFACE:include>
 )
-ament_target_dependencies(${PROJECT_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(${PROJECT_NAME}
+  PUBLIC
+    ${geometry_msgs_TARGETS}
+    ${graph_msgs_TARGETS}
+    moveit_core::moveit_robot_state
+    moveit_core::moveit_utils
+    ${moveit_msgs_TARGETS}
+    moveit_ros_planning::moveit_planning_scene_monitor
+    rclcpp::rclcpp
+    rviz_visual_tools::rviz_visual_tools
+    interactive_markers::interactive_markers
+    ${std_msgs_TARGETS}
+    tf2_eigen::tf2_eigen
+    tf2_ros::tf2_ros
+    ${trajectory_msgs_TARGETS}
+    ${visualization_msgs_TARGETS}
+    ${Boost_LIBRARIES}
+  # Implementation-only: included by src/moveit_visual_tools.cpp and absent from
+  # every public header, so it is kept out of the exported interface and out of
+  # THIS_PACKAGE_INCLUDE_DEPENDS. This is a SHARED library, so a PRIVATE link is
+  # not re-exported at all -- downstream consumers do not need geometric_shapes.
+  PRIVATE
+    geometric_shapes::geometric_shapes
+)
 
 # Demo executable
 add_executable(${PROJECT_NAME}_demo
@@ -55,8 +84,23 @@ add_executable(${PROJECT_NAME}_demo
 )
 target_link_libraries(${PROJECT_NAME}_demo
   ${PROJECT_NAME}
+  ament_index_cpp::ament_index_cpp
+  ${geometry_msgs_TARGETS}
+  ${graph_msgs_TARGETS}
+  moveit_core::moveit_robot_state
+  moveit_core::moveit_utils
+  ${moveit_msgs_TARGETS}
+  moveit_ros_planning::moveit_planning_scene_monitor
+  rclcpp::rclcpp
+  rviz_visual_tools::rviz_visual_tools
+  interactive_markers::interactive_markers
+  ${std_msgs_TARGETS}
+  tf2_eigen::tf2_eigen
+  tf2_ros::tf2_ros
+  ${trajectory_msgs_TARGETS}
+  ${visualization_msgs_TARGETS}
+  ${Boost_LIBRARIES}
 )
-ament_target_dependencies(${PROJECT_NAME}_demo ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 
 # Exports

@@ -33,7 +33,13 @@
 
 // ROS
 #include <rclcpp/rclcpp.hpp>
+#include <ament_index_cpp/version.h>
+#if AMENT_INDEX_CPP_VERSION_GTE(1, 14, 0)
+#include <ament_index_cpp/get_package_share_path.hpp>
+#include <filesystem>
+#else
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#endif
 
 // For visualizing things in rviz
 #include <moveit_visual_tools/moveit_visual_tools.h>
@@ -204,8 +210,12 @@ public:
 
     // --------------------------------------------------------------------
     RCLCPP_INFO_STREAM(LOGGER, "Publishing Collision Mesh");
-    // TODO: Catch exception
+// TODO: Catch exception
+#if AMENT_INDEX_CPP_VERSION_GTE(1, 14, 0)
+    std::string file_path = "file://" + ament_index_cpp::get_package_share_path(THIS_PACKAGE).string();
+#else
     std::string file_path = "file://" + ament_index_cpp::get_package_share_directory(THIS_PACKAGE);
+#endif
     if (file_path == "file://")
       RCLCPP_FATAL_STREAM(LOGGER, "Unable to get " << THIS_PACKAGE << " package path ");
     file_path.append("/resources/demo_mesh.stl");
