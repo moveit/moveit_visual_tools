@@ -2,6 +2,34 @@
 Changelog for package moveit_visual_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix Rolling build: replace ament_target_dependencies + guard the ament_index_cpp header rename (`#156 <https://github.com/moveit/moveit_visual_tools/issues/156>`_)
+  Rolling removed ``ament_target_dependencies``; migrate the library and demo
+  targets to ``target_link_libraries`` with imported targets. Along with it:
+
+  * Declare ``geometric_shapes``, ``moveit_msgs`` and ``ament_index_cpp``, all
+    used directly but resolved until now only through the transitive tree that
+    ``ament_target_dependencies`` flattened onto every target. Closes
+    `#155 <https://github.com/moveit/moveit_visual_tools/issues/155>`_.
+  * Guard the ``ament_index_cpp`` header rename — 1.14 removed
+    ``get_package_share_directory.hpp`` in favour of ``get_package_share_path``.
+  * Link ``moveit_ros_planning::moveit_planning_scene_monitor`` rather than the
+    ``moveit_ros_planning`` umbrella target, which exists only on MoveIt ``main``
+    and is absent from every released distro.
+* Add dependency for moveit_ros_occupancy_map_monitor (`#153 <https://github.com/moveit/moveit_visual_tools/issues/153>`_)
+* ci: cover every released distro with binary debs (`#157 <https://github.com/moveit/moveit_visual_tools/issues/157>`_)
+  The matrix tested two of the five distros this branch ships to. Replace the
+  prebuilt-image jobs with plain binary-deb jobs for humble, jazzy, kilted,
+  lyrical and rolling. The lyrical and rolling jobs are non-blocking until
+  ``moveit_core`` is published for Ubuntu Resolute.
+* CMake: drop boost system (`#154 <https://github.com/moveit/moveit_visual_tools/issues/154>`_)
+  Boost.System has been header-only since 1.69, and 1.89 removed the stub
+  library that ``find_package(Boost COMPONENTS system)`` still required.
+* Bump cmake required version: 3.20 (`#152 <https://github.com/moveit/moveit_visual_tools/issues/152>`_)
+* Update .pre-commit-config.yaml (`#146 <https://github.com/moveit/moveit_visual_tools/issues/146>`_)
+* Contributors: Guilhem Saurel, Nathan Brooks, mosfet80
+
 4.1.2 (2025-02-01)
 ------------------
 * Enhancement/use hpp for headers based on PR https://github.com/moveit/moveit2/pull/3113 (`#147 <https://github.com/ros-planning/moveit_visual_tools/issues/147>`_)
