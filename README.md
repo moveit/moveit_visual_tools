@@ -51,6 +51,10 @@ To run some demos displaying robot states and collision objects:
 
     ros2 launch moveit_visual_tools demo_rviz.launch.py
 
+To run the python binding demo:
+
+    ros2 launch moveit_visual_tools demo_rviz.launch.py launch_python_demo:=true
+
 ## Code API
 
 See [VisualTools Class Reference](http://docs.ros.org/kinetic/api/moveit_visual_tools/html/classmoveit__visual__tools_1_1MoveItVisualTools.html)
