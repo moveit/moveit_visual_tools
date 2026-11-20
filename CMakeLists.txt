@@ -6,7 +6,7 @@ moveit_package()
 
 # Load  all dependencies required for this package
 find_package(ament_index_cpp REQUIRED)
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED COMPONENTS filesystem)
 find_package(Eigen3 REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -69,13 +69,14 @@ target_link_libraries(${PROJECT_NAME}
     tf2_ros::tf2_ros
     ${trajectory_msgs_TARGETS}
     ${visualization_msgs_TARGETS}
-    ${Boost_LIBRARIES}
   # Implementation-only: included by src/moveit_visual_tools.cpp and absent from
   # every public header, so it is kept out of the exported interface and out of
   # THIS_PACKAGE_INCLUDE_DEPENDS. This is a SHARED library, so a PRIVATE link is
-  # not re-exported at all -- downstream consumers do not need geometric_shapes.
+  # not re-exported at all -- downstream consumers do not need geometric_shapes
+  # or Boost::filesystem.
   PRIVATE
     geometric_shapes::geometric_shapes
+    Boost::filesystem
 )
 
 # Demo executable
