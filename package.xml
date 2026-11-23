@@ -17,6 +17,8 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>ament_index_cpp</depend>
+  <depend>libboost-dev</depend>
+  <depend>libboost-filesystem-dev</depend>
   <depend>geometric_shapes</depend>
   <depend>geometry_msgs</depend>
   <depend>graph_msgs</depend>
