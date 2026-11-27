@@ -15,9 +15,9 @@
   <author email="dave@picknik.ai">Dave Coleman</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
-  
+
   <build_depend>moveit_ros_planning</build_depend>
-  
+
   <depend>ament_index_cpp</depend>
   <depend>geometric_shapes</depend>
   <depend>geometry_msgs</depend>
